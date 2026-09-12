@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tarik Tambang Jaringan — SMK Kelas X</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Titan+One&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg1:#0c1633; --bg2:#14294f; --bg3:#1d3f6e;
+  --grass:#2f9e5f; --grass-d:#22824b;
+  --orange:#ff8c1a; --orange-d:#e0740b;
+  --cyan:#26d4f0; --cyan-d:#0fa8c4;
+  --yellow:#ffd21f; --red:#ff5d5d; --green:#39d98a;
+  --paper:#fff8ea; --ink:#152039;
+  --disp:'Titan One',system-ui; --body:'Atkinson Hyperlegible',system-ui;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--body); color:#eef3ff; min-height:100vh;
+  background:
+    radial-gradient(1200px 500px at 50% -10%, #23407c 0%, transparent 60%),
+    linear-gradient(180deg,var(--bg1) 0%, var(--bg2) 55%, #0a1128 100%);
+  overflow-x:hidden;
+}
+::selection{background:var(--orange);color:#fff}
+button{font-family:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+
+.wrap{max-width:1120px;margin:0 auto;padding:14px 16px 40px}
+
+/* ============ HUD ============ */
+.hud{
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  background:linear-gradient(180deg,#101c3d,#0b1430);
+  border:2px solid #24386b;border-radius:16px;
+  padding:10px 16px;box-shadow:0 8px 24px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06);
+}
+.brand{display:flex;flex-direction:column;line-height:1.05;min-width:170px}
+.brand b{font-family:var(--disp);font-weight:400;font-size:17px;letter-spacing:.5px;color:var(--yellow);text-shadow:0 2px 0 #7a4b00}
+.brand span{font-size:11px;opacity:.75;letter-spacing:2px;text-transform:uppercase}
+.teambox{display:flex;flex-direction:column;gap:2px;min-width:118px}
+.teambox .tl{font-family:var(--disp);font-size:13px;letter-spacing:.5px}
+.teambox .tv{font-size:12px;opacity:.85}
+.teambox.l .tl{color:var(--orange)} .teambox.r{text-align:right}.teambox.r .tl{color:var(--cyan)}
+.meter{flex:1;min-width:220px;position:relative}
+.meter-track{
+  height:16px;border-radius:99px;position:relative;
+  background:linear-gradient(90deg,var(--orange) 0%,#ffb35c 34%,#3b4d7d 50%,#5fd8ef 66%,var(--cyan) 100%);
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.18);
+}
+.meter-track .tick{position:absolute;left:50%;top:-5px;bottom:-5px;width:2px;background:rgba(255,255,255,.6)}
+#meterFlag{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-88%);
+  font-size:22px;transition:left .9s cubic-bezier(.2,.9,.3,1.25);
+  filter:drop-shadow(0 3px 3px rgba(0,0,0,.5));
+}
+.qchip,.streak{
+  font-family:var(--disp);font-size:14px;padding:6px 12px;border-radius:10px;letter-spacing:.5px;
+  background:#1b2c59;border:1px solid #33509b;white-space:nowrap;
+}
+.streak{background:#4a2a07;border-color:#a16207;color:var(--yellow);display:none;animation:pulse 1s infinite}
+.streak.on{display:inline-block}
+@keyframes pulse{50%{transform:scale(1.08)}}
+#btnSound{background:#1b2c59;border:1px solid #33509b;border-radius:10px;color:#fff;font-size:16px;padding:6px 10px}
+#btnSound:hover{transform:translateY(-2px)}
+
+/* ============ ARENA ============ */
+.arena{
+  position:relative;margin-top:14px;border-radius:20px;overflow:hidden;
+  height:clamp(300px,40vh,420px);
+  border:2px solid #24386b;box-shadow:0 14px 40px rgba(0,0,0,.45);
+  background:linear-gradient(180deg,#0c1633 0%, #16305e 62%, #1d3f6e 62.5%);
+}
+.arena.shake{animation:shake .45s}
+@keyframes shake{0%,100%{transform:translate(0,0)}20%{transform:translate(-6px,3px)}40%{transform:translate(5px,-3px)}60%{transform:translate(-4px,2px)}80%{transform:translate(3px,-2px)}}
+
+.beam{position:absolute;top:-60px;width:190px;height:380px;pointer-events:none;
+  background:linear-gradient(rgba(255,240,190,.14),transparent 75%);filter:blur(2px);transform:rotate(16deg);
+  animation:beamPulse 5s ease-in-out infinite}
+.beam.b1{left:6%}
+.beam.b2{right:6%;transform:rotate(-16deg);animation-delay:2.5s}
+@keyframes beamPulse{50%{opacity:.35}}
+
+.floaties{position:absolute;inset:0 0 40% 0;pointer-events:none}
+.fl{position:absolute;opacity:.32;animation:drift 9s ease-in-out infinite;font-size:22px}
+.fl.bin{font-family:var(--disp);font-size:13px;color:var(--cyan);background:rgba(38,212,240,.08);
+  border:1px solid rgba(38,212,240,.3);border-radius:6px;padding:2px 6px;letter-spacing:2px}
+@keyframes drift{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-16px) rotate(4deg)}}
+
+.crowd{position:absolute;left:0;right:0;top:34%;height:56px;
+  background:linear-gradient(180deg,#0a1128,#122045);border-bottom:3px solid #081020;overflow:hidden}
+.crowd .dot{position:absolute;width:11px;height:11px;border-radius:50% 50% 45% 45%;animation:bob 2.4s ease-in-out infinite}
+.crowd.hype .dot{animation:jump .5s ease 2}
+@keyframes bob{50%{transform:translateY(-3px)}}
+@keyframes jump{0%,100%{transform:translateY(0)}40%{transform:translateY(-9px)}}
+
+.field{
+  position:absolute;left:0;right:0;bottom:0;height:60%;
+  background:
+    repeating-linear-gradient(90deg,var(--grass) 0 90px,var(--grass-d) 90px 180px);
+  border-top:4px solid #67d98f;
+  box-shadow:inset 0 14px 24px rgba(0,0,0,.28);
+}
+.midline{position:absolute;left:50%;top:0;bottom:0;width:0;border-left:3px dashed rgba(255,255,255,.4)}
+.zone{position:absolute;top:0;bottom:0;width:12%;display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px}
+.zone span{font-family:var(--disp);font-size:9px;letter-spacing:1px;text-align:center;line-height:1.35;opacity:.9;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.zone.zl{left:0;background:linear-gradient(90deg,rgba(255,140,26,.42),rgba(255,140,26,.06));border-right:3px dashed var(--yellow)}
+.zone.zr{right:0;background:linear-gradient(-90deg,rgba(38,212,240,.42),rgba(38,212,240,.06));border-left:3px dashed var(--yellow)}
+.zone.zl span{color:#ffdcae}.zone.zr span{color:#c9f6ff}
+
+/* --- tali --- */
+.rope-track{
+  position:absolute;left:-20%;width:140%;bottom:84px;height:16px;z-index:2;
+  transition:transform .95s cubic-bezier(.2,.9,.3,1.28);
+}
+.rope{position:absolute;inset:0;border-radius:9px;
+  background:repeating-linear-gradient(105deg,#c98b3f 0 7px,#8a5a24 7px 10px,#e2a755 10px 15px);
+  box-shadow:0 5px 0 rgba(0,0,0,.28), inset 0 2px 0 rgba(255,255,255,.25);
+}
+.rope-track.pull .rope{animation:tense .45s}
+@keyframes tense{30%{transform:scaleY(.82)}60%{transform:scaleY(1.12)}}
+.marker{position:absolute;left:50%;bottom:-4px;transform:translateX(-50%);width:34px;pointer-events:none}
+.marker .knot{width:14px;height:24px;margin:0 auto;background:var(--red);border-radius:4px;box-shadow:0 3px 5px rgba(0,0,0,.35)}
+.marker .pole{width:4px;height:52px;margin:-2px auto 0;background:#e9dcc0;border-radius:2px}
+.marker .flag{position:absolute;left:50%;top:-56px;width:0;height:0;margin-left:2px;
+  border-top:14px solid transparent;border-bottom:14px solid transparent;border-left:30px solid var(--yellow);
+  filter:drop-shadow(0 2px 2px rgba(0,0,0,.4));animation:wave 1.1s ease-in-out infinite;transform-origin:left center}
+@keyframes wave{50%{transform:scaleX(.88) skewY(4deg)}}
+
+/* --- tim --- */
+.team{position:absolute;bottom:-4px;width:clamp(150px,21vw,225px);z-index:3;transition:filter .4s}
+.team.left{left:1.5%}.team.right{right:1.5%}
+.team svg{width:100%;height:auto;display:block;transform-origin:50% 100%}
+.team.left svg{animation:heaveL 1.7s ease-in-out infinite}
+.team.right svg{animation:heaveR 1.7s ease-in-out infinite .85s}
+@keyframes heaveL{0%,100%{transform:translate(0,0) rotate(0)}50%{transform:translate(-4px,1px) rotate(-1.4deg)}}
+@keyframes heaveR{0%,100%{transform:translate(0,0) rotate(0)}50%{transform:translate(4px,1px) rotate(1.4deg)}}
+.team.cheer svg{animation:cheer .55s ease 3}
+@keyframes cheer{0%,100%{transform:translateY(0)}45%{transform:translateY(-18px) rotate(-2deg)}}
+.team.sad svg{animation:droop .9s ease forwards}
+@keyframes droop{to{transform:translateY(7px) rotate(3.5deg)}}
+.team.sad{filter:saturate(.55) brightness(.85)}
+.eye{animation:eyeGlow 2.2s ease-in-out infinite}
+@keyframes eyeGlow{50%{opacity:.35}}
+.blinker{animation:blinkLamp 1.4s steps(2) infinite}
+@keyframes blinkLamp{50%{opacity:.2}}
+
+.puff{position:absolute;width:16px;height:16px;border-radius:50%;background:rgba(233,226,208,.75);
+  animation:puff .7s ease-out forwards;z-index:4;pointer-events:none}
+@keyframes puff{from{transform:scale(.4);opacity:.9}to{transform:scale(2.4) translateY(-14px);opacity:0}}
+
+.arena-banner{
+  position:absolute;left:50%;top:36%;transform:translate(-50%,-50%) scale(.6);z-index:6;pointer-events:none;
+  font-family:var(--disp);font-size:clamp(20px,3.4vw,34px);letter-spacing:1px;white-space:nowrap;
+  padding:10px 22px;border-radius:14px;opacity:0;transition:.25s;text-shadow:0 3px 0 rgba(0,0,0,.35);
+}
+.arena-banner.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.arena-banner.good{background:var(--orange);color:#fff;box-shadow:0 10px 30px rgba(255,140,26,.45)}
+.arena-banner.bad{background:var(--cyan-d);color:#04222b;box-shadow:0 10px 30px rgba(38,212,240,.4)}
+
+/* ============ PANEL SOAL ============ */
+.panel{
+  margin-top:16px;background:linear-gradient(180deg,#111d3f,#0d1731);
+  border:2px solid #24386b;border-top:5px solid var(--orange);border-radius:18px;
+  padding:18px 20px 20px;box-shadow:0 14px 34px rgba(0,0,0,.4);position:relative;overflow:hidden;
+}
+.panel::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(600px 120px at 85% -30%, rgba(38,212,240,.09), transparent 70%)}
+.q-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.q-no{font-family:var(--disp);font-size:26px;color:var(--yellow);text-shadow:0 2px 0 #7a4b00;line-height:1}
+.badge{font-size:11.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  padding:4px 10px;border-radius:99px;color:#0d1731}
+.timerwrap{margin-left:auto;display:flex;align-items:center;gap:8px;min-width:200px;flex:1;max-width:320px}
+.tbar{flex:1;height:10px;border-radius:99px;background:#0a1128;border:1px solid #2c4380;overflow:hidden}
+.tbar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--green),var(--yellow));transition:width .12s linear}
+.tbar.low i{background:linear-gradient(90deg,var(--red),var(--orange))}
+#tsec{font-family:var(--disp);font-size:15px;min-width:34px;text-align:right}
+#tsec.low{color:var(--red);animation:pulse .5s infinite}
+.q-text{font-size:clamp(17px,2.2vw,21px);font-weight:700;line-height:1.45;color:#fdf6e3;margin-bottom:14px;animation:slideUp .45s ease}
+@keyframes slideUp{from{opacity:0;transform:translateY(14px)}}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt{
+  display:flex;align-items:center;gap:10px;text-align:left;
+  background:#f7f4ea;color:var(--ink);border:2px solid #cfd6e6;border-radius:12px;
+  padding:11px 13px;font-size:15.5px;font-weight:700;line-height:1.3;
+  transition:transform .16s, box-shadow .16s, border-color .16s;animation:slideUp .45s ease backwards;
+}
+.opt:nth-child(2){animation-delay:.05s}.opt:nth-child(3){animation-delay:.1s}.opt:nth-child(4){animation-delay:.15s}
+.opt .key{flex:0 0 30px;height:30px;display:grid;place-items:center;border-radius:8px;
+  font-family:var(--disp);font-size:15px;color:#fff;background:var(--ink);transition:transform .16s}
+.opt:not(:disabled):hover{transform:translateY(-3px);border-color:var(--orange);box-shadow:0 8px 18px rgba(0,0,0,.3)}
+.opt:not(:disabled):hover .key{transform:rotate(-8deg) scale(1.1);background:var(--orange)}
+.opt:disabled{cursor:default;opacity:.55}
+.opt.correct{background:#d9f7e6;border-color:var(--green);opacity:1;box-shadow:0 0 0 3px rgba(57,217,138,.35)}
+.opt.correct .key{background:var(--green)}
+.opt.wrong{background:#ffe1e1;border-color:var(--red);opacity:1;animation:wobble .4s}
+.opt.wrong .key{background:var(--red)}
+@keyframes wobble{25%{transform:translateX(-6px)}75%{transform:translateX(5px)}}
+
+.feedback{margin-top:14px;min-height:86px;display:flex;flex-direction:column;gap:8px;justify-content:center}
+.fb-line{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.fb-verdict{font-family:var(--disp);font-size:19px;letter-spacing:.5px}
+.fb-verdict.good{color:var(--green)}.fb-verdict.bad{color:var(--red)}
+.fb-pull{font-size:13px;font-weight:700;padding:4px 10px;border-radius:99px;letter-spacing:.5px}
+.fb-pull.l{background:rgba(255,140,26,.16);color:var(--orange);border:1px solid rgba(255,140,26,.5)}
+.fb-pull.r{background:rgba(38,212,240,.14);color:var(--cyan);border:1px solid rgba(38,212,240,.5)}
+.fb-info{font-size:14.5px;line-height:1.5;color:#c8d4f2;border-left:3px solid var(--yellow);padding-left:10px}
+.btn-next{align-self:flex-start;font-family:var(--disp);font-size:16px;letter-spacing:1px;
+  background:var(--orange);color:#fff;border:none;border-radius:12px;padding:10px 22px;
+  box-shadow:0 5px 0 var(--orange-d),0 10px 18px rgba(0,0,0,.35);transition:.15s}
+.btn-next:hover{transform:translateY(-2px)}
+.btn-next:active{transform:translateY(2px);box-shadow:0 2px 0 var(--orange-d)}
+.hidden{display:none!important}
+
+footer{margin-top:18px;text-align:center;font-size:12px;opacity:.55;letter-spacing:1px}
+
+/* ============ OVERLAY ============ */
+.overlay{position:fixed;inset:0;z-index:50;background:rgba(5,10,26,.88);backdrop-filter:blur(3px);
+  display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto}
+.card{
+  max-width:960px;width:100%;background:linear-gradient(160deg,#152752,#0d1731 70%);
+  border:2px solid #33509b;border-radius:22px;padding:30px 34px;position:relative;
+  box-shadow:0 30px 80px rgba(0,0,0,.6);animation:cardIn .5s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes cardIn{from{opacity:0;transform:translateY(30px) scale(.95)}}
+.start-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:28px;align-items:center}
+.kicker{font-size:11px;letter-spacing:3px;color:var(--cyan);font-weight:700;margin-bottom:10px}
+h1{font-family:var(--disp);font-weight:400;font-size:clamp(32px,5vw,54px);line-height:.98;color:#fff;
+  text-shadow:0 4px 0 #7a4b00, 0 8px 24px rgba(255,140,26,.25)}
+h1 span{color:var(--yellow)}
+.tagline{margin:12px 0 14px;font-size:15px;color:#c8d4f2;line-height:1.5}
+.rules{list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.rules li{font-size:14.5px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+  border-radius:10px;padding:8px 12px;line-height:1.4}
+.pillars{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:18px}
+.pillar{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  padding:4px 10px;border-radius:99px;color:#0d1731}
+.btn-big{font-family:var(--disp);font-size:20px;letter-spacing:1px;background:var(--orange);color:#fff;
+  border:none;border-radius:14px;padding:14px 30px;box-shadow:0 6px 0 var(--orange-d),0 14px 28px rgba(255,140,26,.35);transition:.15s}
+.btn-big:hover{transform:translateY(-3px) rotate(-1deg)}
+.btn-big:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-d)}
+.vs{display:flex;flex-direction:column;gap:10px;align-items:center}
+.vs-card{width:100%;border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;transition:transform .2s}
+.vs-card:hover{transform:scale(1.03) rotate(-1deg)}
+.vs-card.l{background:linear-gradient(135deg,rgba(255,140,26,.28),rgba(255,140,26,.08));border:2px solid var(--orange)}
+.vs-card.r{background:linear-gradient(135deg,rgba(38,212,240,.24),rgba(38,212,240,.06));border:2px solid var(--cyan)}
+.vs-card.r:hover{transform:scale(1.03) rotate(1deg)}
+.vs-card svg{width:56px;height:56px;flex:0 0 56px}
+.vs-card b{font-family:var(--disp);font-weight:400;font-size:18px;display:block;letter-spacing:.5px}
+.vs-card.l b{color:var(--orange)}.vs-card.r b{color:var(--cyan)}
+.vs-card small{opacity:.8;font-size:12px}
+.vs-badge{font-family:var(--disp);font-size:26px;color:#fff;background:var(--red);width:58px;height:58px;
+  border-radius:50%;display:grid;place-items:center;box-shadow:0 6px 0 #a03030,0 10px 20px rgba(0,0,0,.4);
+  transform:rotate(-6deg);animation:pulse 1.6s infinite}
+.rope-deco{margin-top:14px;height:12px;border-radius:8px;
+  background:repeating-linear-gradient(105deg,#c98b3f 0 7px,#8a5a24 7px 10px,#e2a755 10px 15px);
+  position:relative;box-shadow:0 4px 0 rgba(0,0,0,.3)}
+.rope-deco::after{content:"🚩";position:absolute;left:50%;top:-20px;transform:translateX(-50%);font-size:20px}
+
+/* hasil akhir */
+.end-title{font-family:var(--disp);font-weight:400;font-size:clamp(30px,4.6vw,50px);line-height:1.05;text-align:center}
+.end-title.win{color:var(--yellow);text-shadow:0 4px 0 #7a4b00}
+.end-title.lose{color:var(--cyan);text-shadow:0 4px 0 #074552}
+.end-title.draw{color:#fff;text-shadow:0 4px 0 #33415e}
+.end-sub{text-align:center;color:#c8d4f2;margin:10px 0 20px;font-size:15.5px;line-height:1.5}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.stat{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;
+  padding:12px 8px;text-align:center}
+.stat b{font-family:var(--disp);font-weight:400;font-size:26px;display:block;color:var(--yellow)}
+.stat span{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;opacity:.8}
+.rankline{text-align:center;font-family:var(--disp);font-size:19px;color:var(--orange);margin-bottom:20px}
+.end-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn-ghost{font-family:var(--disp);font-size:16px;letter-spacing:1px;background:transparent;color:#fff;
+  border:2px solid #4a67ad;border-radius:14px;padding:12px 24px;transition:.15s}
+.btn-ghost:hover{border-color:var(--cyan);color:var(--cyan);transform:translateY(-2px)}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:60;overflow:hidden}
+.cf{position:absolute;top:-20px;width:10px;height:16px;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(105vh) rotate(720deg)}}
+
+@media (max-width:760px){
+  .start-grid{grid-template-columns:1fr}
+  .options{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .team{width:clamp(110px,26vw,170px)}
+  .rope-track{bottom:70px}
+  .zone span{font-size:7.5px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HUD -->
+  <header class="hud">
+    <div class="brand"><b>TARIK TAMBANG JARINGAN</b><span>SMK Kelas X • Informatika</span></div>
+    <div class="teambox l"><span class="tl">🧑‍🎓 TIM SISWA</span><span class="tv">Benar: <b id="scoreL">0</b></span></div>
+    <div class="meter">
+      <div class="meter-track"><b class="tick"></b><i id="meterFlag">🚩</i></div>
+    </div>
+    <div class="teambox r"><span class="tl">TIM KOMPUTER 🤖</span><span class="tv">Salah: <b id="scoreR">0</b></span></div>
+    <span class="qchip">SOAL <span id="qCount">–</span></span>
+    <span class="streak" id="streakChip">🔥 <span id="streakN">0</span> BERUNTUN</span>
+    <button id="btnSound" title="Suara">🔊</button>
+  </header>
+
+  <!-- ARENA -->
+  <section class="arena" id="arena">
+    <div class="beam b1"></div><div class="beam b2"></div>
+    <div class="floaties" id="floaties"></div>
+    <div class="crowd" id="crowd"></div>
+    <div class="field" id="field">
+      <div class="zone zl"><span>GARIS MENANG<br>SISWA</span></div>
+      <div class="zone zr"><span>GARIS MENANG<br>KOMPUTER</span></div>
+      <div class="midline"></div>
+
+      <div class="rope-track" id="ropeTrack">
+        <div class="rope"></div>
+        <div class="marker">
+          <div class="pole"></div><div class="flag"></div><div class="knot"></div>
+        </div>
+      </div>
+
+      <!-- TIM SISWA (kiri) -->
+      <div class="team left" id="teamL">
+        <svg viewBox="0 0 230 190" aria-hidden="true">
+          <ellipse cx="118" cy="180" rx="98" ry="8" fill="rgba(4,20,10,.35)"/>
+          <line x1="186" y1="101" x2="234" y2="100" stroke="#8a5a24" stroke-width="13" stroke-linecap="round"/>
+          <line x1="186" y1="101" x2="234" y2="100" stroke="#e2a755" stroke-width="13" stroke-linecap="round" stroke-dasharray="6 7" opacity=".9"/>
+          <!-- siswi belakang -->
+          <g>
+            <line x1="62" y1="122" x2="94" y2="170" stroke="#57606f" stroke-width="11" stroke-linecap="round"/>
+            <line x1="62" y1="122" x2="116" y2="168" stroke="#57606f" stroke-width="11" stroke-linecap="round"/>
+            <ellipse cx="96" cy="173" rx="12" ry="5" fill="#20242c"/>
+            <ellipse cx="119" cy="171" rx="12" ry="5" fill="#20242c"/>
+            <line x1="56" y1="84" x2="66" y2="126" stroke="#f4f6ff" stroke-width="18" stroke-linecap="round"/>
+            <line x1="56" y1="88" x2="108" y2="112" stroke="#f4f6ff" stroke-width="9" stroke-linecap="round"/>
+            <circle cx="110" cy="113" r="6" fill="#e8b27d"/>
+            <circle cx="48" cy="60" r="18" fill="#ff8c1a"/>
+            <path d="M32 62 a18 18 0 0 1 10 -16" stroke="#e0740b" stroke-width="4" fill="none"/>
+            <circle cx="52" cy="62" r="12.5" fill="#e8b27d"/>
+            <circle cx="57" cy="60" r="1.8" fill="#33251c"/>
+            <path d="M57 67 q3.5 2.5 7 0" stroke="#33251c" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+          </g>
+          <!-- siswa depan -->
+          <g>
+            <line x1="118" y1="124" x2="150" y2="171" stroke="#57606f" stroke-width="12" stroke-linecap="round"/>
+            <line x1="118" y1="124" x2="178" y2="167" stroke="#57606f" stroke-width="12" stroke-linecap="round"/>
+            <ellipse cx="154" cy="174" rx="13" ry="5.5" fill="#20242c"/>
+            <ellipse cx="183" cy="170" rx="13" ry="5.5" fill="#20242c"/>
+            <line x1="110" y1="80" x2="122" y2="128" stroke="#f4f6ff" stroke-width="20" stroke-linecap="round"/>
+            <line x1="108" y1="86" x2="192" y2="100" stroke="#f4f6ff" stroke-width="10" stroke-linecap="round"/>
+            <circle cx="195" cy="100" r="7" fill="#f2b98a"/>
+            <circle cx="103" cy="52" r="17" fill="#f2b98a"/>
+            <path d="M86 48 a17 17 0 0 1 30 -7 l-5 9 z" fill="#3c2a1e"/>
+            <g transform="rotate(-8 103 49)">
+              <rect x="85" y="44" width="37" height="8" rx="4" fill="#ff8c1a"/>
+              <path d="M86 46 l-14 7 3 6 12 -6 z" fill="#ff8c1a"/>
+            </g>
+            <circle cx="111" cy="53" r="2" fill="#33251c"/>
+            <path d="M110 61 q4 3 8 0" stroke="#33251c" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+          </g>
+        </svg>
+      </div>
+
+      <!-- TIM KOMPUTER (kanan) -->
+      <div class="team right" id="teamR">
+        <svg viewBox="0 0 230 190" aria-hidden="true">
+          <ellipse cx="112" cy="180" rx="98" ry="8" fill="rgba(4,20,10,.35)"/>
+          <line x1="-4" y1="100" x2="44" y2="100" stroke="#8a5a24" stroke-width="13" stroke-linecap="round"/>
+          <line x1="-4" y1="100" x2="44" y2="100" stroke="#e2a755" stroke-width="13" stroke-linecap="round" stroke-dasharray="6 7" opacity=".9"/>
+          <!-- robot belakang -->
+          <g>
+            <line x1="196" y1="128" x2="178" y2="168" stroke="#64748b" stroke-width="10" stroke-linecap="round"/>
+            <line x1="204" y1="128" x2="222" y2="168" stroke="#64748b" stroke-width="10" stroke-linecap="round"/>
+            <rect x="171" y="166" width="17" height="7" rx="3" fill="#20242c"/>
+            <rect x="215" y="166" width="17" height="7" rx="3" fill="#20242c"/>
+            <rect x="182" y="82" width="40" height="46" rx="10" fill="#7f92ad" stroke="#475569" stroke-width="2"/>
+            <rect x="186" y="48" width="32" height="26" rx="8" fill="#93a5c0" stroke="#475569" stroke-width="2"/>
+            <rect x="190" y="56" width="22" height="9" rx="4.5" fill="#0e1730"/>
+            <circle class="eye" cx="196" cy="60.5" r="2.6" fill="#26d4f0"/>
+            <circle class="eye" cx="206" cy="60.5" r="2.6" fill="#26d4f0"/>
+            <line x1="202" y1="48" x2="202" y2="38" stroke="#475569" stroke-width="3"/>
+            <circle cx="202" cy="35" r="4" fill="#ffd21f" class="blinker"/>
+            <line x1="184" y1="94" x2="168" y2="108" stroke="#64748b" stroke-width="9" stroke-linecap="round"/>
+            <circle cx="166" cy="110" r="6" fill="#38455e"/>
+          </g>
+          <!-- robot depan -->
+          <g>
+            <line x1="128" y1="132" x2="100" y2="170" stroke="#64748b" stroke-width="11" stroke-linecap="round"/>
+            <line x1="140" y1="132" x2="170" y2="168" stroke="#64748b" stroke-width="11" stroke-linecap="round"/>
+            <rect x="91" y="168" width="19" height="8" rx="3" fill="#20242c"/>
+            <rect x="163" y="166" width="19" height="8" rx="3" fill="#20242c"/>
+            <rect x="112" y="70" width="54" height="62" rx="12" fill="#93a5c0" stroke="#475569" stroke-width="2.5"/>
+            <rect x="122" y="92" width="34" height="19" rx="4" fill="#0e1730"/>
+            <text x="139" y="106" text-anchor="middle" font-family="Titan One, sans-serif" font-size="12" fill="#26d4f0">AI</text>
+            <rect x="116" y="34" width="44" height="32" rx="9" fill="#a7b6cf" stroke="#475569" stroke-width="2.5"/>
+            <rect x="121" y="43" width="34" height="12" rx="6" fill="#0e1730"/>
+            <circle class="eye" cx="130" cy="49" r="3.2" fill="#26d4f0"/>
+            <circle class="eye" cx="146" cy="49" r="3.2" fill="#26d4f0"/>
+            <line x1="138" y1="34" x2="138" y2="20" stroke="#475569" stroke-width="3"/>
+            <circle cx="138" cy="16" r="4.5" fill="#ff5d5d" class="blinker"/>
+            <line x1="114" y1="86" x2="76" y2="97" stroke="#64748b" stroke-width="11" stroke-linecap="round"/>
+            <line x1="76" y1="97" x2="42" y2="100" stroke="#64748b" stroke-width="9" stroke-linecap="round"/>
+            <circle cx="40" cy="100" r="7.5" fill="#38455e"/>
+            <path d="M40 92 a8 8 0 0 1 0 16" stroke="#26d4f0" stroke-width="2" fill="none"/>
+          </g>
+        </svg>
+      </div>
+
+      <div class="arena-banner" id="banner"></div>
+    </div>
+  </section>
+
+  <!-- PANEL SOAL -->
+  <section class="panel" id="panel">
+    <div class="q-meta">
+      <span class="q-no" id="qNo">–</span>
+      <span class="badge" id="qBadge">MATERI</span>
+      <div class="timerwrap"><div class="tbar" id="tbar"><i id="tfill"></i></div><span id="tsec">30</span></div>
+    </div>
+    <h2 class="q-text" id="qText">Bersiaplah… pertandingan segera dimulai!</h2>
+    <div class="options" id="opts"></div>
+    <div class="feedback" id="fb"></div>
+  </section>
+
+  <footer>MEDIA BELAJAR INFORMATIKA • BERPIKIR KOMPUTASIONAL & DASAR JARINGAN • SMK KELAS X</footer>
+</div>
+
+<!-- OVERLAY MULAI -->
+<div class="overlay" id="startOverlay">
+  <div class="card">
+    <div class="start-grid">
+      <div>
+        <p class="kicker">SMK KELAS X • INFORMATIKA • JARINGAN KOMPUTER</p>
+        <h1>TARIK TAMBANG<br><span>JARINGAN</span></h1>
+        <p class="tagline">Adu pintar 20 soal <b>berpikir komputasional</b> bertema jaringan. Setiap jawabanmu menggerakkan tali tambang!</p>
+        <ul class="rules">
+          <li>✅ Jawaban <b>BENAR</b> → tali tertarik ke <b>kiri</b> (ke arah Tim Siswa).</li>
+          <li>❌ Jawaban <b>SALAH</b> / waktu habis → tali terseret ke <b>kanan</b> (ke arah Tim Komputer).</li>
+          <li>🚩 Bawa bendera melewati <b>garis menang kiri</b> untuk menang. Jawab semua benar = menang telak!</li>
+          <li>⏱ 20 soal • 30 detik per soal • posisi akhir menentukan pemenang.</li>
+        </ul>
+        <div class="pillars">
+          <span class="pillar" style="background:#ff8c1a">Dekomposisi</span>
+          <span class="pillar" style="background:#26d4f0">Pengenalan Pola</span>
+          <span class="pillar" style="background:#b78cff">Abstraksi</span>
+          <span class="pillar" style="background:#39d98a">Algoritma</span>
+          <span class="pillar" style="background:#ffd21f">Dasar Jaringan</span>
+        </div>
+        <button class="btn-big" id="btnStart">🔔 MULAI PERTANDINGAN</button>
+      </div>
+      <div>
+        <div class="vs">
+          <div class="vs-card l">
+            <svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="20" fill="#f2b98a"/><path d="M10 27 a20 20 0 0 1 36 -8 l-6 10 z" fill="#3c2a1e"/><rect x="9" y="22" width="42" height="8" rx="4" fill="#ff8c1a"/><circle cx="36" cy="33" r="2.4" fill="#33251c"/><path d="M34 42 q5 4 10 0" stroke="#33251c" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>
+            <div><b>TIM SISWA</b><small>Kamu di sisi kiri — tarik talinya!</small></div>
+          </div>
+          <div class="vs-badge">VS</div>
+          <div class="vs-card r">
+            <svg viewBox="0 0 60 60"><rect x="12" y="16" width="36" height="28" rx="8" fill="#a7b6cf" stroke="#475569" stroke-width="2"/><rect x="17" y="25" width="26" height="10" rx="5" fill="#0e1730"/><circle cx="24" cy="30" r="3" fill="#26d4f0"/><circle cx="37" cy="30" r="3" fill="#26d4f0"/><line x1="30" y1="16" x2="30" y2="8" stroke="#475569" stroke-width="2.5"/><circle cx="30" cy="6" r="3.5" fill="#ff5d5d"/><rect x="18" y="46" width="24" height="8" rx="4" fill="#7f92ad"/></svg>
+            <div><b>TIM KOMPUTER</b><small>AI Jaringan 3000 — jangan kasih kendor!</small></div>
+          </div>
+        </div>
+        <div class="rope-deco"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- OVERLAY HASIL -->
+<div class="overlay hidden" id="endOverlay">
+  <div class="card" style="max-width:640px">
+    <h2 class="end-title" id="endTitle">HASIL</h2>
+    <p class="end-sub" id="endSub"></p>
+    <div class="stats">
+      <div class="stat"><b id="stBenar">0</b><span>Benar</span></div>
+      <div class="stat"><b id="stSalah">0</b><span>Salah</span></div>
+      <div class="stat"><b id="stStreak">0</b><span>Streak Terbaik</span></div>
+      <div class="stat"><b id="stPos">0</b><span>Posisi Tali</span></div>
+    </div>
+    <p class="rankline" id="rankLine"></p>
+    <div class="end-actions">
+      <button class="btn-big" id="btnRestart">🔁 MAIN LAGI</button>
+      <button class="btn-ghost" id="btnMenu">MENU AWAL</button>
+    </div>
+  </div>
+</div>
+<div id="confetti"></div>
+
+<script>
+/* ================= DATA SOAL ================= */
+const QUESTIONS=[
+{p:"Dekomposisi",q:"Teknisi lab memecah pekerjaan besar “membangun jaringan sekolah” menjadi bagian kecil: memasang kabel, mengatur alamat IP, lalu menguji koneksi. Cara berpikir ini disebut…",o:["Abstraksi","Dekomposisi","Pengenalan Pola","Algoritma"],a:1,info:"Dekomposisi = memecah masalah besar menjadi bagian-bagian kecil agar lebih mudah diselesaikan."},
+{p:"Pengenalan Pola",q:"Perhatikan deretan alamat IP: 192.168.1.2 — 192.168.1.3 — 192.168.1.4. Pola yang dapat dikenali adalah…",o:["Semua berada di jaringan yang sama","Semua milik server","Berasal dari jaringan yang berbeda","Semua terhubung lewat WiFi"],a:0,info:"Tiga bagian pertama (192.168.1) sama → bagian network sama, berarti komputer berada dalam satu jaringan lokal."},
+{p:"Abstraksi",q:"Andi menggambar denah jaringan lab hanya menampilkan komputer dan jalur kabel, tanpa menggambar meja, kursi, dan warna tembok. Menyaring informasi penting saja disebut…",o:["Debugging","Pengenalan Pola","Abstraksi","Dekomposisi"],a:2,info:"Abstraksi = fokus pada informasi penting dan mengabaikan detail yang tidak relevan."},
+{p:"Algoritma",q:"Langkah terhubung ke WiFi sekolah: (1) pilih nama WiFi, (2) masukkan kata sandi, (3) tekan Connect, (4) uji membuka situs web. Urutan langkah seperti ini disebut…",o:["Flowchart","Abstraksi","Dekomposisi","Algoritma"],a:3,info:"Algoritma = langkah-langkah berurutan untuk menyelesaikan suatu masalah."},
+{p:"Dasar Jaringan",q:"Jaringan komputer yang mencakup area satu ruangan atau satu gedung sekolah disebut…",o:["MAN","LAN","WAN","PAN"],a:1,info:"LAN (Local Area Network) meliputi area terbatas seperti ruangan, lab, atau satu gedung."},
+{p:"Dasar Jaringan",q:"Jaringan yang menghubungkan kantor pusat di Jakarta dengan kantor cabang di Papua bahkan di luar negeri termasuk…",o:["WAN","LAN","MAN","PAN"],a:0,info:"WAN (Wide Area Network) meliputi wilayah geografis sangat luas, antarkota hingga antarnegara."},
+{p:"Dasar Jaringan",q:"Semua komputer terhubung ke satu titik pusat (switch). Jika satu kabel ke komputer putus, komputer lain tetap aman. Topologi ini adalah…",o:["Bus","Ring","Mesh","Star"],a:3,info:"Topologi Star memakai titik pusat; gangguan pada satu kabel tidak melumpuhkan seluruh jaringan."},
+{p:"Dasar Jaringan",q:"Kelemahan utama topologi Bus adalah…",o:["Sangat boros kabel","Jika kabel utama (backbone) putus, seluruh jaringan lumpuh","Wajib memakai router mahal","Tidak bisa memakai kabel UTP"],a:1,info:"Pada topologi Bus semua data melewati kabel utama; jika backbone putus, jaringan berhenti total."},
+{p:"Dasar Jaringan",q:"Perangkat yang meneruskan paket data antar jaringan berbeda, misalnya dari jaringan sekolah ke internet, adalah…",o:["Switch","Hub","Router","Repeater"],a:2,info:"Router menghubungkan dan memilih jalur terbaik antar jaringan yang berbeda."},
+{p:"Dasar Jaringan",q:"Perangkat yang menghubungkan banyak komputer dalam satu jaringan lokal dan meneruskan data sesuai alamat tujuan adalah…",o:["Switch","Modem","UPS","VGA"],a:0,info:"Switch meneruskan data antar perangkat dalam satu LAN berdasarkan alamat MAC tujuan."},
+{p:"Dasar Jaringan",q:"Alamat logis yang diberikan ke perangkat agar dapat berkomunikasi di jaringan TCP/IP dan dapat diubah secara manual adalah…",o:["MAC Address","IP Address","Serial Number","Port USB"],a:1,info:"IP Address bersifat logis dan dapat diatur; MAC Address bersifat fisik bawaan pabrik."},
+{p:"Dasar Jaringan",q:"Kabel yang intinya terbuat dari serat kaca dan mengirimkan data menggunakan cahaya adalah…",o:["Coaxial","UTP","HDMI","Fiber Optic"],a:3,info:"Fiber optic mengirim data sebagai pulsa cahaya — lebih cepat dan mampu menjangkau jarak jauh."},
+{p:"Dasar Jaringan",q:"Konektor yang dipasang pada ujung kabel UTP untuk jaringan komputer adalah…",o:["RJ-45","RJ-11","BNC","USB-C"],a:0,info:"RJ-45 dipakai untuk kabel UTP/STP; RJ-11 untuk telepon dan BNC untuk coaxial."},
+{p:"Dasar Jaringan",q:"Aturan yang mengatur tata cara pengiriman dan penerimaan data antar perangkat jaringan disebut…",o:["Topologi","Protokol","Bandwidth","Firewall"],a:1,info:"Protokol = aturan komunikasi jaringan, contohnya TCP/IP, HTTP, dan DHCP."},
+{p:"Dasar Jaringan",q:"Istilah untuk kapasitas maksimum data yang dapat ditransfer pada suatu koneksi dalam satu waktu adalah…",o:["Latensi","Jitter","Bandwidth","Paket"],a:2,info:"Bandwidth adalah “lebar jalur” data, biasanya diukur dalam satuan Mbps."},
+{p:"Algoritma",q:"Internet sekolah mati. Rina memeriksa dengan runtut: cek kabel → cek lampu indikator → cek alamat IP → cek router. Pemeriksaan bertahap dan berurutan ini adalah penerapan…",o:["Algoritma","Abstraksi","Pengenalan Pola","Dekomposisi"],a:0,info:"Troubleshooting langkah demi langkah yang sistematis = berpikir algoritmik."},
+{p:"Pengenalan Pola",q:"Diketahui IP: 10.0.0.1, 10.0.0.2, 10.0.0.3. Dengan mengenali polanya, IP berikutnya kemungkinan…",o:["10.0.1.1","10.0.0.4","192.168.0.4","10.10.10.10"],a:1,info:"Pengenalan pola membantu memprediksi: oktet terakhir naik satu → 10.0.0.4."},
+{p:"Dasar Jaringan",q:"Layanan pada jaringan yang membagikan alamat IP secara otomatis ke perangkat yang terhubung adalah…",o:["DNS Server","DHCP Server","FTP Server","Web Server"],a:1,info:"DHCP (Dynamic Host Configuration Protocol) memberikan IP otomatis sehingga tidak perlu pengaturan manual."},
+{p:"Algoritma",q:"Urutan warna kabel straight standar T568B yang benar adalah…",o:["Putih-Orange, Orange, Putih-Hijau, Biru, Putih-Biru, Hijau, Putih-Coklat, Coklat","Putih-Hijau, Hijau, Putih-Orange, Biru, Putih-Biru, Orange, Putih-Coklat, Coklat","Orange, Putih-Orange, Hijau, Putih-Hijau, Biru, Putih-Biru, Coklat, Putih-Coklat","Putih-Coklat, Coklat, Putih-Hijau, Hijau, Putih-Orange, Orange, Putih-Biru, Biru"],a:0,info:"T568B adalah standar paling umum untuk kabel straight UTP (opsi kedua adalah standar T568A)."},
+{p:"Dasar Jaringan",q:"Protokol yang dipakai browser untuk mengambil dan menampilkan halaman web adalah…",o:["SMTP","FTP","DHCP","HTTP/HTTPS"],a:3,info:"HTTP(S) untuk halaman web; SMTP untuk email; FTP untuk transfer berkas."}
+];
+const BADGE_COLOR={"Dekomposisi":"#ff8c1a","Pengenalan Pola":"#26d4f0","Abstraksi":"#b78cff","Algoritma":"#39d98a","Dasar Jaringan":"#ffd21f"};
+const QTIME=30, MAXPOS=10;
+
+/* ================= STATE ================= */
+let order=[],qi=0,pos=0,benar=0,salah=0,streak=0,best=0,phase="idle",timerId=null,timeLeft=QTIME,muted=false;
+const $=id=>document.getElementById(id);
+const field=$("field"),ropeTrack=$("ropeTrack"),teamL=$("teamL"),teamR=$("teamR"),arena=$("arena");
+
+/* ================= AUDIO ================= */
+let actx=null;
+function ac(){if(!actx)actx=new (window.AudioContext||window.webkitAudioContext)();return actx}
+function tone(f,d,type="square",g=.13,delay=0){
+  if(muted)return;try{const c=ac(),o=c.createOscillator(),v=c.createGain();
+  o.type=type;o.frequency.value=f;v.gain.setValueAtTime(g,c.currentTime+delay);
+  v.gain.exponentialRampToValueAtTime(.001,c.currentTime+delay+d);
+  o.connect(v);v.connect(c.destination);o.start(c.currentTime+delay);o.stop(c.currentTime+delay+d);}catch(e){}
+}
+const sfx={
+  click:()=>tone(700,.06,"triangle",.1),
+  ok:()=>{tone(523,.12,"square",.12);tone(659,.12,"square",.12,.11);tone(784,.2,"square",.12,.22)},
+  no:()=>{tone(196,.22,"sawtooth",.12);tone(147,.3,"sawtooth",.12,.18)},
+  tick:()=>tone(880,.05,"triangle",.07),
+  pull:()=>tone(92,.16,"sine",.2),
+  win:()=>{[523,659,784,1046,1318].forEach((f,i)=>tone(f,.22,"square",.13,i*.14))},
+  lose:()=>{[392,330,262,196].forEach((f,i)=>tone(f,.25,"sawtooth",.11,i*.16))}
+};
+
+/* ================= DEKORASI ================= */
+(function buildFloaties(){
+  const items=["📡","🌐","🔌","💻","🛰️","✉️","0110","1010","IP","TCP"];
+  const box=$("floaties");
+  items.forEach((t,i)=>{
+    const s=document.createElement("span");
+    s.className="fl"+(t.length>2?" bin":"");s.textContent=t;
+    s.style.left=(4+i*9.6)+"%";s.style.top=(8+(i%4)*22)+"%";
+    s.style.animationDelay=(i*.7)+"s";s.style.animationDuration=(7+i%5)+"s";
+    box.appendChild(s);
+  });
+})();
+(function buildCrowd(){
+  const c=$("crowd"),cols=["#ff8c1a","#26d4f0","#ffd21f","#39d98a","#ff5d5d","#b78cff","#f4f6ff"];
+  for(let i=0;i<64;i++){
+    const d=document.createElement("span");d.className="dot";
+    d.style.left=(i*1.6+Math.random()*1.2)+"%";
+    d.style.top=(Math.random()<.5?14:34)+Math.random()*8+"px";
+    d.style.background=cols[i%cols.length];
+    d.style.animationDelay=(Math.random()*2)+"s";
+    c.appendChild(d);
+  }
+})();
+
+/* ================= POSISI TALI ================= */
+let stepPx=30;
+function measure(){const w=field.clientWidth;stepPx=(w*0.38)/MAXPOS;applyRope(false)}
+function applyRope(anim=true){
+  ropeTrack.style.transition=anim?"":"none";
+  ropeTrack.style.transform=`translateX(${pos*stepPx}px)`;
+  $("meterFlag").style.left=(50+pos*5)+"%";
+  if(!anim)requestAnimationFrame(()=>ropeTrack.style.transition="");
+}
+window.addEventListener("resize",measure);
+
+/* ================= EFEK ================= */
+function puff(team){
+  const r=team.getBoundingClientRect(),fr=field.getBoundingClientRect();
+  for(let i=0;i<5;i++){
+    const p=document.createElement("span");p.className="puff";
+    p.style.left=(r.left-fr.left+r.width*(0.25+Math.random()*0.5))+"px";
+    p.style.bottom=(4+Math.random()*14)+"px";
+    p.style.animationDelay=(i*0.06)+"s";
+    field.appendChild(p);setTimeout(()=>p.remove(),900);
+  }
+}
+function banner(txt,good){
+  const b=$("banner");b.textContent=txt;b.className="arena-banner show "+(good?"good":"bad");
+  clearTimeout(banner.t);banner.t=setTimeout(()=>b.classList.remove("show"),1500);
+}
+function react(goodForLeft){
+  const w=goodForLeft?teamL:teamR,l=goodForLeft?teamR:teamL;
+  w.classList.remove("sad");w.classList.add("cheer");
+  l.classList.remove("cheer");l.classList.add("sad");
+  setTimeout(()=>{w.classList.remove("cheer");l.classList.remove("sad")},1700);
+  if(!goodForLeft){arena.classList.add("shake");setTimeout(()=>arena.classList.remove("shake"),500)}
+  const c=$("crowd");if(goodForLeft){c.classList.add("hype");setTimeout(()=>c.classList.remove("hype"),1100)}
+}
+function confetti(){
+  const box=$("confetti"),cols=["#ff8c1a","#26d4f0","#ffd21f","#39d98a","#ffffff","#ff5d5d"];
+  for(let i=0;i<110;i++){
+    const s=document.createElement("span");s.className="cf";
+    s.style.left=Math.random()*100+"vw";s.style.background=cols[i%cols.length];
+    s.style.animationDuration=(2.2+Math.random()*2)+"s";s.style.animationDelay=(Math.random()*1.2)+"s";
+    s.style.transform=`rotate(${Math.random()*360}deg)`;
+    box.appendChild(s);setTimeout(()=>s.remove(),5000);
+  }
+}
+
+/* ================= HUD ================= */
+function hud(){
+  $("scoreL").textContent=benar;$("scoreR").textContent=salah;
+  $("qCount").textContent=order.length?String(Math.min(qi+1,20)).padStart(2,"0")+"/20":"–";
+  const chip=$("streakChip");
+  if(streak>=2){chip.classList.add("on");$("streakN").textContent=streak}else chip.classList.remove("on");
+}
+
+/* ================= TIMER ================= */
+function startTimer(){
+  timeLeft=QTIME;paintTimer();
+  clearInterval(timerId);
+  timerId=setInterval(()=>{
+    timeLeft-=0.1;
+    if(timeLeft<=5.05&&Math.abs(timeLeft%1)<0.1)sfx.tick();
+    paintTimer();
+    if(timeLeft<=0){clearInterval(timerId);timeout()}
+  },100);
+}
+function paintTimer(){
+  const t=Math.max(0,timeLeft);
+  $("tfill").style.width=(t/QTIME*100)+"%";
+  $("tsec").textContent=Math.ceil(t);
+  const low=t<=8;$("tbar").classList.toggle("low",low);$("tsec").classList.toggle("low",low);
+}
+
+/* ================= ALUR GAME ================= */
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+function startGame(){
+  order=shuffle([...QUESTIONS.keys()]);
+  qi=0;pos=0;benar=0;salah=0;streak=0;best=0;phase="play";
+  teamL.classList.remove("sad","cheer");teamR.classList.remove("sad","cheer");
+  $("startOverlay").classList.add("hidden");$("endOverlay").classList.add("hidden");
+  $("confetti").innerHTML="";
+  hud();measure();applyRope(false);loadQuestion();
+}
+
+function loadQuestion(){
+  phase="play";
+  const Q=QUESTIONS[order[qi]];
+  $("qNo").textContent=String(qi+1).padStart(2,"0");
+  const badge=$("qBadge");badge.textContent=Q.p;badge.style.background=BADGE_COLOR[Q.p]||"#ffd21f";
+  const qt=$("qText");qt.textContent=Q.q;qt.style.animation="none";qt.offsetHeight;qt.style.animation="";
+  const opts=shuffle(Q.o.map((t,i)=>({t,ok:i===Q.a})));
+  const box=$("opts");box.innerHTML="";
+  opts.forEach((o,i)=>{
+    const b=document.createElement("button");b.className="opt";
+    b.innerHTML=`<span class="key">${"ABCD"[i]}</span><span>${o.t}</span>`;
+    b.addEventListener("click",()=>pick(i,opts));
+    box.appendChild(b);
+  });
+  box.dataset.opts=JSON.stringify(opts);
+  $("fb").innerHTML="";
+  hud();startTimer();
+}
+
+function pick(i,opts){
+  if(phase!=="play")return;
+  phase="feedback";clearInterval(timerId);
+  const btns=[...$("opts").children];
+  btns.forEach(b=>b.disabled=true);
+  const chosen=opts[i],ok=chosen.ok;
+  btns[opts.findIndex(o=>o.ok)].classList.add("correct");
+  if(!ok)btns[i].classList.add("wrong");
+  resolve(ok,false);
+}
+function timeout(){
+  if(phase!=="play")return;
+  phase="feedback";
+  const opts=JSON.parse($("opts").dataset.opts);
+  [...$("opts").children].forEach((b,i)=>{b.disabled=true;if(opts[i].ok)b.classList.add("correct")});
+  resolve(false,true);
+}
+
+function resolve(ok,timedOut){
+  const verdicts={ok:["MANTAP! 🎉","TEPAT SEKALI! ⚡","KEREN! 💪","LUAR BIASA! 🔥"],
+                  bad:["YAH, MELESET! 😅","TALI LEPAS! 😬","BELUM TEPAT! 🤏","AWAS KETARIK! 😱"]};
+  const v=ok?verdicts.ok[Math.floor(Math.random()*4)]:verdicts.bad[Math.floor(Math.random()*4)];
+  if(ok){benar++;pos--;streak++;best=Math.max(best,streak);sfx.ok();banner("💪 TALI TERTARIK KE KIRI!",true)}
+  else{salah++;pos++;streak=0;sfx.no();banner(timedOut?"⏰ WAKTU HABIS! TALI KE KANAN!":"🤖 TALI TERSERET KE KANAN!",false)}
+  setTimeout(()=>sfx.pull(),450);
+  applyRope(true);react(ok);puff(ok?teamR:teamL);hud();
+  const Q=QUESTIONS[order[qi]];
+  $("fb").innerHTML=`
+    <div class="fb-line">
+      <span class="fb-verdict ${ok?"good":"bad"}">${timedOut?"⏰ WAKTU HABIS! ":ok?"✅ ":"❌ "}${v}</span>
+      <span class="fb-pull ${ok?"l":"r"}">${ok?"🚩 Tali bergeser ke arah SISWA":"🚩 Tali bergeser ke arah KOMPUTER"}</span>
+    </div>
+    <p class="fb-info">${timedOut?"Jawaban yang benar: <b>"+Q.o[Q.a]+"</b>. ":""}${Q.info}</p>`;
+  const finished=pos<=-MAXPOS||pos>=MAXPOS||qi===order.length-1;
+  if(finished){
+    const nb=document.createElement("button");nb.className="btn-next";
+    nb.textContent="🏁 LIHAT HASIL";
+    nb.addEventListener("click",endGame);
+    $("fb").appendChild(nb);
+  }else{
+    const nb=document.createElement("button");nb.className="btn-next";
+    nb.textContent="LANJUT ➜";
+    nb.addEventListener("click",()=>{qi++;loadQuestion()});
+    $("fb").appendChild(nb);
+    nb.focus();
+  }
+}
+
+function endGame(){
+  phase="end";clearInterval(timerId);
+  const title=$("endTitle"),sub=$("endSub");
+  if(pos<0){
+    title.textContent="🏆 TIM SISWA MENANG!";title.className="end-title win";
+    sub.textContent=pos===-MAXPOS
+      ?"SEMPURNA! Semua 20 soal dijawab benar — komputer tak berkutik dan terseret melewati garis! Kalian layak jadi juara jaringan."
+      :"Bendera berhasil melewati garis kiri! Pengetahuan jaringan kalian lebih kuat daripada tarikan komputer.";
+    sfx.win();confetti();teamL.classList.add("cheer");teamR.classList.add("sad");
+  }else if(pos>0){
+    title.textContent="🤖 TIM KOMPUTER MENANG";title.className="end-title lose";
+    sub.textContent="Tali terseret melewati garis kanan. Jangan menyerah — pelajari lagi materinya, lalu tantang balik komputernya!";
+    sfx.lose();teamR.classList.add("cheer");teamL.classList.add("sad");
+  }else{
+    title.textContent="🤝 SERI!";title.className="end-title draw";
+    sub.textContent="Kekuatan seimbang tepat di tengah! Satu jawaban benar saja bisa mengubah hasil — coba lagi!";
+    sfx.ok();
+  }
+  $("stBenar").textContent=benar;$("stSalah").textContent=salah;
+  $("stStreak").textContent=best;
+  $("stPos").textContent=(pos>0?"+":"")+pos;
+  const r=benar===20?"🏆 LEGENDA JARINGAN!":benar>=16?"🥇 Calon Network Engineer!":benar>=12?"🥈 Teknisi Andal!":benar>=8?"🥉 Pejuang Sinyal!":"📶 Masih Perlu Latihan — semangat!";
+  $("rankLine").textContent="Gelar kamu: "+r;
+  $("endOverlay").classList.remove("hidden");
+}
+
+/* ================= TOMBOL ================= */
+$("btnStart").addEventListener("click",()=>{sfx.click();ac();startGame()});
+$("btnRestart").addEventListener("click",()=>{sfx.click();startGame()});
+$("btnMenu").addEventListener("click",()=>{sfx.click();$("endOverlay").classList.add("hidden");$("startOverlay").classList.remove("hidden")});
+$("btnSound").addEventListener("click",function(){muted=!muted;this.textContent=muted?"🔇":"🔊";if(!muted)sfx.click()});
+
+document.addEventListener("keydown",e=>{
+  if(phase==="play"){
+    const map={"1":0,"2":1,"3":2,"4":3,a:0,b:1,c:2,d:3};
+    const k=e.key.toLowerCase();
+    if(k in map){const opts=JSON.parse($("opts").dataset.opts||"[]");if(opts.length)pick(map[k],opts)}
+  }else if(phase==="feedback"&&e.key==="Enter"){
+    const nb=document.querySelector(".btn-next");if(nb)nb.click();
+  }
+});
+
+measure();applyRope(false);hud();
+</script>
+</body>
+</html>
