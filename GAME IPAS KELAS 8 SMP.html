@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPAS Explorer: Kelas 8 SMP</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #ec4899;
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-dim: #6b7280;
+            --correct: #10b981;
+            --wrong: #ef4444;
+            --shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 3rem;
+            max-width: 700px;
+            width: 100%;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        h1 {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.2rem;
+            font-weight: 800;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-dim);
+            margin-bottom: 2rem;
+            font-size: 1rem;
+        }
+
+        .screen { display: none; }
+        .screen.active { display: block; animation: slideIn 0.5s ease; }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Start Screen */
+        .start-icon { 
+            font-size: 5rem; 
+            text-align: center; 
+            margin-bottom: 1.5rem;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .info-box h3 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .info-box ul {
+            list-style: none;
+            color: var(--text-dim);
+        }
+
+        .info-box li {
+            padding: 0.3rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .info-box li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--correct);
+            font-weight: bold;
+        }
+
+        /* Quiz Screen */
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+            color: var(--text-dim);
+            font-weight: 600;
+        }
+
+        .quiz-header span { 
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e5e7eb;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            width: 0%;
+            transition: width 0.4s ease;
+            border-radius: 10px;
+        }
+
+        .question-text {
+            font-size: 1.25rem;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .options-container { display: flex; flex-direction: column; gap: 12px; }
+
+        .option-btn {
+            background: #f9fafb;
+            border: 2px solid #e5e7eb;
+            color: var(--text-main);
+            padding: 18px;
+            border-radius: 12px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--primary);
+            background: #f3f4f6;
+            transform: translateX(8px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+        }
+
+        .option-btn.correct {
+            border-color: var(--correct);
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--correct);
+            font-weight: 700;
+        }
+
+        .option-btn.wrong {
+            border-color: var(--wrong);
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--wrong);
+            font-weight: 700;
+        }
+
+        .option-btn:disabled { cursor: not-allowed; }
+
+        .feedback {
+            margin-top: 1.5rem;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 700;
+            display: none;
+            font-size: 1.05rem;
+        }
+
+        .feedback.show { display: block; animation: popIn 0.3s ease; }
+
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .feedback.correct-fb { 
+            background: rgba(16, 185, 129, 0.15); 
+            color: var(--correct);
+            border: 2px solid var(--correct);
+        }
+
+        .feedback.wrong-fb { 
+            background: rgba(239, 68, 68, 0.15); 
+            color: var(--wrong);
+            border: 2px solid var(--wrong);
+        }
+
+        .btn-next {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 1.5rem;
+            display: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-next:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-next.show { display: block; }
+
+        /* End Screen */
+        .result-icon { 
+            font-size: 6rem; 
+            text-align: center; 
+            margin-bottom: 1rem;
+            animation: celebrate 1s ease;
+        }
+
+        @keyframes celebrate {
+            0% { transform: scale(0) rotate(0deg); }
+            50% { transform: scale(1.2) rotate(180deg); }
+            100% { transform: scale(1) rotate(360deg); }
+        }
+
+        .score-display {
+            font-size: 3.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+            font-weight: 800;
+            margin: 1.5rem 0;
+        }
+
+        .result-message { 
+            text-align: center; 
+            margin-bottom: 2rem; 
+            color: var(--text-dim);
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .btn-restart {
+            background: transparent;
+            border: 3px solid var(--primary);
+            color: var(--primary);
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .btn-restart:hover { 
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-color: transparent;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 2rem 1.5rem; }
+            h1 { font-size: 1.8rem; }
+            .question-text { font-size: 1.1rem; }
+            .score-display { font-size: 2.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- START SCREEN -->
+    <div id="start-screen" class="screen active">
+        <div class="start-icon">🔬🌍</div>
+        <h1>IPAS Explorer</h1>
+        <p class="subtitle">Kuis Interaktif Kelas 8 SMP</p>
+        
+        <div class="info-box">
+            <h3>📚 Materi yang Diujikan:</h3>
+            <ul>
+                <li>Sistem Organ Manusia (Pencernaan, Pernapasan, Peredaran Darah)</li>
+                <li>Zat dan Perubahannya</li>
+                <li>Gaya, Energi, dan Pesawat Sederhana</li>
+                <li>Getaran, Gelombang, dan Bunyi</li>
+                <li>Cahaya dan Optik</li>
+                <li>Kondisi Geografis Indonesia</li>
+                <li>Keanekaragaman Budaya</li>
+                <li>Kegiatan Ekonomi Masyarakat</li>
+            </ul>
+        </div>
+
+        <p style="text-align: center; margin-bottom: 2rem; color: var(--text-dim); font-size: 0.95rem;">
+            Jawab <strong style="color: var(--primary);">20 pertanyaan</strong> dengan benar. 
+            Setiap jawaban benar mendapat <strong style="color: var(--secondary);">5 poin</strong>. 
+            Total skor maksimal: <strong>100 poin</strong>!
+        </p>
+        
+        <button class="btn-next show" onclick="startGame()" style="display: block;">🚀 MULAI PETUALANGAN</button>
+    </div>
+
+    <!-- QUIZ SCREEN -->
+    <div id="quiz-screen" class="screen">
+        <div class="quiz-header">
+            <div>Soal <span id="current-q">1</span> / <span id="total-q">20</span></div>
+            <div>Skor: <span id="score-display">0</span></div>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        
+        <div class="question-text" id="question-text">Loading question...</div>
+        
+        <div class="options-container" id="options-container">
+            <!-- Options will be injected here -->
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+        <button class="btn-next" id="btn-next" onclick="nextQuestion()">SOAL BERIKUTNYA →</button>
+    </div>
+
+    <!-- END SCREEN -->
+    <div id="end-screen" class="screen">
+        <div class="result-icon" id="result-icon">🏆</div>
+        <h1 style="margin-bottom: 0;">Petualangan Selesai!</h1>
+        <div class="score-display" id="final-score">0 / 100</div>
+        <p class="result-message" id="result-message">Kamu berhasil menyelesaikan kuis.</p>
+        <button class="btn-restart" onclick="restartGame()">🔄 MAIN LAGI</button>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        // IPA - Sistem Pencernaan
+        {
+            question: "Enzim yang dihasilkan oleh lambung dan berfungsi untuk membunuh kuman penyakit yang masuk bersama makanan adalah...",
+            options: ["Pepsin", "Renin", "Asam klorida (HCl)", "Lipase"],
+            answer: 2
+        },
+        {
+            question: "Organ pencernaan yang berfungsi sebagai tempat penyerapan sari-sari makanan adalah...",
+            options: ["Lambung", "Usus besar", "Usus halus", "Kerongkongan"],
+            answer: 2
+        },
+        // IPA - Sistem Pernapasan
+        {
+            question: "Pertukaran oksigen dan karbon dioksida dalam sistem pernapasan manusia terjadi di...",
+            options: ["Trakea", "Bronkus", "Alveolus", "Laring"],
+            answer: 2
+        },
+        {
+            question: "Volume udara yang dapat dihirup setelah melakukan inspirasi biasa disebut...",
+            options: ["Volume tidal", "Volume suplementer", "Volume komplementer", "Kapasitas vital"],
+            answer: 2
+        },
+        // IPA - Sistem Peredaran Darah
+        {
+            question: "Pembuluh darah yang membawa darah kaya oksigen dari paru-paru ke jantung adalah...",
+            options: ["Arteri pulmonalis", "Vena pulmonalis", "Aorta", "Vena kava"],
+            answer: 1
+        },
+        {
+            question: "Komponen darah yang berfungsi untuk membekukan darah saat terjadi luka adalah...",
+            options: ["Eritrosit", "Leukosit", "Trombosit", "Plasma darah"],
+            answer: 2
+        },
+        // IPA - Zat dan Perubahannya
+        {
+            question: "Perubahan wujud zat dari gas menjadi cair disebut...",
+            options: ["Menguap", "Mengembun", "Menyublim", "Mengkristal"],
+            answer: 1
+        },
+        {
+            question: "Contoh perubahan kimia dalam kehidupan sehari-hari adalah...",
+            options: ["Es mencair", "Besi berkarat", "Gula larut dalam air", "Kertas disobek"],
+            answer: 1
+        },
+        // IPA - Gaya dan Energi
+        {
+            question: "Pesawat sederhana yang prinsip kerjanya berdasarkan hukum pengungkit adalah...",
+            options: ["Bidang miring", "Katrol", "Gerobak dorong", "Roda gigi"],
+            answer: 2
+        },
+        {
+            question: "Energi yang dimiliki oleh benda karena kedudukannya terhadap permukaan tanah disebut...",
+            options: ["Energi kinetik", "Energi potensial", "Energi mekanik", "Energi panas"],
+            answer: 1
+        },
+        // IPA - Getaran dan Gelombang
+        {
+            question: "Jumlah getaran yang terjadi dalam satu detik disebut...",
+            options: ["Periode", "Frekuensi", "Amplitudo", "Simpangan"],
+            answer: 1
+        },
+        {
+            question: "Bunyi dapat merambat melalui medium berikut, kecuali...",
+            options: ["Zat padat", "Zat cair", "Zat gas", "Ruang hampa"],
+            answer: 3
+        },
+        // IPA - Cahaya dan Optik
+        {
+            question: "Alat optik yang digunakan untuk membantu mata melihat benda-benda yang sangat kecil adalah...",
+            options: ["Teropong", "Mikroskop", "Periskop", "Kaleidoskop"],
+            answer: 1
+        },
+        {
+            question: "Cacat mata yang dapat dibantu dengan lensa cekung adalah...",
+            options: ["Hipermetropi", "Miopi", "Presbiopi", "Astigmatisme"],
+            answer: 1
+        },
+        // IPS - Kondisi Geografis Indonesia
+        {
+            question: "Indonesia terletak di antara dua benua, yaitu...",
+            options: ["Asia dan Australia", "Asia dan Eropa", "Australia dan Amerika", "Asia dan Afrika"],
+            answer: 0
+        },
+        {
+            question: "Angin muson barat yang bertiup pada bulan Oktober-April membawa dampak berupa...",
+            options: ["Musim kemarau", "Musim hujan", "Musim pancaroba", "Musim kemarau panjang"],
+            answer: 1
+        },
+        // IPS - Keanekaragaman Budaya
+        {
+            question: "Rumah adat Gadang berasal dari daerah...",
+            options: ["Jawa Tengah", "Sumatera Barat", "Sulawesi Selatan", "Bali"],
+            answer: 1
+        },
+        {
+            question: "Tarian Saman yang terkenal berasal dari provinsi...",
+            options: ["Nanggroe Aceh Darussalam", "Sumatera Utara", "Riau", "Jambi"],
+            answer: 0
+        },
+        // IPS - Kegiatan Ekonomi
+        {
+            question: "Kegiatan ekonomi yang mengolah bahan mentah menjadi barang jadi disebut...",
+            options: ["Produksi", "Distribusi", "Konsumsi", "Ekspedisi"],
+            answer: 0
+        },
+        {
+            question: "Pelaku ekonomi yang berperan sebagai penyedia faktor produksi adalah...",
+            options: ["Rumah tangga konsumen", "Rumah tangga produsen", "Pemerintah", "Masyarakat luar negeri"],
+            answer: 1
+        }
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+    let answered = false;
+
+    const startScreen = document.getElementById('start-screen');
+    const quizScreen = document.getElementById('quiz-screen');
+    const endScreen = document.getElementById('end-screen');
+    
+    const questionText = document.getElementById('question-text');
+    const optionsContainer = document.getElementById('options-container');
+    const feedback = document.getElementById('feedback');
+    const btnNext = document.getElementById('btn-next');
+    
+    const currentQDisplay = document.getElementById('current-q');
+    const totalQDisplay = document.getElementById('total-q');
+    const scoreDisplay = document.getElementById('score-display');
+    const progressFill = document.getElementById('progress-fill');
+
+    function startGame() {
+        startScreen.classList.remove('active');
+        quizScreen.classList.add('active');
+        currentQuestion = 0;
+        score = 0;
+        totalQDisplay.innerText = questions.length;
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        answered = false;
+        const q = questions[currentQuestion];
+        
+        currentQDisplay.innerText = currentQuestion + 1;
+        scoreDisplay.innerText = score;
+        progressFill.style.width = ((currentQuestion) / questions.length) * 100 + '%';
+        
+        questionText.innerText = q.question;
+        optionsContainer.innerHTML = '';
+        feedback.className = 'feedback';
+        feedback.innerText = '';
+        btnNext.classList.remove('show');
+
+        q.options.forEach((option, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = option;
+            btn.onclick = () => checkAnswer(index, btn);
+            optionsContainer.appendChild(btn);
+        });
+    }
+
+    function checkAnswer(selectedIndex, selectedBtn) {
+        if (answered) return;
+        answered = true;
+
+        const q = questions[currentQuestion];
+        const allBtns = document.querySelectorAll('.option-btn');
+        
+        allBtns.forEach(btn => btn.disabled = true);
+
+        if (selectedIndex === q.answer) {
+            selectedBtn.classList.add('correct');
+            score += 5;
+            scoreDisplay.innerText = score;
+            feedback.innerText = "✅ Benar! +5 Poin";
+            feedback.className = 'feedback show correct-fb';
+        } else {
+            selectedBtn.classList.add('wrong');
+            allBtns[q.answer].classList.add('correct');
+            feedback.innerText = "❌ Kurang tepat. Jawaban yang benar ditandai hijau.";
+            feedback.className = 'feedback show wrong-fb';
+        }
+
+        btnNext.classList.add('show');
+        if (currentQuestion === questions.length - 1) {
+            btnNext.innerText = "🎉 LIHAT HASIL";
+        }
+    }
+
+    function nextQuestion() {
+        currentQuestion++;
+        if (currentQuestion < questions.length) {
+            loadQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        quizScreen.classList.remove('active');
+        endScreen.classList.add('active');
+        
+        const finalScore = document.getElementById('final-score');
+        const resultIcon = document.getElementById('result-icon');
+        const resultMessage = document.getElementById('result-message');
+        
+        finalScore.innerText = `${score} / 100`;
+        progressFill.style.width = '100%';
+
+        if (score === 100) {
+            resultIcon.innerText = "🏆";
+            resultMessage.innerText = "SEMPURNA! Kamu adalah IPAS Master sejati. Pengetahuanmu luar biasa!";
+        } else if (score >= 80) {
+            resultIcon.innerText = "🌟";
+            resultMessage.innerText = "Luar biasa! Kamu sangat menguasai materi IPAS. Pertahankan prestasimu!";
+        } else if (score >= 60) {
+            resultIcon.innerText = "👍";
+            resultMessage.innerText = "Bagus! Kamu sudah memahami sebagian besar materi. Terus tingkatkan!";
+        } else if (score >= 40) {
+            resultIcon.innerText = "📖";
+            resultMessage.innerText = "Cukup baik. Pelajari kembali materi yang belum kamu kuasai untuk hasil yang lebih baik.";
+        } else {
+            resultIcon.innerText = "💪";
+            resultMessage.innerText = "Jangan menyerah! Baca kembali buku paket dan modul IPAS, lalu coba lagi. Kamu pasti bisa!";
+        }
+    }
+
+    function restartGame() {
+        endScreen.classList.remove('active');
+        startScreen.classList.add('active');
+        btnNext.innerText = "SOAL BERIKUTNYA →";
+    }
+</script>
+
+</body>
+</html>
