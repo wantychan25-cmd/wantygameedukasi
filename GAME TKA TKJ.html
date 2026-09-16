@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TKJ Master: TKA Class XII</title>
+    <style>
+        :root {
+            --primary: #00ffcc;
+            --bg-dark: #0a0a0a;
+            --card-bg: #151515;
+            --text-main: #e0e0e0;
+            --text-dim: #888;
+            --correct: #00e676;
+            --wrong: #ff5252;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            background-image: radial-gradient(circle at 50% 50%, #1a1a2e 0%, #0a0a0a 100%);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: var(--card-bg);
+            border: 1px solid #333;
+            border-radius: 16px;
+            padding: 2.5rem;
+            max-width: 650px;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(0, 255, 204, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), #007bff);
+        }
+
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2rem;
+            text-shadow: 0 0 10px rgba(0, 255, 204, 0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-dim);
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+
+        .screen { display: none; }
+        .screen.active { display: block; animation: fadeIn 0.4s ease; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Start Screen */
+        .start-icon { font-size: 4rem; text-align: center; margin-bottom: 1rem; }
+        
+        /* Quiz Screen */
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--text-dim);
+        }
+        
+        .quiz-header span { font-weight: bold; color: var(--primary); }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #222;
+            border-radius: 4px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 8px var(--primary);
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .options-container { display: flex; flex-direction: column; gap: 12px; }
+
+        .option-btn {
+            background: #1e1e1e;
+            border: 2px solid #333;
+            color: var(--text-main);
+            padding: 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--primary);
+            background: #252525;
+            transform: translateX(5px);
+        }
+
+        .option-btn.correct {
+            border-color: var(--correct);
+            background: rgba(0, 230, 118, 0.1);
+            color: var(--correct);
+        }
+
+        .option-btn.wrong {
+            border-color: var(--wrong);
+            background: rgba(255, 82, 82, 0.1);
+            color: var(--wrong);
+        }
+
+        .option-btn:disabled { cursor: not-allowed; }
+
+        .feedback {
+            margin-top: 1.5rem;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+
+        .feedback.show { display: block; }
+        .feedback.correct-fb { background: rgba(0, 230, 118, 0.15); color: var(--correct); }
+        .feedback.wrong-fb { background: rgba(255, 82, 82, 0.15); color: var(--wrong); }
+
+        .btn-next {
+            background: var(--primary);
+            color: #000;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 1.5rem;
+            display: none;
+            transition: 0.2s;
+        }
+
+        .btn-next:hover { background: #00e6b8; transform: scale(1.02); }
+        .btn-next.show { display: block; }
+
+        /* End Screen */
+        .result-icon { font-size: 5rem; text-align: center; margin-bottom: 1rem; }
+        .score-display {
+            font-size: 3rem;
+            color: var(--primary);
+            text-align: center;
+            font-weight: bold;
+            margin: 1rem 0;
+            text-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
+        }
+        
+        .result-message { text-align: center; margin-bottom: 2rem; color: var(--text-dim); }
+
+        .btn-restart {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.2s;
+        }
+
+        .btn-restart:hover { background: var(--primary); color: #000; }
+
+        @media (max-width: 500px) {
+            .container { padding: 1.5rem; }
+            h1 { font-size: 1.5rem; }
+            .question-text { font-size: 1.05rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- START SCREEN -->
+    <div id="start-screen" class="screen active">
+        <div class="start-icon">🌐</div>
+        <h1>TKJ MASTER</h1>
+        <p class="subtitle">Simulasi TKA / UKK Kelas XII Teknik Komputer & Jaringan</p>
+        <p style="text-align: center; margin-bottom: 2rem; color: var(--text-dim); font-size: 0.9rem;">
+            Uji kemampuanmu dalam materi Jaringan Dasar, Server, Fiber Optic, dan Keamanan Jaringan. 
+            Jawab 10 pertanyaan dengan benar untuk mendapatkan gelar <strong style="color: var(--primary);">Network Master</strong>!
+        </p>
+        <button class="btn-next show" onclick="startGame()" style="display: block;">MULAI UJIAN</button>
+    </div>
+
+    <!-- QUIZ SCREEN -->
+    <div id="quiz-screen" class="screen">
+        <div class="quiz-header">
+            <div>Soal <span id="current-q">1</span> / <span id="total-q">10</span></div>
+            <div>Skor: <span id="score-display">0</span></div>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        
+        <div class="question-text" id="question-text">Loading question...</div>
+        
+        <div class="options-container" id="options-container">
+            <!-- Options will be injected here -->
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+        <button class="btn-next" id="btn-next" onclick="nextQuestion()">LANJUTKAN</button>
+    </div>
+
+    <!-- END SCREEN -->
+    <div id="end-screen" class="screen">
+        <div class="result-icon" id="result-icon">🏆</div>
+        <h1 style="margin-bottom: 0;">Ujian Selesai!</h1>
+        <div class="score-display" id="final-score">0 / 100</div>
+        <p class="result-message" id="result-message">Kamu berhasil menyelesaikan ujian.</p>
+        <button class="btn-restart" onclick="restartGame()">ULANGI UJIAN</button>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        {
+            question: "Layer pada model OSI yang bertugas untuk melakukan routing (penentuan jalur) dan logical addressing (IP Address) adalah...",
+            options: ["Data Link Layer", "Network Layer", "Transport Layer", "Session Layer"],
+            answer: 1
+        },
+        {
+            question: "Perintah dasar di Command Prompt (CMD) yang digunakan untuk menguji konektivitas jaringan dari satu host ke host lain adalah...",
+            options: ["ipconfig", "tracert", "ping", "netstat"],
+            answer: 2
+        },
+        {
+            question: "Perangkat jaringan yang berfungsi untuk menghubungkan dua atau lebih jaringan yang memiliki perbedaan Network ID dan meneruskan paket data antar jaringan adalah...",
+            options: ["Switch", "Hub", "Router", "Repeater"],
+            answer: 2
+        },
+        {
+            question: "Protokol yang digunakan untuk memberikan alamat IP secara otomatis kepada client dalam suatu jaringan disebut...",
+            options: ["DNS", "DHCP", "FTP", "SMTP"],
+            answer: 1
+        },
+        {
+            question: "Subnet mask default untuk IP Address kelas C adalah...",
+            options: ["255.0.0.0", "255.255.0.0", "255.255.255.0", "255.255.255.255"],
+            answer: 2
+        },
+        {
+            question: "Alat khusus yang digunakan untuk menyambung (splicing) inti kabel Fiber Optic dengan presisi tinggi adalah...",
+            options: ["Crimping Tool", "Fusion Splicer", "Optical Power Meter", "Tone Generator"],
+            answer: 1
+        },
+        {
+            question: "Topologi jaringan di mana setiap node terhubung secara serial dan membentuk lingkaran tertutup disebut topologi...",
+            options: ["Bus", "Star", "Ring", "Mesh"],
+            answer: 2
+        },
+        {
+            question: "Layanan server yang berfungsi menerjemahkan nama domain (URL) menjadi alamat IP agar dapat diakses oleh komputer adalah...",
+            options: ["Web Server", "Mail Server", "DNS Server", "File Server"],
+            answer: 2
+        },
+        {
+            question: "Teknik membagi suatu network besar menjadi beberapa subnetwork yang lebih kecil untuk efisiensi IP Address disebut...",
+            options: ["Supernetting", "Subnetting", "NAT", "VLAN"],
+            answer: 1
+        },
+        {
+            question: "Protokol yang digunakan untuk mengakses halaman web secara aman dengan enkripsi data adalah...",
+            options: ["HTTP", "FTP", "HTTPS", "TELNET"],
+            answer: 2
+        }
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+    let answered = false;
+
+    const startScreen = document.getElementById('start-screen');
+    const quizScreen = document.getElementById('quiz-screen');
+    const endScreen = document.getElementById('end-screen');
+    
+    const questionText = document.getElementById('question-text');
+    const optionsContainer = document.getElementById('options-container');
+    const feedback = document.getElementById('feedback');
+    const btnNext = document.getElementById('btn-next');
+    
+    const currentQDisplay = document.getElementById('current-q');
+    const totalQDisplay = document.getElementById('total-q');
+    const scoreDisplay = document.getElementById('score-display');
+    const progressFill = document.getElementById('progress-fill');
+
+    function startGame() {
+        startScreen.classList.remove('active');
+        quizScreen.classList.add('active');
+        currentQuestion = 0;
+        score = 0;
+        totalQDisplay.innerText = questions.length;
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        answered = false;
+        const q = questions[currentQuestion];
+        
+        currentQDisplay.innerText = currentQuestion + 1;
+        scoreDisplay.innerText = score;
+        progressFill.style.width = ((currentQuestion) / questions.length) * 100 + '%';
+        
+        questionText.innerText = q.question;
+        optionsContainer.innerHTML = '';
+        feedback.className = 'feedback';
+        feedback.innerText = '';
+        btnNext.classList.remove('show');
+
+        q.options.forEach((option, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = option;
+            btn.onclick = () => checkAnswer(index, btn);
+            optionsContainer.appendChild(btn);
+        });
+    }
+
+    function checkAnswer(selectedIndex, selectedBtn) {
+        if (answered) return;
+        answered = true;
+
+        const q = questions[currentQuestion];
+        const allBtns = document.querySelectorAll('.option-btn');
+        
+        allBtns.forEach(btn => btn.disabled = true);
+
+        if (selectedIndex === q.answer) {
+            selectedBtn.classList.add('correct');
+            score += 10;
+            scoreDisplay.innerText = score;
+            feedback.innerText = "✅ Jawaban Benar! +10 Poin";
+            feedback.className = 'feedback show correct-fb';
+        } else {
+            selectedBtn.classList.add('wrong');
+            allBtns[q.answer].classList.add('correct');
+            feedback.innerText = "❌ Jawaban Salah. Jawaban yang benar ditandai hijau.";
+            feedback.className = 'feedback show wrong-fb';
+        }
+
+        btnNext.classList.add('show');
+        if (currentQuestion === questions.length - 1) {
+            btnNext.innerText = "LIHAT HASIL";
+        }
+    }
+
+    function nextQuestion() {
+        currentQuestion++;
+        if (currentQuestion < questions.length) {
+            loadQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        quizScreen.classList.remove('active');
+        endScreen.classList.add('active');
+        
+        const finalScore = document.getElementById('final-score');
+        const resultIcon = document.getElementById('result-icon');
+        const resultMessage = document.getElementById('result-message');
+        
+        finalScore.innerText = `${score} / 100`;
+        progressFill.style.width = '100%';
+
+        if (score === 100) {
+            resultIcon.innerText = "🏆";
+            resultMessage.innerText = "SEMPURNA! Kamu adalah Network Master sejati. Pertahankan ilmumu!";
+        } else if (score >= 70) {
+            resultIcon.innerText = "🌟";
+            resultMessage.innerText = "Hebat! Kamu sudah sangat menguasai materi TKJ. Sedikit lagi menuju sempurna!";
+        } else if (score >= 50) {
+            resultIcon.innerText = "💻";
+            resultMessage.innerText = "Cukup baik. Terus pelajari materi subnetting, routing, dan server untuk hasil yang lebih maksimal.";
+        } else {
+            resultIcon.innerText = "📚";
+            resultMessage.innerText = "Jangan menyerah! Pelajari kembali buku paket dan modul TKJ, lalu coba lagi.";
+        }
+    }
+
+    function restartGame() {
+        endScreen.classList.remove('active');
+        startScreen.classList.add('active');
+        btnNext.innerText = "LANJUTKAN";
+    }
+</script>
+
+</body>
+</html>
