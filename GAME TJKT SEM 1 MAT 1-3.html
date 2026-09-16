@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TKJ Explorer: Dasar-Dasar TJKT Kelas X</title>
+    <style>
+        :root {
+            --primary: #00f2fe;
+            --secondary: #4facfe;
+            --bg-dark: #0b1021;
+            --card-bg: #131a33;
+            --text-main: #e0e0e0;
+            --text-dim: #8892b0;
+            --correct: #00e676;
+            --wrong: #ff5252;
+            --accent: #ff007f;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: radial-gradient(circle at 50% 50%, #1a2445 0%, #0b1021 100%);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: var(--card-bg);
+            border: 1px solid rgba(79, 172, 254, 0.2);
+            border-radius: 16px;
+            padding: 2.5rem;
+            max-width: 700px;
+            width: 100%;
+            box-shadow: 0 10px 40px rgba(0, 242, 254, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+        }
+
+        h1 {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2rem;
+            font-weight: 800;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-dim);
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+
+        .screen { display: none; }
+        .screen.active { display: block; animation: fadeIn 0.5s ease; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Start Screen */
+        .start-icon { font-size: 4rem; text-align: center; margin-bottom: 1rem; }
+        .principles-box {
+            background: rgba(79, 172, 254, 0.05);
+            border: 1px solid rgba(79, 172, 254, 0.2);
+            border-radius: 10px;
+            padding: 1.2rem;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+        .principles-box h3 { color: var(--primary); margin-bottom: 0.5rem; font-size: 1rem; }
+        .principles-box ul { list-style: none; color: var(--text-dim); }
+        .principles-box li { margin-bottom: 5px; padding-left: 20px; position: relative; }
+        .principles-box li::before { content: "⚡"; position: absolute; left: 0; }
+
+        /* Quiz Screen */
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-dim);
+        }
+        .quiz-header span { font-weight: bold; color: var(--primary); }
+
+        .category-badge {
+            display: inline-block;
+            background: rgba(255, 0, 127, 0.15);
+            color: var(--accent);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            border: 1px solid var(--accent);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #1e2746;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            width: 0%;
+            transition: width 0.4s ease;
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        .question-text {
+            font-size: 1.15rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .options-container { display: flex; flex-direction: column; gap: 12px; }
+        .option-btn {
+            background: #1a2340;
+            border: 2px solid #2a365c;
+            color: var(--text-main);
+            padding: 14px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--primary);
+            background: #202b4d;
+            transform: translateX(5px);
+        }
+        .option-btn.correct { border-color: var(--correct); background: rgba(0, 230, 118, 0.1); color: var(--correct); font-weight: bold; }
+        .option-btn.wrong { border-color: var(--wrong); background: rgba(255, 82, 82, 0.1); color: var(--wrong); }
+        .option-btn:disabled { cursor: not-allowed; }
+
+        .feedback {
+            margin-top: 1.5rem;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: none;
+            line-height: 1.5;
+        }
+        .feedback.show { display: block; animation: popIn 0.3s ease; }
+        .feedback.correct-fb { background: rgba(0, 230, 118, 0.1); color: var(--correct); border-left: 4px solid var(--correct); }
+        .feedback.wrong-fb { background: rgba(255, 82, 82, 0.1); color: var(--wrong); border-left: 4px solid var(--wrong); }
+
+        .btn-next {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: #000;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 1.5rem;
+            display: none;
+            transition: 0.2s;
+        }
+        .btn-next:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(0, 242, 254, 0.4); }
+        .btn-next.show { display: block; }
+
+        /* End Screen */
+        .result-icon { font-size: 5rem; text-align: center; margin-bottom: 1rem; }
+        .score-display {
+            font-size: 3rem;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+            font-weight: 800;
+            margin: 1rem 0;
+        }
+        .result-message { text-align: center; margin-bottom: 2rem; color: var(--text-dim); line-height: 1.6; }
+        .btn-restart {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.2s;
+        }
+        .btn-restart:hover { background: var(--primary); color: #000; }
+
+        @media (max-width: 500px) {
+            .container { padding: 1.5rem; }
+            h1 { font-size: 1.5rem; }
+            .question-text { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- START SCREEN -->
+    <div id="start-screen" class="screen active">
+        <div class="start-icon">🌐</div>
+        <h1>TKJ EXPLORER</h1>
+        <p class="subtitle">Dasar-Dasar TJKT Kelas X | Pendekatan Deep Learning</p>
+        
+        <div class="principles-box">
+            <h3>🧠 Prinsip Pembelajaran Mendalam:</h3>
+            <ul>
+                <li><strong>Berkesadaran:</strong> Membangun etika & keselamatan kerja (K3LH).</li>
+                <li><strong>Bermakna:</strong> Mengaitkan materi dengan peluang karier nyata.</li>
+                <li><strong>Memahami:</strong> Menelusuri konsep sejarah & topologi jaringan.</li>
+            </ul>
+        </div>
+
+        <p style="text-align: center; margin-bottom: 2rem; color: var(--text-dim); font-size: 0.9rem;">
+            Jawab <strong style="color: var(--primary);">30 pertanyaan</strong> untuk menguji fondasi pengetahuan jaringanmu. Setiap jawaban memiliki konteks mengapa hal tersebut penting bagi seorang Network Engineer.
+        </p>
+        
+        <button class="btn-next show" onclick="startGame()" style="display: block;">MULAI EKSPLORASI</button>
+    </div>
+
+    <!-- QUIZ SCREEN -->
+    <div id="quiz-screen" class="screen">
+        <div class="quiz-header">
+            <div>Soal <span id="current-q">1</span> / <span id="total-q">30</span></div>
+            <div>Skor: <span id="score-display">0</span></div>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        
+        <div id="category-badge" class="category-badge">Kategori</div>
+        <div class="question-text" id="question-text">Loading question...</div>
+        
+        <div class="options-container" id="options-container"></div>
+
+        <div class="feedback" id="feedback"></div>
+        <button class="btn-next" id="btn-next" onclick="nextQuestion()">LANJUTKAN</button>
+    </div>
+
+    <!-- END SCREEN -->
+    <div id="end-screen" class="screen">
+        <div class="result-icon" id="result-icon">🏆</div>
+        <h1 style="margin-bottom: 0;">Eksplorasi Selesai!</h1>
+        <div class="score-display" id="final-score">0 / 30</div>
+        <p class="result-message" id="result-message">Kamu berhasil menyelesaikan ujian.</p>
+        <button class="btn-restart" onclick="restartGame()">ULANGI EKSPLORASI</button>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        // KATEGORI 1: BERKESADARAN (K3LH & Tata Tertib) - 7 Soal
+        {
+            category: "Berkesadaran (K3LH)",
+            question: "Apa tujuan utama penerapan K3LH di bengkel jaringan komputer?",
+            options: ["Agar pekerjaan selesai lebih cepat", "Melindungi keselamatan pekerja dan mencegah kecelakaan kerja", "Menghemat penggunaan alat-alat bengkel", "Memenuhi syarat administrasi sekolah saja"],
+            answer: 1,
+            explanation: "K3LH berfokus pada keselamatan manusia. Kesadaran (mindful) akan bahaya listrik dan fisik adalah fondasi utama sebelum menyentuh perangkat jaringan."
+        },
+        {
+            category: "Berkesadaran (K3LH)",
+            question: "Alat Pelindung Diri (APD) yang paling tepat digunakan saat melakukan penyambungan kabel Fiber Optic (Splicing) adalah...",
+            options: ["Sarung tangan kain dan kacamata hitam", "Sarung tangan lateks dan kacamata pelindung (safety glasses)", "Masker gas dan sepatu bot besi", "Helm proyek dan rompi reflektor"],
+            answer: 1,
+            explanation: "Serat optik yang patah bisa menusuk kulit dan memantulkan cahaya laser ke mata. Kesadaran akan bahaya mikro ini sangat penting bagi teknisi FO."
+        },
+        {
+            category: "Berkesadaran (K3LH)",
+            question: "Mengapa makanan dan minuman dilarang keras dibawa ke area praktikum jaringan?",
+            options: ["Karena bisa membuat ruangan menjadi kotor dan berbau", "Karena dapat merusak perangkat keras akibat tumpahan atau remah-remah", "Karena sekolah ingin murid fokus belajar saja", "Karena makanan bisa dicuri oleh teman sekelas"],
+            answer: 1,
+            explanation: "Tata tertib ini dibuat untuk melindungi perangkat sensitif seperti Router, Switch, dan PC dari kerusakan fisik dan korsleting."
+        },
+        {
+            category: "Berkesadaran (K3LH)",
+            question: "Apa tindakan pertama yang harus dilakukan jika melihat kabel listrik terkelupas di dekat perangkat jaringan?",
+            options: ["Membiarkannya karena bukan tugas kita", "Segera melapor ke guru/instruktur dan memberi tanda peringatan", "Membetulkannya sendiri dengan tangan kosong", "Menutupnya dengan selotip biasa dan melanjutkan kerja"],
+            answer: 1,
+            explanation: "Kesadaran keselamatan (safety awareness) menuntut kita untuk tidak mengambil risiko dan segera mengisolasi area bahaya."
+        },
+        {
+            category: "Berkesadaran (K3LH)",
+            question: "Posisi duduk yang ergonomis saat melakukan crimping kabel UTP dalam waktu lama bertujuan untuk...",
+            options: ["Agar terlihat profesional di depan klien", "Mencegah cedera otot dan kelelahan mata", "Mempercepat proses pemasangan konektor", "Menghemat ruang di meja kerja"],
+            answer: 1,
+            explanation: "Ergonomi adalah bagian dari K3LH. Kesehatan jangka panjang teknisi sangat bergantung pada kebiasaan kerja yang benar."
+        },
+        {
+            category: "Berkesadaran (K3LH)",
+            question: "Simbol K3LH berupa gambar 'tangan menyentuh api' memiliki arti...",
+            options: ["Dilarang membawa barang mudah terbakar", "Peringatan bahaya panas / permukaan panas", "Wajib menggunakan sarung tangan tahan api", "Area dilarang merokok"],
+            answer: 1,
+            explanation: "Memahami simbol K3LH adalah bentuk kesadaran visual terhadap potensi bahaya di lingkungan kerja."
+        },
+        {
+            category: "Berkesadaran (K3LH)",
+            question: "Langkah 'Housekeeping' (5R: Ringkas, Rapi, Resik, Rawat, Rajin) di bengkel TKJ bertujuan untuk...",
+            options: ["Membuat bengkel terlihat mewah", "Menciptakan lingkungan kerja yang aman, efisien, dan nyaman", "Menghabiskan waktu luang sebelum praktik", "Menghindari teguran dari kepala sekolah"],
+            answer: 1,
+            explanation: "Lingkungan yang rapi mencegah kecelakaan (seperti tersandung kabel) dan meningkatkan efisiensi kerja teknisi."
+        },
+
+        // KATEGORI 2: BERMAKNA (Profesi & Technopreneur) - 7 Soal
+        {
+            category: "Bermakna (Profesi)",
+            question: "Seorang profesional yang bertugas merancang, mengimplementasikan, dan memelihara infrastruktur jaringan suatu perusahaan disebut...",
+            options: ["Software Engineer", "Network Administrator", "Database Analyst", "System Analyst"],
+            answer: 1,
+            explanation: "Network Administrator adalah profesi inti TJKT. Memahami peran ini mengaitkan materi sekolah dengan kebutuhan industri nyata."
+        },
+        {
+            category: "Bermakna (Profesi)",
+            question: "Apa tugas utama dari staf NOC (Network Operations Center)?",
+            options: ["Menjual perangkat jaringan ke pelanggan", "Memantau kinerja jaringan 24/7 dan menangani insiden/gangguan", "Memprogram aplikasi web perusahaan", "Melakukan instalasi kabel di luar gedung"],
+            answer: 1,
+            explanation: "NOC adalah 'menara pengawas' jaringan. Profesi ini membutuhkan ketelitian tinggi dan sangat dicari di perusahaan ISP dan Enterprise."
+        },
+        {
+            category: "Bermakna (Profesi)",
+            question: "Teknisi yang memiliki spesialisasi khusus dalam pemasangan, penyambungan, dan pengujian kabel serat optik disebut...",
+            options: ["Copper Technician", "Fiber Optic Technician", "Wireless Engineer", "Security Analyst"],
+            answer: 1,
+            explanation: "Dengan tingginya demand internet cepat, Fiber Optic Technician menjadi profesi yang sangat menjanjikan dan bergaji tinggi."
+        },
+        {
+            category: "Bermakna (Profesi)",
+            question: "Apa yang dimaksud dengan ISP dalam dunia jaringan?",
+            options: ["Internet Service Provider (Penyedia Layanan Internet)", "Internal System Protocol", "Integrated Server Platform", "Internet Security Protocol"],
+            answer: 0,
+            explanation: "ISP seperti Indihome, Biznet, atau MyRepublic adalah perusahaan yang menyediakan akses internet. Banyak alumni TKJ berkarier di sini."
+        },
+        {
+            category: "Bermakna (Technopreneur)",
+            question: "Konsep 'Technopreneur' dalam bidang TJKT berarti...",
+            options: ["Bekerja sebagai karyawan di perusahaan teknologi", "Memanfaatkan keahlian teknologi untuk menciptakan peluang bisnis mandiri", "Membuat virus komputer untuk dijual", "Hanya fokus pada teori jaringan tanpa praktik"],
+            answer: 1,
+            explanation: "Technopreneurship memadukan skill teknis (misal: setting Mikrotik) dengan jiwa bisnis (misal: membuka jasa ISP RT/RW)."
+        },
+        {
+            category: "Bermakna (Technopreneur)",
+            question: "Manakah contoh bisnis technopreneur yang relevan bagi lulusan TJKT?",
+            options: ["Membuka warung kopi", "Jasa instalasi dan maintenance jaringan LAN/WiFi untuk kantor & cafe", "Menjual pakaian secara online", "Membuka jasa servis sepeda motor"],
+            answer: 1,
+            explanation: "Banyak UMKM dan Cafe membutuhkan jaringan WiFi yang stabil. Ini adalah peluang bisnis nyata bagi lulusan TJKT."
+        },
+        {
+            category: "Bermakna (Profesi)",
+            question: "Selain kemampuan teknis (hard skill), kemampuan apa yang sangat penting saat menangani komplain pelanggan yang internetnya mati?",
+            options: ["Kemampuan coding bahasa Python", "Kemampuan komunikasi dan empati (soft skill)", "Kemampuan merakit PC gaming", "Kemampuan menggambar desain grafis"],
+            answer: 1,
+            explanation: "Di dunia kerja, kemampuan berkomunikasi dengan baik (customer service) sama pentingnya dengan kemampuan teknis troubleshooting."
+        },
+
+        // KATEGORI 3: MEMAHAMI (Sejarah Jaringan) - 8 Soal
+        {
+            category: "Memahami (Sejarah)",
+            question: "Jaringan komputer mana yang dianggap sebagai cikal bakal lahirnya Internet?",
+            options: ["NSFNET", "ARPANET", "CERN", "TCP/IP"],
+            answer: 1,
+            explanation: "ARPANET (Advanced Research Projects Agency Network) dibuat oleh Departemen Pertahanan AS pada 1969 sebagai proyek awal jaringan packet-switching."
+        },
+        {
+            category: "Memahami (Sejarah)",
+            question: "Pada tahun berapakah ARPANET pertama kali berhasil menghubungkan 4 node (komputer) pertama?",
+            options: ["1959", "1969", "1979", "1989"],
+            answer: 1,
+            explanation: "Tahun 1969 adalah tonggak sejarah di mana UCLA, SRI, UCSB, dan Univ of Utah berhasil terhubung untuk pertama kalinya."
+        },
+        {
+            category: "Memahami (Sejarah)",
+            question: "Protokol standar yang digunakan agar berbagai jenis jaringan komputer di seluruh dunia dapat saling berkomunikasi adalah...",
+            options: ["HTTP", "FTP", "TCP/IP", "SMTP"],
+            answer: 2,
+            explanation: "TCP/IP (Transmission Control Protocol/Internet Protocol) adalah 'bahasa universal' yang membuat internet global mungkin terjadi."
+        },
+        {
+            category: "Memahami (Sejarah)",
+            question: "Siapakah penemu World Wide Web (WWW) yang memungkinkan kita mengakses halaman web seperti saat ini?",
+            options: ["Bill Gates", "Steve Jobs", "Tim Berners-Lee", "Vint Cerf"],
+            answer: 2,
+            explanation: "Tim Berners-Lee menciptakan WWW pada tahun 1989 di CERN, mengubah internet dari sekadar jaringan data menjadi media informasi visual."
+        },
+        {
+            category: "Memahami (Sejarah)",
+            question: "Konsep pengiriman data di mana pesan dipecah menjadi paket-paket kecil untuk dikirim melalui rute yang berbeda disebut...",
+            options: ["Circuit Switching", "Packet Switching", "Line Switching", "Data Switching"],
+            answer: 1,
+            explanation: "Packet Switching adalah konsep revolusioner yang membuat jaringan lebih tahan banting (fault-tolerant) dibandingkan sistem telepon konvensional."
+        },
+        {
+            category: "Memahami (Sejarah)",
+            question: "Apa karakteristik utama dari era 'Web 1.0' pada awal perkembangan internet?",
+            options: ["Interaktif dan media sosial", "Statis dan hanya bisa dibaca (read-only)", "Berbasis cloud computing", "Menggunakan kecerdasan buatan"],
+            answer: 1,
+            explanation: "Web 1.0 ibarat 'membaca koran digital'. Pengguna hanya bisa melihat informasi, belum bisa berinteraksi atau mengunggah konten."
+        },
+        {
+            category: "Memahami (Sejarah)",
+            question: "Organisasi nirlaba yang mengatur standarisasi protokol internet (seperti IP Address dan Domain Name) adalah...",
+            options: ["IEEE", "ISOC (Internet Society) / IETF", "ITU", "ANSI"],
+            answer: 1,
+            explanation: "Memahami bahwa internet diatur oleh standar global, bukan oleh satu negara atau perusahaan saja."
+        },
+        {
+            category: "Memahami (Sejarah)",
+            question: "Evolusi jaringan internet di Indonesia pada awalnya dipelopori oleh komunitas yang dikenal dengan singkatan...",
+            options: ["APJII", "PANDI", "IDSRG / UI-Net", "Aspakom"],
+            answer: 2,
+            explanation: "UI-Net (Universitas Indonesia Network) adalah salah satu jaringan akademis pertama di Indonesia yang menjadi cikal bakal internet nasional."
+        },
+
+        // KATEGORI 4: MEMAHAMI (Konsep Dasar PAN, LAN, MAN, WAN) - 8 Soal
+        {
+            category: "Memahami (Konsep Jaringan)",
+            question: "Jaringan komputer yang mencakup area sangat kecil, seperti koneksi antara smartphone dengan smartwatch atau TWS, disebut...",
+            options: ["LAN", "MAN", "PAN", "WAN"],
+            answer: 2,
+            explanation: "PAN (Personal Area Network) berpusat pada individu. Teknologi yang sering digunakan adalah Bluetooth atau Infrared."
+        },
+        {
+            category: "Memahami (Konsep Jaringan)",
+            question: "Jaringan yang menghubungkan komputer-komputer dalam satu area terbatas seperti ruang kelas, laboratorium, atau satu gedung sekolah disebut...",
+            options: ["PAN", "LAN", "MAN", "WAN"],
+            answer: 1,
+            explanation: "LAN (Local Area Network) adalah fondasi jaringan di sekolah/perusahaan. Kecepatan transfer datanya sangat tinggi (bisa mencapai 1 Gbps)."
+        },
+        {
+            category: "Memahami (Konsep Jaringan)",
+            question: "Jika sebuah perusahaan memiliki kantor cabang di berbagai kota dalam satu provinsi dan menghubungkan jaringan mereka, jenis jaringan ini disebut...",
+            options: ["PAN", "LAN", "MAN", "WAN"],
+            answer: 2,
+            explanation: "MAN (Metropolitan Area Network) mencakup area kota atau provinsi. Contoh nyatanya adalah jaringan bank yang menghubungkan antar cabang dalam satu kota."
+        },
+        {
+            category: "Memahami (Konsep Jaringan)",
+            question: "Jaringan komputer yang mencakup area geografis yang sangat luas, seperti antar negara atau antar benua, disebut...",
+            options: ["PAN", "LAN", "MAN", "WAN"],
+            answer: 3,
+            explanation: "WAN (Wide Area Network) menggunakan teknologi seperti Fiber Optik bawah laut atau Satelit. Internet adalah contoh WAN terbesar."
+        },
+        {
+            category: "Memahami (Konsep Jaringan)",
+            question: "Teknologi nirkabel yang umum digunakan untuk membangun jaringan LAN di dalam rumah atau cafe disebut...",
+            options: ["Bluetooth", "Wi-Fi", "Cellular", "NFC"],
+            answer: 1,
+            explanation: "Wi-Fi (Wireless Fidelity) menggunakan gelombang radio untuk menghubungkan perangkat ke router tanpa kabel fisik."
+        },
+        {
+            category: "Memahami (Konsep Jaringan)",
+            question: "Media transmisi kabel yang paling umum digunakan untuk menghubungkan komputer dalam jaringan LAN saat ini adalah...",
+            options: ["Kabel Coaxial", "Kabel Fiber Optic", "Kabel Twisted Pair (UTP)", "Kabel Telephone"],
+            answer: 2,
+            explanation: "Kabel UTP (Unshielded Twisted Pair) seperti Cat5e atau Cat6 adalah standar kabel LAN karena harganya terjangkau dan mudah dipasang."
+        },
+        {
+            category: "Memahami (Konsep Jaringan)",
+            question: "Manakah dari berikut ini yang merupakan contoh implementasi jaringan WAN?",
+            options: ["Jaringan WiFi di perpustakaan sekolah", "Koneksi Bluetooth HP ke Speaker", "Jaringan ATM Bank yang terhubung antar pulau", "Jaringan LAN di warnet"],
+            answer: 2,
+            explanation: "Jaringan ATM Bank harus terhubung ke server pusat yang bisa berada di kota/negara lain, sehingga membutuhkan infrastruktur WAN."
+        },
+        {
+            category: "Memahami (Konsep Jaringan)",
+            question: "Mengapa jaringan LAN di sekolah biasanya tidak langsung terhubung ke internet tanpa perangkat tambahan?",
+            options: ["Karena internet terlalu lambat", "Karena membutuhkan Router/Gateway untuk menghubungkan jaringan lokal (LAN) ke jaringan luas (WAN/Internet)", "Karena sekolah tidak memiliki komputer", "Karena kabel UTP tidak bisa menghantarkan data internet"],
+            answer: 1,
+            explanation: "Router berfungsi sebagai 'jembatan' yang menerjemahkan dan meneruskan paket data dari jaringan lokal (LAN) menuju internet (WAN)."
+        }
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+    let answered = false;
+
+    const startScreen = document.getElementById('start-screen');
+    const quizScreen = document.getElementById('quiz-screen');
+    const endScreen = document.getElementById('end-screen');
+    
+    const questionText = document.getElementById('question-text');
+    const optionsContainer = document.getElementById('options-container');
+    const feedback = document.getElementById('feedback');
+    const btnNext = document.getElementById('btn-next');
+    const categoryBadge = document.getElementById('category-badge');
+    
+    const currentQDisplay = document.getElementById('current-q');
+    const totalQDisplay = document.getElementById('total-q');
+    const scoreDisplay = document.getElementById('score-display');
+    const progressFill = document.getElementById('progress-fill');
+
+    function startGame() {
+        startScreen.classList.remove('active');
+        quizScreen.classList.add('active');
+        currentQuestion = 0;
+        score = 0;
+        totalQDisplay.innerText = questions.length;
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        answered = false;
+        const q = questions[currentQuestion];
+        
+        currentQDisplay.innerText = currentQuestion + 1;
+        scoreDisplay.innerText = score;
+        progressFill.style.width = ((currentQuestion) / questions.length) * 100 + '%';
+        
+        categoryBadge.innerText = q.category;
+        questionText.innerText = q.question;
+        optionsContainer.innerHTML = '';
+        feedback.className = 'feedback';
+        feedback.innerText = '';
+        btnNext.classList.remove('show');
+
+        q.options.forEach((option, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = option;
+            btn.onclick = () => checkAnswer(index, btn);
+            optionsContainer.appendChild(btn);
+        });
+    }
+
+    function checkAnswer(selectedIndex, selectedBtn) {
+        if (answered) return;
+        answered = true;
+
+        const q = questions[currentQuestion];
+        const allBtns = document.querySelectorAll('.option-btn');
+        
+        allBtns.forEach(btn => btn.disabled = true);
+
+        if (selectedIndex === q.answer) {
+            selectedBtn.classList.add('correct');
+            score += 1;
+            scoreDisplay.innerText = score;
+            feedback.innerHTML = `<strong>✅ Benar!</strong><br>${q.explanation}`;
+            feedback.className = 'feedback show correct-fb';
+        } else {
+            selectedBtn.classList.add('wrong');
+            allBtns[q.answer].classList.add('correct');
+            feedback.innerHTML = `<strong>❌ Kurang tepat.</strong><br>${q.explanation}`;
+            feedback.className = 'feedback show wrong-fb';
+        }
+
+        btnNext.classList.add('show');
+        if (currentQuestion === questions.length - 1) {
+            btnNext.innerText = "LIHAT HASIL AKHIR";
+        } else {
+            btnNext.innerText = "LANJUTKAN";
+        }
+    }
+
+    function nextQuestion() {
+        currentQuestion++;
+        if (currentQuestion < questions.length) {
+            loadQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        quizScreen.classList.remove('active');
+        endScreen.classList.add('active');
+        
+        const finalScore = document.getElementById('final-score');
+        const resultIcon = document.getElementById('result-icon');
+        const resultMessage = document.getElementById('result-message');
+        
+        finalScore.innerText = `${score} / ${questions.length}`;
+        progressFill.style.width = '100%';
+
+        const percentage = (score / questions.length) * 100;
+
+        if (percentage === 100) {
+            resultIcon.innerText = "🏆";
+            resultMessage.innerText = "SEMPURNA! Kamu memiliki fondasi yang sangat kuat. Kesadaran keselamatan, pemahaman konsep, dan wawasan karirmu sudah siap untuk praktik lanjutan!";
+        } else if (percentage >= 80) {
+            resultIcon.innerText = "🌟";
+            resultMessage.innerText = "Luar Biasa! Kamu sudah memahami konsep dasar jaringan dengan sangat baik. Terus asah kepekaan K3LH dan wawasan teknopreneurmu!";
+        } else if (percentage >= 60) {
+            resultIcon.innerText = "💻";
+            resultMessage.innerText = "Bagus! Fondasi sudah mulai terbentuk. Pelajari kembali sejarah jaringan dan konsep topologi untuk hasil yang lebih maksimal.";
+        } else {
+            resultIcon.innerText = "📚";
+            resultMessage.innerText = "Jangan menyerah! Dunia jaringan sangat luas. Baca kembali modul tentang K3LH, profesi, dan sejarah internet, lalu coba lagi!";
+        }
+    }
+
+    function restartGame() {
+        endScreen.classList.remove('active');
+        startScreen.classList.add('active');
+        btnNext.innerText = "LANJUTKAN";
+    }
+</script>
+
+</body>
+</html>
