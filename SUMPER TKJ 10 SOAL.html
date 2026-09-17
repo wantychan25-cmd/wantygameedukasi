@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super TJKT - Game Edukasi TKJ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Press Start 2P', 'Courier New', monospace;
+            background: #000;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 900px;
+            height: 600px;
+            border: 4px solid #333;
+            overflow: hidden;
+        }
+
+        /* Sky & Background */
+        #gameCanvas {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #5c94fc 0%, #5c94fc 60%, #87CEEB 100%);
+        }
+
+        /* Clouds */
+        .cloud {
+            position: absolute;
+            background: white;
+            border-radius: 50px;
+            opacity: 0.9;
+        }
+
+        /* Ground */
+        #ground {
+            position: absolute;
+            bottom: 0;
+            width: 300%;
+            height: 80px;
+            background: linear-gradient(0deg, #8B4513 0%, #A0522D 40%, #228B22 40%, #32CD32 100%);
+        }
+
+        /* Player */
+        #player {
+            position: absolute;
+            width: 40px;
+            height: 50px;
+            bottom: 80px;
+            left: 50px;
+            transition: none;
+            z-index: 10;
+        }
+
+        .player-body {
+            width: 40px;
+            height: 50px;
+            background: #FF0000;
+            border-radius: 5px 5px 0 0;
+            position: relative;
+        }
+
+        .player-body::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: 5px;
+            width: 30px;
+            height: 20px;
+            background: #FFD700;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .player-body::after {
+            content: '🧢';
+            position: absolute;
+            top: -25px;
+            left: 5px;
+            font-size: 20px;
+        }
+
+        .player-eyes {
+            position: absolute;
+            top: 5px;
+            left: 10px;
+            width: 20px;
+            height: 8px;
+        }
+
+        .player-eyes::before, .player-eyes::after {
+            content: '';
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: #000;
+            border-radius: 50%;
+        }
+
+        .player-eyes::before { left: 0; }
+        .player-eyes::after { right: 0; }
+
+        /* Question Blocks */
+        .question-block {
+            position: absolute;
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            border: 3px solid #8B6914;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #8B4513;
+            cursor: pointer;
+            animation: blockFloat 2s ease-in-out infinite;
+            z-index: 5;
+        }
+
+        .question-block:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px #FFD700;
+        }
+
+        .question-block.answered {
+            background: linear-gradient(135deg, #8B4513, #654321);
+            color: #333;
+        }
+
+        @keyframes blockFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        /* Coins */
+        .coin {
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            background: radial-gradient(circle, #FFD700, #FFA500);
+            border-radius: 50%;
+            border: 2px solid #DAA520;
+            animation: coinSpin 1s linear infinite;
+            z-index: 4;
+        }
+
+        .coin::after {
+            content: '₿';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 12px;
+            color: #8B6914;
+            font-weight: bold;
+        }
+
+        @keyframes coinSpin {
+            0% { transform: scaleX(1); }
+            50% { transform: scaleX(0.3); }
+            100% { transform: scaleX(1); }
+        }
+
+        /* Enemies */
+        .enemy {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            bottom: 80px;
+            z-index: 6;
+        }
+
+        .enemy-body {
+            width: 40px;
+            height: 35px;
+            background: #8B4513;
+            border-radius: 50% 50% 0 0;
+            position: relative;
+        }
+
+        .enemy-body::before, .enemy-body::after {
+            content: '';
+            position: absolute;
+            top: 10px;
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .enemy-body::before { left: 8px; }
+        .enemy-body::after { right: 8px; }
+
+        .enemy-feet {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .enemy-feet::before, .enemy-feet::after {
+            content: '';
+            width: 15px;
+            height: 8px;
+            background: #654321;
+            border-radius: 0 0 5px 5px;
+        }
+
+        /* Pipes */
+        .pipe {
+            position: absolute;
+            bottom: 80px;
+            width: 60px;
+            height: 80px;
+            background: linear-gradient(90deg, #006400, #228B22, #006400);
+            border: 3px solid #004d00;
+            border-radius: 5px 5px 0 0;
+            z-index: 3;
+        }
+
+        .pipe::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -5px;
+            width: 70px;
+            height: 20px;
+            background: linear-gradient(90deg, #006400, #32CD32, #006400);
+            border: 3px solid #004d00;
+            border-radius: 5px;
+        }
+
+        /* HUD */
+        #hud {
+            position: absolute;
+            top: 10px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            z-index: 100;
+            color: white;
+            font-size: 12px;
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        .hud-item {
+            text-align: center;
+        }
+
+        .hud-value {
+            color: #FFD700;
+            font-size: 16px;
+            margin-top: 5px;
+        }
+
+        /* Quiz Modal */
+        #quizModal {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 700px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 4px solid #FFD700;
+            border-radius: 15px;
+            padding: 30px;
+            z-index: 1000;
+            color: white;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+        }
+
+        #quizModal h2 {
+            color: #FFD700;
+            margin-bottom: 10px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        #quizModal .question-text {
+            font-size: 13px;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .answer-btn {
+            display: block;
+            width: 100%;
+            padding: 12px 20px;
+            margin: 8px 0;
+            background: linear-gradient(135deg, #2d3436, #636e72);
+            border: 2px solid #74b9ff;
+            border-radius: 8px;
+            color: white;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .answer-btn:hover {
+            background: linear-gradient(135deg, #0984e3, #74b9ff);
+            transform: translateX(10px);
+            box-shadow: 0 0 10px rgba(116, 185, 255, 0.5);
+        }
+
+        .answer-btn.correct {
+            background: linear-gradient(135deg, #00b894, #55efc4) !important;
+            border-color: #00b894 !important;
+        }
+
+        .answer-btn.wrong {
+            background: linear-gradient(135deg, #d63031, #ff7675) !important;
+            border-color: #d63031 !important;
+        }
+
+        /* Start Screen */
+        #startScreen {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #0c0c1d 0%, #1a1a3e 50%, #2d1b69 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        #startScreen h1 {
+            color: #FFD700;
+            font-size: 28px;
+            text-shadow: 3px 3px 0 #FF6347, 6px 6px 0 #000;
+            margin-bottom: 10px;
+            animation: titleBounce 1s ease-in-out infinite;
+        }
+
+        #startScreen h2 {
+            color: #87CEEB;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        #startScreen .subtitle {
+            color: #ccc;
+            font-size: 11px;
+            margin-bottom: 40px;
+            text-align: center;
+            line-height: 2;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        @keyframes titleBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        #startBtn {
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #FF6347, #FF4500);
+            border: 3px solid #FFD700;
+            border-radius: 30px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            animation: pulse 1.5s ease-in-out infinite;
+            font-family: 'Press Start 2P', monospace;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 10px #FF6347; }
+            50% { transform: scale(1.05); box-shadow: 0 0 25px #FF6347; }
+        }
+
+        /* Game Over / Win Screen */
+        #endScreen {
+            display: none;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        #endScreen h1 {
+            color: #FFD700;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        #endScreen .stats {
+            color: white;
+            font-size: 12px;
+            line-height: 2.5;
+            text-align: center;
+            margin-bottom: 30px;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        #restartBtn {
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #00b894, #00cec9);
+            border: 3px solid #FFD700;
+            border-radius: 30px;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            font-family: 'Press Start 2P', monospace;
+        }
+
+        /* Stars/Particles */
+        .star {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 2s ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* Power-up */
+        .powerup {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle, #ff0000, #cc0000);
+            border-radius: 50%;
+            border: 2px solid #fff;
+            z-index: 4;
+            animation: powerupBounce 0.5s ease-in-out infinite;
+        }
+
+        .powerup::after {
+            content: '⭐';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 16px;
+        }
+
+        @keyframes powerupBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        /* Flag */
+        #flag {
+            position: absolute;
+            bottom: 80px;
+            right: 50px;
+            z-index: 5;
+        }
+
+        .flag-pole {
+            width: 6px;
+            height: 200px;
+            background: linear-gradient(90deg, #666, #999, #666);
+        }
+
+        .flag-cloth {
+            position: absolute;
+            top: 0;
+            left: 6px;
+            width: 50px;
+            height: 35px;
+            background: linear-gradient(135deg, #FF0000, #FF4500);
+            clip-path: polygon(0 0, 100% 25%, 100% 75%, 0 100%);
+            animation: flagWave 1s ease-in-out infinite;
+        }
+
+        @keyframes flagWave {
+            0%, 100% { transform: skewY(0deg); }
+            50% { transform: skewY(2deg); }
+        }
+
+        /* Progress Bar */
+        #progressBar {
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 10px;
+            background: #333;
+            border-radius: 5px;
+            border: 1px solid #666;
+            z-index: 100;
+        }
+
+        #progressFill {
+            height: 100%;
+            background: linear-gradient(90deg, #00b894, #55efc4);
+            border-radius: 5px;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        /* Notification */
+        #notification {
+            display: none;
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            background: rgba(0,0,0,0.8);
+            color: #FFD700;
+            border-radius: 20px;
+            font-size: 11px;
+            z-index: 500;
+            border: 2px solid #FFD700;
+        }
+
+        /* Instructions */
+        .instructions {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255,255,255,0.7);
+            font-size: 9px;
+            text-align: center;
+            z-index: 100;
+        }
+
+        /* Level indicator */
+        .level-badge {
+            position: absolute;
+            top: 50px;
+            right: 10px;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 10px;
+            z-index: 100;
+            border: 2px solid #FFD700;
+        }
+
+        /* Responsive */
+        @media (max-width: 920px) {
+            #gameContainer {
+                width: 100vw;
+                height: 100vh;
+            }
+            #quizModal {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <!-- Start Screen -->
+        <div id="startScreen">
+            <h1>SUPER TJKT</h1>
+            <h2>🎮 Game Edukasi TKJ 🎮</h2>
+            <div class="subtitle">
+                Kelas XII TKJ - TKA Dasar-dasar<br>
+                Teknik Jaringan Komputer & Telekomunikasi<br><br>
+                🏃 Lari & Lompat untuk mengumpulkan koin<br>
+                ❓ Tabrak blok ? untuk menjawab soal<br>
+                ⭐ Kumpulkan semua bintang untuk menang!
+            </div>
+            <button id="startBtn" onclick="startGame()">▶ MULAI GAME</button>
+            <div class="instructions" style="position:relative; margin-top:30px; color:#aaa;">
+                Kontrol: ← → Bergerak | SPACE Lompat | ↑ Lompat
+            </div>
+        </div>
+
+        <!-- Game Canvas -->
+        <div id="gameCanvas">
+            <!-- HUD -->
+            <div id="hud">
+                <div class="hud-item">
+                    <div>SKOR</div>
+                    <div class="hud-value" id="scoreDisplay">0000</div>
+                </div>
+                <div class="hud-item">
+                    <div>KOIN</div>
+                    <div class="hud-value" id="coinDisplay">🪙 0</div>
+                </div>
+                <div class="hud-item">
+                    <div>NYAWA</div>
+                    <div class="hud-value" id="livesDisplay">❤️ 3</div>
+                </div>
+                <div class="hud-item">
+                    <div>SOAL</div>
+                    <div class="hud-value" id="questionDisplay">0/10</div>
+                </div>
+            </div>
+
+            <!-- Level Badge -->
+            <div class="level-badge">LEVEL 1 - WAWASAN DUNIA KERJA</div>
+
+            <!-- Player -->
+            <div id="player">
+                <div class="player-body">
+                    <div class="player-eyes"></div>
+                </div>
+            </div>
+
+            <!-- Ground -->
+            <div id="ground"></div>
+
+            <!-- Flag -->
+            <div id="flag">
+                <div class="flag-pole"></div>
+                <div class="flag-cloth"></div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div id="progressBar">
+                <div id="progressFill"></div>
+            </div>
+
+            <!-- Notification -->
+            <div id="notification"></div>
+        </div>
+
+        <!-- Quiz Modal -->
+        <div id="quizModal">
+            <h2>❓ SOAL TKA TJKT ❓</h2>
+            <div class="question-text" id="questionText"></div>
+            <div id="answersContainer"></div>
+        </div>
+
+        <!-- End Screen -->
+        <div id="endScreen">
+            <h1 id="endTitle">🎉 SELAMAT! 🎉</h1>
+            <div class="stats" id="endStats"></div>
+            <button id="restartBtn" onclick="restartGame()">🔄 MAIN LAGI</button>
+        </div>
+    </div>
+
+    <script>
+        // ============ GAME DATA ============
+        const questions = [
+            {
+                question: "Profesi yang bertanggung jawab untuk merancang, menginstalasi, dan mengkonfigurasi jaringan komputer di sebuah perusahaan disebut...",
+                answers: [
+                    "A. Network Engineer",
+                    "B. Graphic Designer",
+                    "C. Database Administrator",
+                    "D. Software Tester"
+                ],
+                correct: 0,
+                explanation: "Network Engineer adalah profesi yang merancang dan mengkonfigurasi jaringan komputer."
+            },
+            {
+                question: "Dalam dunia industri jaringan dan telekomunikasi, profesi yang bertugas memantau dan menjaga keamanan jaringan dari serangan siber disebut...",
+                answers: [
+                    "A. Web Developer",
+                    "B. Cyber Security Analyst",
+                    "C. System Analyst",
+                    "D. Data Entry"
+                ],
+                correct: 1,
+                explanation: "Cyber Security Analyst bertugas memantau dan menjaga keamanan jaringan."
+            },
+            {
+                question: "Alur kerja dalam proses bisnis layanan jaringan komputer yang benar adalah...",
+                answers: [
+                    "A. Implementasi → Perencanaan → Evaluasi",
+                    "B. Evaluasi → Implementasi → Perencanaan",
+                    "C. Perencanaan → Implementasi → Evaluasi",
+                    "D. Implementasi → Evaluasi → Perencanaan"
+                ],
+                correct: 2,
+                explanation: "Alur kerja yang benar: Perencanaan → Implementasi → Evaluasi (Plan-Do-Check)."
+            },
+            {
+                question: "Budaya kerja 5K (Keamanan, Ketertiban, Kebersihan, Keindahan, dan Kekeluargaan) merupakan contoh penerapan...",
+                answers: [
+                    "A. Etos kerja individu",
+                    "B. Budaya kerja industri",
+                    "C. Proses bisnis layanan",
+                    "D. Alur kerja teknis"
+                ],
+                correct: 1,
+                explanation: "5K merupakan bagian dari budaya kerja yang diterapkan di lingkungan industri."
+            },
+            {
+                question: "Perkembangan industri jaringan komputer yang ditandai dengan konektivitas perangkat IoT merupakan bagian dari revolusi industri ke...",
+                answers: [
+                    "A. Revolusi Industri 1.0",
+                    "B. Revolusi Industri 2.0",
+                    "C. Revolusi Industri 3.0",
+                    "D. Revolusi Industri 4.0"
+                ],
+                correct: 3,
+                explanation: "IoT merupakan ciri khas Revolusi Industri 4.0 dengan konektivitas perangkat."
+            },
+            {
+                question: "Seorang teknisi yang bertugas memasang kabel fiber optik dan melakukan splicing disebut...",
+                answers: [
+                    "A. Network Administrator",
+                    "B. Fiber Optic Technician",
+                    "C. IT Support",
+                    "D. Cloud Architect"
+                ],
+                correct: 1,
+                explanation: "Fiber Optic Technician khusus menangani pemasangan dan penyambungan kabel fiber optik."
+            },
+            {
+                question: "Dalam etos kerja bidang TJKT, sikap yang menunjukkan tanggung jawab dan dedikasi tinggi terhadap pekerjaan disebut...",
+                answers: [
+                    "A. Profesionalisme",
+                    "B. Nepotisme",
+                    "C. Favoritisme",
+                    "D. Individualisme"
+                ],
+                correct: 0,
+                explanation: "Profesionalisme mencerminkan tanggung jawab dan dedikasi tinggi dalam bekerja."
+            },
+            {
+                question: "Proses bisnis layanan ISP (Internet Service Provider) yang benar dimulai dari...",
+                answers: [
+                    "A. Billing → Instalasi → Maintenance",
+                    "B. Instalasi → Konfigurasi → Maintenance → Billing",
+                    "C. Maintenance → Instalasi → Billing",
+                    "D. Billing → Maintenance → Instalasi"
+                ],
+                correct: 1,
+                explanation: "Proses ISP: Instalasi → Konfigurasi → Maintenance → Billing."
+            },
+            {
+                question: "Jabatan yang bertanggung jawab mengelola server, melakukan backup data, dan memastikan ketersediaan layanan jaringan adalah...",
+                answers: [
+                    "A. Network Engineer",
+                    "B. System Administrator",
+                    "C. Helpdesk Technician",
+                    "D. Sales Engineer"
+                ],
+                correct: 1,
+                explanation: "System Administrator mengelola server dan memastikan ketersediaan layanan."
+            },
+            {
+                question: "Dalam klasifikasi dunia industri telekomunikasi, perusahaan yang menyediakan infrastruktur jaringan fisik seperti tower dan kabel disebut...",
+                answers: [
+                    "A. Content Provider",
+                    "B. Infrastructure Provider",
+                    "C. Service Provider",
+                    "D. Application Provider"
+                ],
+                correct: 1,
+                explanation: "Infrastructure Provider menyediakan infrastruktur fisik seperti tower dan kabel."
+            }
+        ];
+
+        // ============ GAME STATE ============
+        let gameState = {
+            score: 0,
+            coins: 0,
+            lives: 3,
+            questionsAnswered: 0,
+            correctAnswers: 0,
+            playerX: 50,
+            playerY: 80,
+            velocityY: 0,
+            isJumping: false,
+            isMovingLeft: false,
+            isMovingRight: false,
+            gameStarted: false,
+            gamePaused: false,
+            cameraX: 0,
+            worldWidth: 3000,
+            blocksHit: [],
+            coinsCollected: [],
+            enemiesDefeated: [],
+            powerupsCollected: []
+        };
+
+        // ============ GAME OBJECTS ============
+        let gameObjects = {
+            blocks: [],
+            coins: [],
+            enemies: [],
+            pipes: [],
+            powerups: [],
+            clouds: []
+        };
+
+        // ============ INITIALIZATION ============
+        function initGameObjects() {
+            const canvas = document.getElementById('gameCanvas');
+            
+            // Create clouds
+            for (let i = 0; i < 8; i++) {
+                let cloud = document.createElement('div');
+                cloud.className = 'cloud';
+                cloud.style.width = (60 + Math.random() * 80) + 'px';
+                cloud.style.height = (30 + Math.random() * 20) + 'px';
+                cloud.style.left = (Math.random() * 2800) + 'px';
+                cloud.style.top = (30 + Math.random() * 120) + 'px';
+                canvas.appendChild(cloud);
+                gameObjects.clouds.push({el: cloud, x: parseFloat(cloud.style.left)});
+            }
+
+            // Create question blocks with positions
+            const blockPositions = [
+                {x: 300, y: 300, qIndex: 0},
+                {x: 550, y: 280, qIndex: 1},
+                {x: 800, y: 320, qIndex: 2},
+                {x: 1050, y: 280, qIndex: 3},
+                {x: 1300, y: 300, qIndex: 4},
+                {x: 1550, y: 280, qIndex: 5},
+                {x: 1800, y: 320, qIndex: 6},
+                {x: 2050, y: 280, qIndex: 7},
+                {x: 2300, y: 300, qIndex: 8},
+                {x: 2550, y: 280, qIndex: 9}
+            ];
+
+            blockPositions.forEach((pos, i) => {
+                let block = document.createElement('div');
+                block.className = 'question-block';
+                block.id = 'block-' + i;
+                block.style.left = pos.x + 'px';
+                block.style.bottom = pos.y + 'px';
+                block.innerHTML = '?';
+                block.dataset.qIndex = pos.qIndex;
+                canvas.appendChild(block);
+                gameObjects.blocks.push({
+                    el: block, 
+                    x: pos.x, 
+                    y: pos.y, 
+                    qIndex: pos.qIndex,
+                    answered: false
+                });
+            });
+
+            // Create coins
+            const coinPositions = [
+                {x: 200, y: 200}, {x: 250, y: 200}, {x: 350, y: 180},
+                {x: 450, y: 200}, {x: 500, y: 180}, {x: 650, y: 200},
+                {x: 700, y: 180}, {x: 900, y: 200}, {x: 950, y: 180},
+                {x: 1100, y: 200}, {x: 1150, y: 180}, {x: 1200, y: 200},
+                {x: 1400, y: 180}, {x: 1450, y: 200}, {x: 1600, y: 180},
+                {x: 1700, y: 200}, {x: 1900, y: 180}, {x: 1950, y: 200},
+                {x: 2100, y: 180}, {x: 2200, y: 200}, {x: 2400, y: 180},
+                {x: 2500, y: 200}, {x: 2600, y: 180}, {x: 2700, y: 200}
+            ];
+
+            coinPositions.forEach((pos, i) => {
+                let coin = document.createElement('div');
+                coin.className = 'coin';
+                coin.id = 'coin-' + i;
+                coin.style.left = pos.x + 'px';
+                coin.style.bottom = pos.y + 'px';
+                canvas.appendChild(coin);
+                gameObjects.coins.push({el: coin, x: pos.x, y: pos.y, collected: false});
+            });
+
+            // Create enemies
+            const enemyPositions = [400, 750, 1150, 1600, 2000, 2400];
+            enemyPositions.forEach((pos, i) => {
+                let enemy = document.createElement('div');
+                enemy.className = 'enemy';
+                enemy.id = 'enemy-' + i;
+                enemy.style.left = pos + 'px';
+                enemy.innerHTML = '<div class="enemy-body"></div><div class="enemy-feet"></div>';
+                canvas.appendChild(enemy);
+                gameObjects.enemies.push({
+                    el: enemy, 
+                    x: pos, 
+                    startX: pos,
+                    direction: 1, 
+                    speed: 1 + Math.random(),
+                    range: 100,
+                    defeated: false
+                });
+            });
+
+            // Create pipes
+            const pipePositions = [600, 1000, 1500, 2100, 2600];
+            pipePositions.forEach((pos, i) => {
+                let pipe = document.createElement('div');
+                pipe.className = 'pipe';
+                pipe.id = 'pipe-' + i;
+                pipe.style.left = pos + 'px';
+                pipe.style.height = (60 + Math.random() * 40) + 'px';
+                canvas.appendChild(pipe);
+                gameObjects.pipes.push({el: pipe, x: pos, height: parseInt(pipe.style.height)});
+            });
+
+            // Create power-ups (stars)
+            const powerupPositions = [500, 1250, 1900, 2500];
+            powerupPositions.forEach((pos, i) => {
+                let powerup = document.createElement('div');
+                powerup.className = 'powerup';
+                powerup.id = 'powerup-' + i;
+                powerup.style.left = pos + 'px';
+                powerup.style.bottom = '250px';
+                canvas.appendChild(powerup);
+                gameObjects.powerups.push({el: powerup, x: pos, collected: false});
+            });
+
+            // Position flag
+            document.getElementById('flag').style.right = '50px';
+            document.getElementById('flag').style.left = '2800px';
+        }
+
+        // ============ GAME LOOP ============
+        let gameLoop;
+        let lastTime = 0;
+
+        function startGame() {
+            document.getElementById('startScreen').style.display = 'none';
+            gameState.gameStarted = true;
+            initGameObjects();
+            gameLoop = requestAnimationFrame(update);
+            showNotification("🎮 Game Dimulai! Tabrak blok ? untuk menjawab soal!");
+        }
+
+        function update(timestamp) {
+            if (!gameState.gameStarted || gameState.gamePaused) {
+                gameLoop = requestAnimationFrame(update);
+                return;
+            }
+
+            const deltaTime = timestamp - lastTime;
+            lastTime = timestamp;
+
+            // Player movement
+            if (gameState.isMovingRight) {
+                gameState.playerX += 4;
+            }
+            if (gameState.isMovingLeft) {
+                gameState.playerX -= 4;
+            }
+
+            // Gravity
+            gameState.velocityY -= 0.6;
+            gameState.playerY += gameState.velocityY;
+
+            // Ground collision
+            if (gameState.playerY <= 80) {
+                gameState.playerY = 80;
+                gameState.velocityY = 0;
+                gameState.isJumping = false;
+            }
+
+            // Boundaries
+            if (gameState.playerX < 0) gameState.playerX = 0;
+            if (gameState.playerX > gameState.worldWidth - 40) gameState.playerX = gameState.worldWidth - 40;
+
+            // Camera
+            gameState.cameraX = gameState.playerX - 350;
+            if (gameState.cameraX < 0) gameState.cameraX = 0;
+            if (gameState.cameraX > gameState.worldWidth - 900) gameState.cameraX = gameState.worldWidth - 900;
+
+            // Update player position
+            const player = document.getElementById('player');
+            player.style.left = (gameState.playerX - gameState.cameraX) + 'px';
+            player.style.bottom = gameState.playerY + 'px';
+
+            // Update camera (move world)
+            updateWorldPosition();
+
+            // Update enemies
+            updateEnemies();
+
+            // Check collisions
+            checkCollisions();
+
+            // Check win condition
+            if (gameState.playerX >= 2780) {
+                winGame();
+                return;
+            }
+
+            // Update progress
+            updateProgress();
+
+            gameLoop = requestAnimationFrame(update);
+        }
+
+        function updateWorldPosition() {
+            const canvas = document.getElementById('gameCanvas');
+            const ground = document.getElementById('ground');
+            const flag = document.getElementById('flag');
+
+            // Move all game objects based on camera
+            gameObjects.blocks.forEach(block => {
+                block.el.style.left = (block.x - gameState.cameraX) + 'px';
+            });
+
+            gameObjects.coins.forEach(coin => {
+                if (!coin.collected) {
+                    coin.el.style.left = (coin.x - gameState.cameraX) + 'px';
+                }
+            });
+
+            gameObjects.enemies.forEach(enemy => {
+                if (!enemy.defeated) {
+                    enemy.el.style.left = (enemy.x - gameState.cameraX) + 'px';
+                }
+            });
+
+            gameObjects.pipes.forEach(pipe => {
+                pipe.el.style.left = (pipe.x - gameState.cameraX) + 'px';
+            });
+
+            gameObjects.powerups.forEach(powerup => {
+                if (!powerup.collected) {
+                    powerup.el.style.left = (powerup.x - gameState.cameraX) + 'px';
+                }
+            });
+
+            gameObjects.clouds.forEach(cloud => {
+                cloud.el.style.left = (cloud.x - gameState.cameraX * 0.3) + 'px';
+            });
+
+            flag.style.left = (2800 - gameState.cameraX) + 'px';
+        }
+
+        function updateEnemies() {
+            gameObjects.enemies.forEach(enemy => {
+                if (enemy.defeated) return;
+
+                enemy.x += enemy.speed * enemy.direction;
+
+                if (enemy.x > enemy.startX + enemy.range || enemy.x < enemy.startX - enemy.range) {
+                    enemy.direction *= -1;
+                }
+            });
+        }
+
+        function checkCollisions() {
+            const playerRect = {
+                x: gameState.playerX,
+                y: gameState.playerY,
+                width: 40,
+                height: 50
+            };
+
+            // Check block collisions (head bump)
+            gameObjects.blocks.forEach((block, i) => {
+                if (block.answered) return;
+
+                const blockRect = {
+                    x: block.x,
+                    y: block.y,
+                    width: 45,
+                    height: 45
+                };
+
+                // Check if player hits block from below
+                if (gameState.velocityY > 0 &&
+                    playerRect.x + 30 > blockRect.x &&
+                    playerRect.x < blockRect.x + blockRect.width &&
+                    playerRect.y + 50 >= blockRect.y &&
+                    playerRect.y + 50 <= blockRect.y + 20) {
+                    
+                    hitBlock(i);
+                }
+            });
+
+            // Check coin collisions
+            gameObjects.coins.forEach((coin, i) => {
+                if (coin.collected) return;
+
+                const dist = Math.sqrt(
+                    Math.pow((gameState.playerX + 20) - (coin.x + 12), 2) +
+                    Math.pow((gameState.playerY + 25) - (coin.y + 12), 2)
+                );
+
+                if (dist < 35) {
+                    collectCoin(i);
+                }
+            });
+
+            // Check enemy collisions
+            gameObjects.enemies.forEach((enemy, i) => {
+                if (enemy.defeated) return;
+
+                const dist = Math.abs((gameState.playerX + 20) - (enemy.x + 20));
+                const distY = Math.abs((gameState.playerY) - 80);
+
+                if (dist < 35 && distY < 30) {
+                    // Check if jumping on enemy
+                    if (gameState.velocityY < 0 && gameState.playerY > 100) {
+                        defeatEnemy(i);
+                    } else {
+                        playerHit();
+                    }
+                }
+            });
+
+            // Check powerup collisions
+            gameObjects.powerups.forEach((powerup, i) => {
+                if (powerup.collected) return;
+
+                const dist = Math.sqrt(
+                    Math.pow((gameState.playerX + 20) - (powerup.x + 15), 2) +
+                    Math.pow((gameState.playerY + 25) - 250, 2)
+                );
+
+                if (dist < 40) {
+                    collectPowerup(i);
+                }
+            });
+
+            // Check pipe collisions
+            gameObjects.pipes.forEach(pipe => {
+                const pipeRect = {
+                    x: pipe.x,
+                    width: 60,
+                    height: pipe.height
+                };
+
+                if (gameState.playerX + 40 > pipeRect.x &&
+                    gameState.playerX < pipeRect.x + pipeRect.width &&
+                    gameState.playerY < pipeRect.height) {
+                    // Push player back
+                    if (gameState.isMovingRight) {
+                        gameState.playerX = pipeRect.x - 42;
+                    } else if (gameState.isMovingLeft) {
+                        gameState.playerX = pipeRect.x + pipeRect.width + 2;
+                    }
+                }
+            });
+        }
+
+        function hitBlock(index) {
+            const block = gameObjects.blocks[index];
+            if (block.answered) return;
+
+            gameState.gamePaused = true;
+            showQuiz(block.qIndex, index);
+        }
+
+        function collectCoin(index) {
+            const coin = gameObjects.coins[index];
+            coin.collected = true;
+            coin.el.style.display = 'none';
+            gameState.coins++;
+            gameState.score += 100;
+            updateHUD();
+            showNotification("🪙 +100 poin! Koin dikumpulkan!");
+        }
+
+        function defeatEnemy(index) {
+            const enemy = gameObjects.enemies[index];
+            enemy.defeated = true;
+            enemy.el.style.display = 'none';
+            gameState.score += 200;
+            gameState.velocityY = 8; // Bounce
+            updateHUD();
+            showNotification("👾 +200 poin! Musuh dikalahkan!");
+        }
+
+        function collectPowerup(index) {
+            const powerup = gameObjects.powerups[index];
+            powerup.collected = true;
+            powerup.el.style.display = 'none';
+            gameState.score += 500;
+            updateHUD();
+            showNotification("⭐ +500 poin! Power-up dikumpulkan!");
+        }
+
+        function playerHit() {
+            gameState.lives--;
+            updateHUD();
+            showNotification("💔 Nyawa berkurang! Sisa: " + gameState.lives);
+            
+            // Reset player position
+            gameState.playerX = Math.max(50, gameState.playerX - 100);
+            gameState.velocityY = 5;
+
+            if (gameState.lives <= 0) {
+                gameOver();
+            }
+        }
+
+        // ============ QUIZ SYSTEM ============
+        function showQuiz(qIndex, blockIndex) {
+            const modal = document.getElementById('quizModal');
+            const questionText = document.getElementById('questionText');
+            const answersContainer = document.getElementById('answersContainer');
+
+            const q = questions[qIndex];
+            questionText.textContent = q.question;
+            answersContainer.innerHTML = '';
+
+            q.answers.forEach((answer, i) => {
+                let btn = document.createElement('button');
+                btn.className = 'answer-btn';
+                btn.textContent = answer;
+                btn.onclick = () => submitAnswer(i, qIndex, blockIndex);
+                answersContainer.appendChild(btn);
+            });
+
+            modal.style.display = 'block';
+        }
+
+        function submitAnswer(selected, qIndex, blockIndex) {
+            const q = questions[qIndex];
+            const buttons = document.querySelectorAll('.answer-btn');
+            const block = gameObjects.blocks[blockIndex];
+
+            buttons.forEach((btn, i) => {
+                btn.onclick = null;
+                if (i === q.correct) {
+                    btn.classList.add('correct');
+                } else if (i === selected && selected !== q.correct) {
+                    btn.classList.add('wrong');
+                }
+            });
+
+            gameState.questionsAnswered++;
+
+            if (selected === q.correct) {
+                gameState.correctAnswers++;
+                gameState.score += 1000;
+                showNotification("✅ BENAR! +1000 poin! " + q.explanation);
+            } else {
+                showNotification("❌ SALAH! Jawaban: " + q.answers[q.correct] + ". " + q.explanation);
+            }
+
+            block.answered = true;
+            block.el.classList.add('answered');
+            block.el.innerHTML = '✓';
+
+            updateHUD();
+
+            setTimeout(() => {
+                document.getElementById('quizModal').style.display = 'none';
+                gameState.gamePaused = false;
+            }, 2500);
+        }
+
+        // ============ UI UPDATES ============
+        function updateHUD() {
+            document.getElementById('scoreDisplay').textContent = String(gameState.score).padStart(4, '0');
+            document.getElementById('coinDisplay').textContent = '🪙 ' + gameState.coins;
+            document.getElementById('livesDisplay').textContent = '❤️ ' + gameState.lives;
+            document.getElementById('questionDisplay').textContent = gameState.questionsAnswered + '/10';
+        }
+
+        function updateProgress() {
+            const progress = (gameState.playerX / gameState.worldWidth) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+
+        function showNotification(text) {
+            const notif = document.getElementById('notification');
+            notif.textContent = text;
+            notif.style.display = 'block';
+            setTimeout(() => {
+                notif.style.display = 'none';
+            }, 3000);
+        }
+
+        // ============ GAME END ============
+        function winGame() {
+            gameState.gameStarted = false;
+            cancelAnimationFrame(gameLoop);
+
+            const endScreen = document.getElementById('endScreen');
+            document.getElementById('endTitle').textContent = '🎉 LEVEL SELESAI! 🎉';
+            document.getElementById('endStats').innerHTML = `
+                <p>🏆 Skor Akhir: <strong>${gameState.score}</strong></p>
+                <p>🪙 Koin: <strong>${gameState.coins}</strong></p>
+                <p>❓ Soal Dijawab: <strong>${gameState.questionsAnswered}/10</strong></p>
+                <p>✅ Jawaban Benar: <strong>${gameState.correctAnswers}/10</strong></p>
+                <p>❤️ Nyawa Tersisa: <strong>${gameState.lives}</strong></p>
+                <p>📊 Nilai: <strong>${Math.round((gameState.correctAnswers / 10) * 100)}</strong></p>
+                <br>
+                <p style="color:#FFD700;">🌟 Selamat! Kamu telah menyelesaikan<br>TKA Dasar-dasar TJKT! 🌟</p>
+            `;
+            endScreen.style.display = 'flex';
+        }
+
+        function gameOver() {
+            gameState.gameStarted = false;
+            cancelAnimationFrame(gameLoop);
+
+            const endScreen = document.getElementById('endScreen');
+            document.getElementById('endTitle').textContent = '💀 GAME OVER 💀';
+            document.getElementById('endStats').innerHTML = `
+                <p>🏆 Skor Akhir: <strong>${gameState.score}</strong></p>
+                <p>🪙 Koin: <strong>${gameState.coins}</strong></p>
+                <p>❓ Soal Dijawab: <strong>${gameState.questionsAnswered}/10</strong></p>
+                <p>✅ Jawaban Benar: <strong>${gameState.correctAnswers}/10</strong></p>
+                <br>
+                <p style="color:#ff7675;">Jangan menyerah! Coba lagi!</p>
+            `;
+            endScreen.style.display = 'flex';
+        }
+
+        function restartGame() {
+            // Reset state
+            gameState = {
+                score: 0,
+                coins: 0,
+                lives: 3,
+                questionsAnswered: 0,
+                correctAnswers: 0,
+                playerX: 50,
+                playerY: 80,
+                velocityY: 0,
+                isJumping: false,
+                isMovingLeft: false,
+                isMovingRight: false,
+                gameStarted: true,
+                gamePaused: false,
+                cameraX: 0,
+                worldWidth: 3000,
+                blocksHit: [],
+                coinsCollected: [],
+                enemiesDefeated: [],
+                powerupsCollected: []
+            };
+
+            // Remove old objects
+            document.querySelectorAll('.question-block, .coin, .enemy, .pipe, .powerup, .cloud').forEach(el => el.remove());
+            gameObjects = { blocks: [], coins: [], enemies: [], pipes: [], powerups: [], clouds: [] };
+
+            // Hide end screen
+            document.getElementById('endScreen').style.display = 'none';
+            document.getElementById('quizModal').style.display = 'none';
+
+            // Reinitialize
+            initGameObjects();
+            updateHUD();
+            gameLoop = requestAnimationFrame(update);
+        }
+
+        // ============ CONTROLS ============
+        document.addEventListener('keydown', (e) => {
+            if (!gameState.gameStarted) return;
+
+            switch(e.code) {
+                case 'ArrowRight':
+                case 'KeyD':
+                    gameState.isMovingRight = true;
+                    break;
+                case 'ArrowLeft':
+                case 'KeyA':
+                    gameState.isMovingLeft = true;
+                    break;
+                case 'Space':
+                case 'ArrowUp':
+                case 'KeyW':
+                    if (!gameState.isJumping) {
+                        gameState.velocityY = 12;
+                        gameState.isJumping = true;
+                    }
+                    break;
+            }
+            e.preventDefault();
+        });
+
+        document.addEventListener('keyup', (e) => {
+            switch(e.code) {
+                case 'ArrowRight':
+                case 'KeyD':
+                    gameState.isMovingRight = false;
+                    break;
+                case 'ArrowLeft':
+                case 'KeyA':
+                    gameState.isMovingLeft = false;
+                    break;
+            }
+        });
+
+        // Touch controls for mobile
+        let touchStartX = 0;
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+            if (!gameState.isJumping) {
+                gameState.velocityY = 12;
+                gameState.isJumping = true;
+            }
+        });
+
+        document.addEventListener('touchmove', (e) => {
+            const touchX = e.touches[0].clientX;
+            if (touchX > touchStartX + 20) {
+                gameState.isMovingRight = true;
+                gameState.isMovingLeft = false;
+            } else if (touchX < touchStartX - 20) {
+                gameState.isMovingLeft = true;
+                gameState.isMovingRight = false;
+            }
+        });
+
+        document.addEventListener('touchend', () => {
+            gameState.isMovingRight = false;
+            gameState.isMovingLeft = false;
+        });
+    </script>
+</body>
+</html>
