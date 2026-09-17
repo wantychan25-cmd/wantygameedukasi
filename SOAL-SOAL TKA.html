@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Network Quest - TKA TJKT Kelas XII</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', sans-serif; }
+body {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    color: white;
+}
+#gameContainer {
+    width: 100%;
+    max-width: 1100px;
+    background: rgba(0,0,0,0.6);
+    border: 3px solid #00d4ff;
+    border-radius: 20px;
+    box-shadow: 0 0 40px rgba(0,212,255,0.5);
+    overflow: hidden;
+}
+/* HEADER */
+.header {
+    background: linear-gradient(90deg, #00d4ff, #0099ff);
+    padding: 15px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.header h1 { font-size: 22px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+.header h1 span { color: #FFD700; }
+.stats {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+.stat-box {
+    background: rgba(0,0,0,0.4);
+    padding: 8px 15px;
+    border-radius: 10px;
+    border: 2px solid #FFD700;
+    font-size: 13px;
+    font-weight: bold;
+}
+.stat-box .val { color: #FFD700; font-size: 16px; }
+
+/* MAP */
+.map-area {
+    padding: 25px;
+    min-height: 450px;
+    position: relative;
+    background: 
+        radial-gradient(circle at 20% 30%, rgba(0,212,255,0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(255,215,0,0.1) 0%, transparent 50%);
+}
+.map-title {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 18px;
+    color: #00d4ff;
+}
+.map-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+}
+.location {
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    border: 3px solid #00d4ff;
+    border-radius: 15px;
+    padding: 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+}
+.location:hover {
+    transform: translateY(-5px) scale(1.03);
+    box-shadow: 0 10px 25px rgba(0,212,255,0.5);
+    border-color: #FFD700;
+}
+.location.completed {
+    background: linear-gradient(135deg, #11998e, #38ef7d);
+    border-color: #38ef7d;
+}
+.location.locked {
+    background: linear-gradient(135deg, #434343, #000000);
+    border-color: #666;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+.location.locked:hover { transform: none; box-shadow: none; }
+.location-icon { font-size: 40px; margin-bottom: 8px; }
+.location-name { font-size: 14px; font-weight: bold; margin-bottom: 5px; }
+.location-info { font-size: 11px; color: #FFD700; }
+.location-badge {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: #FFD700;
+    color: #000;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+/* PROGRESS BAR */
+.progress-section {
+    padding: 15px 25px;
+    background: rgba(0,0,0,0.4);
+}
+.progress-label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+.progress-bar {
+    height: 20px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid #00d4ff;
+}
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00d4ff, #FFD700);
+    width: 0%;
+    transition: width 0.5s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: bold;
+    color: #000;
+}
+
+/* QUIZ MODAL */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+.modal-overlay.active { display: flex; }
+.modal {
+    background: linear-gradient(135deg, #141e30, #243b55);
+    border: 3px solid #00d4ff;
+    border-radius: 20px;
+    padding: 30px;
+    max-width: 700px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 0 50px rgba(0,212,255,0.5);
+}
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #00d4ff;
+}
+.modal-title { font-size: 18px; color: #FFD700; }
+.modal-close {
+    background: #ff4757;
+    border: none;
+    color: white;
+    width: 35px; height: 35px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+}
+.question-number {
+    background: #00d4ff;
+    color: #000;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    display: inline-block;
+    margin-bottom: 15px;
+}
+.question-text {
+    font-size: 15px;
+    line-height: 1.7;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+    border-left: 4px solid #FFD700;
+}
+.answers { display: flex; flex-direction: column; gap: 10px; }
+.answer-btn {
+    background: rgba(255,255,255,0.08);
+    border: 2px solid #00d4ff;
+    color: white;
+    padding: 12px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: left;
+    font-size: 14px;
+    transition: all 0.3s;
+    line-height: 1.5;
+}
+.answer-btn:hover:not(:disabled) {
+    background: rgba(0,212,255,0.2);
+    transform: translateX(5px);
+}
+.answer-btn.correct {
+    background: linear-gradient(90deg, #11998e, #38ef7d);
+    border-color: #38ef7d;
+    color: #000;
+    font-weight: bold;
+}
+.answer-btn.wrong {
+    background: linear-gradient(90deg, #eb3349, #f45c43);
+    border-color: #f45c43;
+}
+.answer-btn:disabled { cursor: not-allowed; }
+.feedback {
+    margin-top: 15px;
+    padding: 15px;
+    border-radius: 10px;
+    font-size: 13px;
+    line-height: 1.6;
+    display: none;
+}
+.feedback.show { display: block; }
+.feedback.correct { background: rgba(17,153,142,0.3); border-left: 4px solid #38ef7d; }
+.feedback.wrong { background: rgba(235,51,73,0.3); border-left: 4px solid #f45c43; }
+.next-btn {
+    margin-top: 15px;
+    background: linear-gradient(90deg, #00d4ff, #0099ff);
+    border: none;
+    color: white;
+    padding: 12px 25px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+    display: none;
+}
+.next-btn.show { display: inline-block; }
+.next-btn:hover { transform: scale(1.05); }
+
+/* START SCREEN */
+.start-screen {
+    text-align: center;
+    padding: 40px 20px;
+}
+.start-screen h1 {
+    font-size: 36px;
+    background: linear-gradient(90deg, #00d4ff, #FFD700);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 10px;
+}
+.start-screen h2 { color: #FFD700; margin-bottom: 20px; font-size: 18px; }
+.start-screen p { margin-bottom: 15px; line-height: 1.8; font-size: 14px; }
+.start-btn {
+    background: linear-gradient(90deg, #FFD700, #FFA500);
+    border: none;
+    color: #000;
+    padding: 15px 40px;
+    border-radius: 30px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 20px;
+    box-shadow: 0 5px 20px rgba(255,215,0,0.5);
+    transition: all 0.3s;
+}
+.start-btn:hover { transform: scale(1.1); }
+.feature-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin: 25px 0;
+    text-align: left;
+}
+.feature {
+    background: rgba(0,212,255,0.1);
+    padding: 15px;
+    border-radius: 10px;
+    border-left: 4px solid #00d4ff;
+}
+.feature-icon { font-size: 24px; margin-bottom: 5px; }
+.feature-title { color: #FFD700; font-weight: bold; margin-bottom: 5px; }
+.feature-desc { font-size: 12px; color: #ccc; }
+
+/* END SCREEN */
+.end-screen {
+    text-align: center;
+    padding: 40px 20px;
+}
+.end-screen h1 {
+    font-size: 32px;
+    margin-bottom: 20px;
+}
+.grade {
+    font-size: 80px;
+    font-weight: bold;
+    margin: 20px 0;
+    text-shadow: 0 0 30px currentColor;
+}
+.grade.A { color: #38ef7d; }
+.grade.B { color: #00d4ff; }
+.grade.C { color: #FFD700; }
+.grade.D { color: #FFA500; }
+.grade.E { color: #f45c43; }
+.final-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin: 25px 0;
+}
+.final-stat {
+    background: rgba(0,212,255,0.1);
+    padding: 20px;
+    border-radius: 15px;
+    border: 2px solid #00d4ff;
+}
+.final-stat .num { font-size: 32px; color: #FFD700; font-weight: bold; }
+.final-stat .label { font-size: 12px; color: #ccc; margin-top: 5px; }
+.review-btn {
+    background: linear-gradient(90deg, #00d4ff, #0099ff);
+    border: none;
+    color: white;
+    padding: 12px 30px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: bold;
+    margin: 10px;
+}
+.review-btn:hover { transform: scale(1.05); }
+
+/* REVIEW */
+.review-list {
+    max-height: 400px;
+    overflow-y: auto;
+    margin: 20px 0;
+    text-align: left;
+}
+.review-item {
+    background: rgba(255,255,255,0.05);
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    border-left: 4px solid;
+}
+.review-item.correct { border-color: #38ef7d; }
+.review-item.wrong { border-color: #f45c43; }
+.review-q { font-weight: bold; margin-bottom: 8px; font-size: 13px; }
+.review-a { font-size: 12px; line-height: 1.6; }
+.review-a span { display: block; margin: 3px 0; }
+
+@media (max-width: 600px) {
+    .header h1 { font-size: 16px; }
+    .stat-box { font-size: 11px; padding: 5px 10px; }
+    .start-screen h1 { font-size: 24px; }
+    .modal { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div id="gameContainer">
+    <!-- HEADER -->
+    <div class="header">
+        <h1>🌐 NETWORK <span>QUEST</span></h1>
+        <div class="stats">
+            <div class="stat-box">📝 Soal: <span class="val" id="progressText">0/50</span></div>
+            <div class="stat-box">✅ Benar: <span class="val" id="correctText">0</span></div>
+            <div class="stat-box">🏆 Skor: <span class="val" id="scoreText">0</span></div>
+            <div class="stat-box">❤️ Nyawa: <span class="val" id="livesText">3</span></div>
+        </div>
+    </div>
+
+    <!-- START SCREEN -->
+    <div id="startScreen" class="start-screen">
+        <h1>🌐 NETWORK QUEST 🌐</h1>
+        <h2>TKA Dasar-dasar TJKT - Kelas XII TKJ</h2>
+        <p>Jelajahi dunia industri Teknik Jaringan Komputer dan Telekomunikasi!<br>
+        Jawab <strong>50 soal</strong> dari 5 lokasi berbeda untuk menjadi Network Master!</p>
+        
+        <div class="feature-list">
+            <div class="feature">
+                <div class="feature-icon">💼</div>
+                <div class="feature-title">Profesi & Jabatan</div>
+                <div class="feature-desc">10 soal tentang jenis profesi di dunia TJKT</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🔄</div>
+                <div class="feature-title">Alur Kerja</div>
+                <div class="feature-desc">10 soal tentang proses bisnis layanan</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🚀</div>
+                <div class="feature-title">Perkembangan Industri</div>
+                <div class="feature-desc">10 soal tentang industri 4.0 & teknologi</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🤝</div>
+                <div class="feature-title">Budaya & Etos Kerja</div>
+                <div class="feature-desc">10 soal budaya kerja & profesionalisme</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🎯</div>
+                <div class="feature-title">Studi Kasus</div>
+                <div class="feature-desc">10 soal analisis kasus TJKT</div>
+            </div>
+        </div>
+
+        <button class="start-btn" onclick="startGame()">🎮 MULAI PETUALANGAN</button>
+    </div>
+
+    <!-- MAP AREA -->
+    <div id="mapArea" class="map-area" style="display:none;">
+        <div class="map-title">🗺️ PETA DUNIA TJKT - Pilih Lokasi untuk Menjawab Soal</div>
+        <div class="map-grid" id="mapGrid"></div>
+    </div>
+
+    <!-- PROGRESS -->
+    <div id="progressSection" class="progress-section" style="display:none;">
+        <div class="progress-label">
+            <span>📊 Progres Penyelesaian</span>
+            <span id="progressPercent">0%</span>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill">0%</div>
+        </div>
+    </div>
+
+    <!-- END SCREEN -->
+    <div id="endScreen" class="end-screen" style="display:none;"></div>
+</div>
+
+<!-- QUIZ MODAL -->
+<div class="modal-overlay" id="quizModal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title" id="modalTitle">📝 Soal</div>
+            <button class="modal-close" onclick="closeModal()">✕</button>
+        </div>
+        <div class="question-number" id="qNumber">Soal 1</div>
+        <div class="question-text" id="qText"></div>
+        <div class="answers" id="answersContainer"></div>
+        <div class="feedback" id="feedback"></div>
+        <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Soal Berikutnya ➡️</button>
+    </div>
+</div>
+
+<script>
+// ============ 50 SOAL TKA TJKT ============
+const allQuestions = {
+    profesi: [
+        {
+            q: "Profesi yang bertanggung jawab merancang, membangun, dan mengoptimalkan infrastruktur jaringan komputer skala enterprise disebut...",
+            a: ["Network Engineer", "Graphic Designer", "Database Administrator", "Content Writer"],
+            correct: 0,
+            exp: "Network Engineer bertugas merancang dan mengoptimalkan infrastruktur jaringan."
+        },
+        {
+            q: "Petugas yang bekerja di NOC (Network Operations Center) untuk memantau kinerja jaringan 24/7 disebut...",
+            a: ["NOC Engineer", "SEO Specialist", "UI Designer", "Sales Manager"],
+            correct: 0,
+            exp: "NOC Engineer memantau jaringan secara real-time di Network Operations Center."
+        },
+        {
+            q: "Teknisi yang bertugas memasang kabel fiber optik di lapangan dan melakukan splicing disebut...",
+            a: ["Field Technician", "Software Developer", "HR Manager", "Accountant"],
+            correct: 0,
+            exp: "Field Technician bekerja di lapangan untuk instalasi dan pemeliharaan fisik."
+        },
+        {
+            q: "Profesi yang fokus pada keamanan jaringan dan sistem dari ancaman siber disebut...",
+            a: ["Cyber Security Analyst", "Civil Engineer", "Mechanical Engineer", "Chef"],
+            correct: 0,
+            exp: "Cyber Security Analyst melindungi sistem dari serangan siber."
+        },
+        {
+            q: "Seseorang yang mengelola server, melakukan backup, dan memastikan uptime layanan disebut...",
+            a: ["System Administrator", "Video Editor", "Event Organizer", "Tour Guide"],
+            correct: 0,
+            exp: "System Administrator mengelola server dan memastikan layanan berjalan optimal."
+        },
+        {
+            q: "Profesi yang memberikan dukungan teknis pertama kepada pengguna yang mengalami masalah jaringan disebut...",
+            a: ["Helpdesk Technician", "Architect", "Doctor", "Pilot"],
+            correct: 0,
+            exp: "Helpdesk Technician adalah lini pertama dukungan teknis untuk user."
+        },
+        {
+            q: "Spesialis yang merancang solusi cloud untuk perusahaan seperti AWS, Azure, atau GCP disebut...",
+            a: ["Cloud Architect", "Dentist", "Lawyer", "Teacher"],
+            correct: 0,
+            exp: "Cloud Architect merancang solusi cloud computing untuk organisasi."
+        },
+        {
+            q: "Profesi yang bertugas mengkonfigurasi router, switch, dan firewall pada jaringan ISP adalah...",
+            a: ["Network Administrator", "Fashion Designer", "Musician", "Athlete"],
+            correct: 0,
+            exp: "Network Administrator mengelola perangkat jaringan seperti router dan switch."
+        },
+        {
+            q: "Tenaga profesional yang menjual solusi jaringan ke klien dengan pemahaman teknis mendalam disebut...",
+            a: ["Sales Engineer", "Cashier", "Driver", "Farmer"],
+            correct: 0,
+            exp: "Sales Engineer menggabungkan kemampuan teknis dan penjualan."
+        },
+        {
+            q: "Profesi yang melakukan audit dan sertifikasi jaringan sesuai standar industri disebut...",
+            a: ["Network Consultant/Auditor", "Baker", "Gardener", "Painter"],
+            correct: 0,
+            exp: "Network Consultant/Auditor melakukan audit dan memberikan rekomendasi."
+        }
+    ],
+    alurKerja: [
+        {
+            q: "Urutan alur kerja proses bisnis layanan ISP yang benar adalah...",
+            a: ["Survei → Instalasi → Konfigurasi → Testing → Handover", "Testing → Instalasi → Survei", "Handover → Konfigurasi → Instalasi", "Instalasi → Survei → Testing"],
+            correct: 0,
+            exp: "Alur kerja ISP: Survei lokasi → Instalasi → Konfigurasi → Testing → Handover ke pelanggan."
+        },
+        {
+            q: "Tahap pertama dalam perencanaan pembangunan jaringan baru adalah...",
+            a: ["Analisis kebutuhan dan survei lokasi", "Pembelian perangkat", "Instalasi kabel", "Konfigurasi router"],
+            correct: 0,
+            exp: "Perencanaan dimulai dengan analisis kebutuhan dan survei lokasi."
+        },
+        {
+            q: "Dokumen yang berisi rancangan topologi jaringan sebelum implementasi disebut...",
+            a: ["Network Design Document (NDD)", "Invoice", "Receipt", "Menu"],
+            correct: 0,
+            exp: "NDD adalah dokumen desain topologi dan spesifikasi jaringan."
+        },
+        {
+            q: "Proses memindahkan layanan dari tim proyek ke tim operasional disebut...",
+            a: ["Handover/Transition", "Shutdown", "Reboot", "Formatting"],
+            correct: 0,
+            exp: "Handover adalah proses serah terima dari proyek ke operasional."
+        },
+        {
+            q: "SLA (Service Level Agreement) dalam layanan jaringan berfungsi untuk...",
+            a: ["Menjamin kualitas layanan dengan parameter tertentu", "Menghapus data pelanggan", "Mematikan server", "Mengganti perangkat"],
+            correct: 0,
+            exp: "SLA menjamin kualitas layanan dengan parameter uptime, latency, dll."
+        },
+        {
+            q: "Tahap pemeliharaan jaringan yang dilakukan secara rutin untuk mencegah gangguan disebut...",
+            a: ["Preventive Maintenance", "Corrective Maintenance", "Emergency Shutdown", "Data Deletion"],
+            correct: 0,
+            exp: "Preventive Maintenance dilakukan rutin untuk mencegah gangguan."
+        },
+        {
+            q: "Dalam proses bisnis TJKT, tahap 'commissioning' berarti...",
+            a: ["Pengujian dan pengaktifan sistem", "Pembongkaran sistem", "Pembelian perangkat", "Pemasangan iklan"],
+            correct: 0,
+            exp: "Commissioning adalah tahap pengujian akhir sebelum sistem diaktifkan."
+        },
+        {
+            q: "Metodologi PDCA dalam manajemen kualitas jaringan adalah...",
+            a: ["Plan-Do-Check-Act", "Play-Do-Clean-Act", "Plan-Delay-Check-Archive", "Pay-Do-Check-Act"],
+            correct: 0,
+            exp: "PDCA: Plan (rencana), Do (lakukan), Check (periksa), Act (tindak lanjut)."
+        },
+        {
+            q: "Ticketing system dalam layanan jaringan berfungsi untuk...",
+            a: ["Mencatat dan melacak setiap laporan masalah", "Mencetak struk belanja", "Mengirim email promosi", "Membuat konten website"],
+            correct: 0,
+            exp: "Ticketing system mencatat dan melacak laporan masalah dari user."
+        },
+        {
+            q: "Dalam proses troubleshooting jaringan, langkah pertama yang harus dilakukan adalah...",
+            a: ["Identifikasi masalah", "Membeli perangkat baru", "Mengganti semua kabel", "Mematikan server"],
+            correct: 0,
+            exp: "Langkah pertama troubleshooting adalah identifikasi masalah dengan jelas."
+        }
+    ],
+    industri: [
+        {
+            q: "Revolusi industri yang ditandai dengan IoT, cloud computing, dan big data disebut...",
+            a: ["Industri 4.0", "Industri 1.0", "Industri 2.0", "Industri 0.5"],
+            correct: 0,
+            exp: "Industri 4.0 ditandai IoT, cloud, AI, big data, dan otomatisasi."
+        },
+        {
+            q: "Teknologi jaringan seluler generasi kelima yang menawarkan kecepatan tinggi dan latency rendah adalah...",
+            a: ["5G", "2G", "3G", "1G"],
+            correct: 0,
+            exp: "5G menawarkan kecepatan hingga 10 Gbps dan latency sangat rendah."
+        },
+        {
+            q: "Konsep komputasi yang menyediakan sumber daya IT melalui internet disebut...",
+            a: ["Cloud Computing", "Edge Computing", "Quantum Computing", "Manual Computing"],
+            correct: 0,
+            exp: "Cloud Computing menyediakan resources IT via internet (IaaS, PaaS, SaaS)."
+        },
+        {
+            q: "IoT (Internet of Things) adalah...",
+            a: ["Jaringan perangkat fisik yang terhubung internet", "Jenis kabel jaringan", "Sistem operasi server", "Bahasa pemrograman"],
+            correct: 0,
+            exp: "IoT menghubungkan perangkat fisik ke internet untuk pertukaran data."
+        },
+        {
+            q: "SDN (Software Defined Network) memisahkan...",
+            a: ["Control plane dan data plane", "Monitor dan keyboard", "Server dan client", "Input dan output"],
+            correct: 0,
+            exp: "SDN memisahkan control plane (pengaturan) dari data plane (forwarding)."
+        },
+        {
+            q: "Teknologi jaringan yang menggunakan kabel serat kaca untuk transmisi data adalah...",
+            a: ["Fiber Optic", "Coaxial", "UTP", "STP"],
+            correct: 0,
+            exp: "Fiber Optic menggunakan serat kaca dengan kecepatan tinggi dan jarak jauh."
+        },
+        {
+            q: "NFV (Network Function Virtualization) berfungsi untuk...",
+            a: ["Mengvirtualisasi fungsi jaringan yang sebelumnya hardware-based", "Mempercepat gaming", "Mengedit video", "Mendesain grafis"],
+            correct: 0,
+            exp: "NFV mengubah fungsi jaringan (router, firewall) menjadi software-based."
+        },
+        {
+            q: "Protokol IPv6 dikembangkan terutama karena...",
+            a: ["Keterbatasan alamat IPv4", "IPv4 terlalu cepat", "IPv4 terlalu mahal", "IPv4 tidak aman"],
+            correct: 0,
+            exp: "IPv6 dikembangkan karena alamat IPv4 (4,3 miliar) sudah habis."
+        },
+        {
+            q: "Konsep edge computing bertujuan untuk...",
+            a: ["Memproses data lebih dekat dengan sumbernya", "Menyimpan data di cloud pusat", "Menghapus data lokal", "Memperlambat proses"],
+            correct: 0,
+            exp: "Edge computing memproses data di tepi jaringan untuk latency rendah."
+        },
+        {
+            q: "Teknologi Wi-Fi generasi terbaru yang mendukung kecepatan tinggi adalah...",
+            a: ["Wi-Fi 6 (802.11ax)", "Wi-Fi 1", "Wi-Fi 0", "Wi-Fi Classic"],
+            correct: 0,
+            exp: "Wi-Fi 6 (802.11ax) menawarkan kecepatan dan efisiensi lebih baik."
+        }
+    ],
+    budayaKerja: [
+        {
+            q: "Prinsip 5K dalam budaya kerja industri adalah...",
+            a: ["Keamanan, Ketertiban, Kebersihan, Keindahan, Kekeluargaan", "Kaya, Kuat, Cepat, Tepat, Benar", "Keras, Kaku, Koum, Keras, Kejam", "Kopi, Kue, Karyawan, Kantor, Kasir"],
+            correct: 0,
+            exp: "5K: Keamanan, Ketertiban, Kebersihan, Keindahan, Kekeluargaan."
+        },
+        {
+            q: "Metode 5R (Ringkas, Rapi, Resik, Rawat, Rajin) berasal dari prinsip...",
+            a: ["5S Jepang (Seiri, Seiton, Seiso, Seiketsu, Shitsuke)", "5P Inggris", "5M Amerika", "5C Prancis"],
+            correct: 0,
+            exp: "5R adalah adaptasi dari 5S Jepang untuk budaya kerja efisien."
+        },
+        {
+            q: "APD (Alat Pelindung Diri) yang wajib digunakan teknisi saat bekerja di ketinggian adalah...",
+            a: ["Harness dan helm keselamatan", "Jas hujan", "Sandal jepit", "Kacamata hitam"],
+            correct: 0,
+            exp: "Harness dan helm wajib untuk pekerjaan di ketinggian (K3)."
+        },
+        {
+            q: "Sikap profesional yang ditunjukkan seorang teknisi TJKT adalah...",
+            a: ["Disiplin, tanggung jawab, dan terus belajar", "Datang sesuka hati", "Menyalahkan orang lain", "Bekerja asal selesai"],
+            correct: 0,
+            exp: "Profesionalisme ditunjukkan dengan disiplin, tanggung jawab, dan pengembangan diri."
+        },
+        {
+            q: "K3LH dalam dunia kerja TJKT adalah singkatan dari...",
+            a: ["Keselamatan, Kesehatan Kerja, dan Lingkungan Hidup", "Kerja Keras, Kerja Lelah, Kerja Haus", "Kantor, Karyawan, Listrik, Hari", "Kabel, Komputer, Laptop, Harddisk"],
+            correct: 0,
+            exp: "K3LH: Keselamatan, Kesehatan Kerja, dan Lingkungan Hidup."
+        },
+        {
+            q: "Etos kerja 'work smart, not just work hard' bermakna...",
+            a: ["Bekerja cerdas, bukan hanya keras", "Bekerja lambat", "Tidak perlu bekerja", "Bekerja sambil tidur"],
+            correct: 0,
+            exp: "Work smart berarti bekerja efisien dengan strategi, bukan hanya mengandalkan usaha keras."
+        },
+        {
+            q: "Sertifikasi profesional di bidang jaringan yang diakui global adalah...",
+            a: ["CCNA, CCNP, CompTIA Network+", "Sertifikat kelulusan SD", "SIM A", "KTP"],
+            correct: 0,
+            exp: "CCNA/CCNP (Cisco) dan CompTIA Network+ adalah sertifikasi global."
+        },
+        {
+            q: "Integritas dalam bekerja berarti...",
+            a: ["Jujur dan konsisten antara perkataan dan perbuatan", "Suka berbohong", "Menyontek laporan", "Datang terlambat"],
+            correct: 0,
+            exp: "Integritas adalah kejujuran dan konsistensi moral dalam bekerja."
+        },
+        {
+            q: "Teamwork dalam proyek jaringan berarti...",
+            a: ["Berkolaborasi untuk mencapai tujuan bersama", "Bekerja sendiri-sendiri", "Saling menjatuhkan", "Tidak berkomunikasi"],
+            correct: 0,
+            exp: "Teamwork adalah kolaborasi efektif antar anggota tim."
+        },
+        {
+            q: "Komunikasi efektif dalam dunia kerja TJKT ditandai dengan...",
+            a: ["Penyampaian informasi jelas, tepat, dan sopan", "Berteriak-teriak", "Menggunakan bahasa kasar", "Tidak memberi kabar"],
+            correct: 0,
+            exp: "Komunikasi efektif: jelas, tepat waktu, dan profesional."
+        }
+    ],
+    studiKasus: [
+        {
+            q: "Sebuah perusahaan mengalami gangguan internet berulang. Langkah profesional yang harus dilakukan Network Engineer adalah...",
+            a: ["Analisis log, identifikasi akar masalah, lalu implementasi solusi permanen", "Mematikan seluruh jaringan", "Mengabaikan masalah", "Menyalahkan pelanggan"],
+            correct: 0,
+            exp: "Troubleshooting profesional: analisis → identifikasi root cause → solusi permanen."
+        },
+        {
+            q: "Seorang teknisi menemukan kabel fiber optik putus di tiang ketinggian 10 meter. Tindakan K3 yang tepat adalah...",
+            a: ["Gunakan harness, helm, dan ikuti SOP pekerjaan ketinggian", "Naik tanpa alat pengaman", "Minta orang lain yang naik", "Tinggalkan lokasi"],
+            correct: 0,
+            exp: "SOP K3: gunakan APD lengkap dan ikuti prosedur kerja ketinggian."
+        },
+        {
+            q: "Klien mengeluh koneksi lambat. Langkah pertama helpdesk technician adalah...",
+            a: ["Mendengarkan keluhan dan gathering informasi detail", "Langsung mengganti router", "Mematikan layanan", "Menyalahkan klien"],
+            correct: 0,
+            exp: "Helpdesk profesional: dengarkan, kumpulkan informasi, baru tindakan."
+        },
+        {
+            q: "Perusahaan ingin upgrade jaringan ke cloud. Cloud Architect harus...",
+            a: ["Analisis kebutuhan, pilih solusi cloud sesuai budget dan requirement", "Memaksa klien pakai termahal", "Menolak permintaan", "Menggunakan cloud gratis tanpa pertimbangan"],
+            correct: 0,
+            exp: "Cloud Architect menganalisis kebutuhan dan memilih solusi optimal."
+        },
+        {
+            q: "Saat instalasi jaringan di kantor, teknisi menemukan asbes. Sikap yang tepat adalah...",
+            a: ["Hentikan pekerjaan, laporkan ke supervisor, ikuti prosedur B3", "Lanjutkan saja", "Sentuh langsung", "Abaikan"],
+            correct: 0,
+            exp: "Asbes adalah B3 berbahaya, harus ditangani sesuai prosedur K3."
+        },
+        {
+            q: "NOC Engineer mendeteksi serangan DDoS ke server perusahaan. Tindakan yang tepat adalah...",
+            a: ["Aktifkan mitigation system, laporkan ke tim security, dokumentasi", "Matikan internet total", "Abaikan saja", "Hapus semua data"],
+            correct: 0,
+            exp: "Respon insiden: mitigation → eskalasi → dokumentasi."
+        },
+        {
+            q: "Seorang Network Engineer ditawari hadiah oleh vendor untuk memilih produknya. Sikap profesional adalah...",
+            a: ["Menolak dan tetap pilih berdasarkan kebutuhan teknis", "Menerima hadiah dan pilih produk vendor", "Meminta hadiah lebih besar", "Mengundurkan diri"],
+            correct: 0,
+            exp: "Profesionalisme menolak gratifikasi dan memilih berdasarkan objektif teknis."
+        },
+        {
+            q: "Tim proyek jaringan harus menyelesaikan instalasi dalam 3 hari. Strategi yang tepat adalah...",
+            a: ["Planning detail, pembagian tugas, koordinasi tim, monitoring progress", "Bekerja tanpa rencana", "Menunda pekerjaan", "Menyalahkan anggota tim"],
+            correct: 0,
+            exp: "Manajemen proyek: planning, organizing, actuating, controlling."
+        },
+        {
+            q: "Pelanggan marah karena layanan down. Sikap helpdesk yang profesional adalah...",
+            a: ["Tetap tenang, empati, minta maaf, dan beri update solusi", "Ikut marah", "Mengabaikan pelanggan", "Mematikan telepon"],
+            correct: 0,
+            exp: "Service excellence: tetap profesional, empati, dan solutif."
+        },
+        {
+            q: "Seorang teknisi TJKT harus bekerja lembur untuk menyelesaikan proyek. Etos kerja yang ditunjukkan adalah...",
+            a: ["Tanggung jawab dan komitmen menyelesaikan tugas", "Menolak tanpa alasan", "Meninggalkan pekerjaan", "Bekerja asal-asalan"],
+            correct: 0,
+            exp: "Etos kerja tinggi: tanggung jawab dan komitmen pada penyelesaian tugas."
+        }
+    ]
+};
+
+// ============ GAME STATE ============
+const locations = [
+    { id: 'profesi', name: 'Kantor ISP', icon: '💼', category: 'profesi', desc: '10 Soal Profesi' },
+    { id: 'alurKerja', name: 'Data Center', icon: '🔄', category: 'alurKerja', desc: '10 Soal Alur Kerja' },
+    { id: 'industri', name: 'Tower Telekomunikasi', icon: '🚀', category: 'industri', desc: '10 Soal Industri' },
+    { id: 'budayaKerja', name: 'Ruang Training', icon: '🤝', category: 'budayaKerja', desc: '10 Soal Budaya Kerja' },
+    { id: 'studiKasus', name: 'Lab Jaringan', icon: '🎯', category: 'studiKasus', desc: '10 Soal Kasus' }
+];
+
+let gameState = {
+    score: 0,
+    correct: 0,
+    totalAnswered: 0,
+    lives: 3,
+    currentLocation: null,
+    currentQuestionIndex: 0,
+    locationProgress: {},
+    answeredQuestions: [],
+    gameStarted: false
+};
+
+// ============ FUNCTIONS ============
+function startGame() {
+    document.getElementById('startScreen').style.display = 'none';
+    document.getElementById('mapArea').style.display = 'block';
+    document.getElementById('progressSection').style.display = 'block';
+    gameState.gameStarted = true;
+    renderMap();
+    updateStats();
+}
+
+function renderMap() {
+    const grid = document.getElementById('mapGrid');
+    grid.innerHTML = '';
+    locations.forEach(loc => {
+        const progress = gameState.locationProgress[loc.id] || { answered: 0, total: allQuestions[loc.category].length };
+        const completed = progress.answered >= progress.total;
+        const div = document.createElement('div');
+        div.className = 'location' + (completed ? ' completed' : '');
+        div.innerHTML = `
+            <div class="location-icon">${loc.icon}</div>
+            <div class="location-name">${loc.name}</div>
+            <div class="location-info">${loc.desc}</div>
+            <div class="location-info">${progress.answered}/${progress.total} soal</div>
+            ${completed ? '<div class="location-badge">✓ SELESAI</div>' : ''}
+        `;
+        div.onclick = () => openLocation(loc);
+        grid.appendChild(div);
+    });
+}
+
+function openLocation(loc) {
+    const progress = gameState.locationProgress[loc.id] || { answered: 0, total: allQuestions[loc.category].length };
+    if (progress.answered >= progress.total) {
+        alert('✅ Lokasi ini sudah selesai! Semua soal telah dijawab.');
+        return;
+    }
+    if (gameState.lives <= 0) {
+        alert('💀 Nyawa habis! Game Over.');
+        endGame();
+        return;
+    }
+    gameState.currentLocation = loc;
+    gameState.currentQuestionIndex = progress.answered;
+    showQuestion();
+}
+
+function showQuestion() {
+    const loc = gameState.currentLocation;
+    const questions = allQuestions[loc.category];
+    if (gameState.currentQuestionIndex >= questions.length) {
+        closeModal();
+        return;
+    }
+    const q = questions[gameState.currentQuestionIndex];
+    document.getElementById('modalTitle').innerHTML = `${loc.icon} ${loc.name}`;
+    document.getElementById('qNumber').textContent = `Soal ${gameState.totalAnswered + 1} / 50 (${loc.desc.split(' ')[0]} ke-${gameState.currentQuestionIndex + 1})`;
+    document.getElementById('qText').textContent = q.q;
+    
+    const container = document.getElementById('answersContainer');
+    container.innerHTML = '';
+    q.a.forEach((ans, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'answer-btn';
+        btn.textContent = String.fromCharCode(65 + i) + '. ' + ans;
+        btn.onclick = () => selectAnswer(i);
+        container.appendChild(btn);
+    });
+    
+    document.getElementById('feedback').className = 'feedback';
+    document.getElementById('feedback').innerHTML = '';
+    document.getElementById('nextBtn').className = 'next-btn';
+    document.getElementById('quizModal').classList.add('active');
+}
+
+function selectAnswer(idx) {
+    const loc = gameState.currentLocation;
+    const q = allQuestions[loc.category][gameState.currentQuestionIndex];
+    const buttons = document.querySelectorAll('.answer-btn');
+    buttons.forEach(b => b.disabled = true);
+    
+    const feedback = document.getElementById('feedback');
+    const isCorrect = idx === q.correct;
+    
+    if (isCorrect) {
+        buttons[idx].classList.add('correct');
+        gameState.score += 100;
+        gameState.correct++;
+        feedback.className = 'feedback correct show';
+        feedback.innerHTML = `<strong>✅ BENAR! +100 poin</strong><br>${q.exp}`;
+    } else {
+        buttons[idx].classList.add('wrong');
+        buttons[q.correct].classList.add('correct');
+        gameState.lives--;
+        feedback.className = 'feedback wrong show';
+        feedback.innerHTML = `<strong>❌ KURANG TEPAT</strong><br>Jawaban benar: <strong>${String.fromCharCode(65 + q.correct)}. ${q.a[q.correct]}</strong><br>${q.exp}`;
+    }
+    
+    gameState.totalAnswered++;
+    gameState.answeredQuestions.push({
+        location: loc.name,
+        question: q.q,
+        userAnswer: q.a[idx],
+        correctAnswer: q.a[q.correct],
+        isCorrect: isCorrect
+    });
+    
+    // Update location progress
+    if (!gameState.locationProgress[loc.id]) {
+        gameState.locationProgress[loc.id] = { answered: 0, total: allQuestions[loc.category].length };
+    }
+    gameState.locationProgress[loc.id].answered++;
+    gameState.currentQuestionIndex++;
+    
+    document.getElementById('nextBtn').className = 'next-btn show';
+    updateStats();
+    
+    if (gameState.lives <= 0) {
+        document.getElementById('nextBtn').textContent = '🏁 Lihat Hasil Akhir';
+    }
+}
+
+function nextQuestion() {
+    if (gameState.lives <= 0) {
+        closeModal();
+        endGame();
+        return;
+    }
+    const loc = gameState.currentLocation;
+    const questions = allQuestions[loc.category];
+    if (gameState.currentQuestionIndex >= questions.length) {
+        closeModal();
+        renderMap();
+        checkAllComplete();
+    } else {
+        showQuestion();
+    }
+}
+
+function closeModal() {
+    document.getElementById('quizModal').classList.remove('active');
+}
+
+function updateStats() {
+    document.getElementById('progressText').textContent = `${gameState.totalAnswered}/50`;
+    document.getElementById('correctText').textContent = gameState.correct;
+    document.getElementById('scoreText').textContent = gameState.score;
+    document.getElementById('livesText').textContent = '❤️'.repeat(gameState.lives) || '💀';
+    const percent = Math.round((gameState.totalAnswered / 50) * 100);
+    document.getElementById('progressPercent').textContent = percent + '%';
+    document.getElementById('progressFill').style.width = percent + '%';
+    document.getElementById('progressFill').textContent = percent + '%';
+}
+
+function checkAllComplete() {
+    let total = 0;
+    locations.forEach(loc => {
+        const p = gameState.locationProgress[loc.id];
+        if (p) total += p.answered;
+    });
+    if (total >= 50) {
+        endGame();
+    }
+}
+
+function endGame() {
+    document.getElementById('mapArea').style.display = 'none';
+    document.getElementById('progressSection').style.display = 'none';
+    const endScreen = document.getElementById('endScreen');
+    endScreen.style.display = 'block';
+    
+    const percent = Math.round((gameState.correct / 50) * 100);
+    let grade = 'E', gradeClass = 'E', message = '';
+    if (percent >= 90) { grade = 'A'; gradeClass = 'A'; message = '🏆 LUAR BIASA! Kamu Network Master!'; }
+    else if (percent >= 80) { grade = 'B'; gradeClass = 'B'; message = '🌟 HEBAT! Kamu calon profesional TJKT!'; }
+    else if (percent >= 70) { grade = 'C'; gradeClass = 'C'; message = '👍 BAGUS! Terus tingkatkan!'; }
+    else if (percent >= 60) { grade = 'D'; gradeClass = 'D'; message = '💪 LUMAYAN! Perlu belajar lagi.'; }
+    else { grade = 'E'; gradeClass = 'E'; message = '📚 AYO BELAJAR LAGI!'; }
+    
+    endScreen.innerHTML = `
+        <h1>🏁 PETUALANGAN SELESAI! 🏁</h1>
+        <div class="grade ${gradeClass}">${grade}</div>
+        <h2 style="color:#FFD700; margin-bottom:20px;">${message}</h2>
+        <div class="final-stats">
+            <div class="final-stat">
+                <div class="num">${gameState.correct}</div>
+                <div class="label">Jawaban Benar</div>
+            </div>
+            <div class="final-stat">
+                <div class="num">${50 - gameState.correct}</div>
+                <div class="label">Jawaban Salah</div>
+            </div>
+            <div class="final-stat">
+                <div class="num">${percent}%</div>
+                <div class="label">Nilai Akhir</div>
+            </div>
+            <div class="final-stat">
+                <div class="num">${gameState.score}</div>
+                <div class="label">Total Skor</div>
+            </div>
+        </div>
+        <button class="review-btn" onclick="showReview()">📋 Review Semua Jawaban</button>
+        <button class="review-btn" onclick="restartGame()">🔄 Main Lagi</button>
+    `;
+}
+
+function showReview() {
+    const endScreen = document.getElementById('endScreen');
+    let reviewHTML = '<h1>📋 REVIEW JAWABAN</h1><div class="review-list">';
+    gameState.answeredQuestions.forEach((item, i) => {
+        reviewHTML += `
+            <div class="review-item ${item.isCorrect ? 'correct' : 'wrong'}">
+                <div class="review-q">${i+1}. ${item.question}</div>
+                <div class="review-a">
+                    <span>📍 Lokasi: <strong>${item.location}</strong></span>
+                    <span>👤 Jawabanmu: <strong>${item.userAnswer}</strong> ${item.isCorrect ? '✅' : '❌'}</span>
+                    ${!item.isCorrect ? `<span>✅ Jawaban benar: <strong>${item.correctAnswer}</strong></span>` : ''}
+                </div>
+            </div>
+        `;
+    });
+    reviewHTML += '</div><button class="review-btn" onclick="backToEnd()">🔙 Kembali</button>';
+    endScreen.innerHTML = reviewHTML;
+}
+
+function backToEnd() {
+    endGame();
+}
+
+function restartGame() {
+    gameState = {
+        score: 0, correct: 0, totalAnswered: 0, lives: 3,
+        currentLocation: null, currentQuestionIndex: 0,
+        locationProgress: {}, answeredQuestions: [], gameStarted: false
+    };
+    document.getElementById('endScreen').style.display = 'none';
+    document.getElementById('startScreen').style.display = 'block';
+}
+</script>
+</body>
+</html>
