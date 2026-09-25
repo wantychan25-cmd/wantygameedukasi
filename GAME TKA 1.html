@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game TKA TKJ Kelas XII</title>
+    <style>
+        :root {
+            --primary: #00ffcc;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --correct: #10b981;
+            --wrong: #ef4444;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background-color: var(--bg-card);
+            width: 100%;
+            max-width: 800px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            color: var(--primary);
+            margin: 0;
+            font-size: 1.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            margin: 5px 0 0;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 10px;
+            background-color: #334155;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), #0099ff);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: var(--text-muted);
+        }
+
+        .stats span {
+            color: var(--primary);
+        }
+
+        .question-box {
+            background-color: #0f172a;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+
+        .options-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-btn {
+            background-color: #334155;
+            border: 2px solid transparent;
+            color: var(--text-main);
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background-color: #475569;
+            border-color: var(--primary);
+            transform: translateX(5px);
+        }
+
+        .option-btn:disabled {
+            cursor: not-allowed;
+        }
+
+        .option-btn.correct {
+            background-color: rgba(16, 185, 129, 0.2);
+            border-color: var(--correct);
+            color: var(--correct);
+        }
+
+        .option-btn.wrong {
+            background-color: rgba(239, 68, 68, 0.2);
+            border-color: var(--wrong);
+            color: var(--wrong);
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, var(--primary), #0099ff);
+            color: var(--bg-dark);
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: transform 0.2s;
+            display: none;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.02);
+        }
+
+        .result-screen {
+            text-align: center;
+            display: none;
+        }
+
+        .result-screen h2 {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .score-display {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .result-message {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Start Screen -->
+    <div id="start-screen" class="header">
+        <h1>Game TKA TKJ</h1>
+        <p>Uji Kompetensi Akademik Kelas XII SMK TKJ</p>
+        <p style="margin-top: 20px; color: #cbd5e1;">Total 50 Soal Pilihan Ganda (A-E)</p>
+        <p style="color: #94a3b8; font-size: 0.9rem;">Mencakup: Jaringan, Mikrotik, Server, Fiber Optik, & Keamanan</p>
+        <button class="btn-primary" style="display: block;" onclick="startGame()">MULAI UJIAN</button>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="game-screen" class="hidden">
+        <div class="stats">
+            <div>Soal: <span id="current-q">1</span> / 50</div>
+            <div>Skor: <span id="score">0</span></div>
+        </div>
+        <div class="progress-bar-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        
+        <div class="question-box">
+            <p class="question-text" id="question-text">Loading...</p>
+        </div>
+        
+        <div class="options-grid" id="options-grid">
+            <!-- Options will be injected here -->
+        </div>
+
+        <button class="btn-primary" id="next-btn" onclick="nextQuestion()">Soal Berikutnya &rarr;</button>
+    </div>
+
+    <!-- Result Screen -->
+    <div id="result-screen" class="result-screen">
+        <h2>Ujian Selesai!</h2>
+        <div class="score-display" id="final-score">0 / 50</div>
+        <p class="result-message" id="result-message">Pesan hasil</p>
+        <button class="btn-primary" style="display: block;" onclick="restartGame()">Ulangi Ujian</button>
+    </div>
+</div>
+
+<script>
+    // Database 50 Soal TKA TKJ Kelas XII
+    const questions = [
+        {q: "Layer OSI yang bertanggung jawab atas routing dan pengalamatan logis (IP Address) adalah...", o: ["Data Link", "Transport", "Network", "Session", "Application"], a: 2},
+        {q: "Protokol yang digunakan untuk menerjemahkan nama domain (seperti google.com) menjadi IP Address adalah...", o: ["DNS", "DHCP", "WINS", "ARP", "RARP"], a: 0},
+        {q: "Perintah dasar di Windows dan Linux untuk menguji konektivitas jaringan ke sebuah host adalah...", o: ["tracert", "ping", "ipconfig", "netstat", "nslookup"], a: 1},
+        {q: "Subnet mask default untuk CIDR /24 adalah...", o: ["255.0.0.0", "255.255.0.0", "255.255.255.0", "255.255.255.128", "255.255.255.252"], a: 2},
+        {q: "Panjang maksimum kabel UTP (Unshielded Twisted Pair) untuk jaringan Ethernet adalah...", o: ["50 meter", "100 meter", "185 meter", "500 meter", "1000 meter"], a: 1},
+        {q: "Fitur di MikroTik yang digunakan untuk membatasi bandwidth (QoS) secara sederhana adalah...", o: ["Hotspot", "PPP", "Simple Queue", "NAT", "DHCP"], a: 2},
+        {q: "Port default untuk protokol HTTP (Web Server) adalah...", o: ["21", "22", "80", "443", "8080"], a: 2},
+        {q: "Port default untuk protokol HTTPS (Secure Web) adalah...", o: ["80", "443", "8443", "25", "110"], a: 1},
+        {q: "Alat yang digunakan untuk menyambung core kabel Fiber Optik disebut...", o: ["Crimping Tool", "Punch Down Tool", "Fusion Splicer", "OTDR", "Cable Tester"], a: 2},
+        {q: "Standar Wi-Fi 802.11ac dan 802.11ax beroperasi pada frekuensi...", o: ["2.4 GHz saja", "5 GHz", "900 MHz", "60 GHz", "3.5 GHz"], a: 1},
+        {q: "Protokol routing dinamis yang bersifat Open Standard dan menggunakan konsep Area adalah...", o: ["RIP", "IGRP", "OSPF", "EIGRP", "BGP"], a: 2},
+        {q: "Tipe NAT di MikroTik yang menyembunyikan banyak IP Private ke dalam satu IP Public disebut...", o: ["DstNAT", "SrcNAT / Masquerade", "Port Forwarding", "Netmap", "Redirect"], a: 1},
+        {q: "Perintah di Linux untuk menampilkan konfigurasi IP Address adalah...", o: ["ip route", "ip addr", "route -n", "netstat -r", "traceroute"], a: 1},
+        {q: "Topologi jaringan di mana setiap node terhubung langsung ke perangkat pusat (Hub/Switch) adalah...", o: ["Bus", "Ring", "Star", "Mesh", "Tree"], a: 2},
+        {q: "Protokol yang bertugas memberikan alamat IP secara otomatis kepada client adalah...", o: ["DNS", "FTP", "SMTP", "DHCP", "SNMP"], a: 3},
+        {q: "Layer pada model OSI yang menangani format data seperti enkripsi, kompresi, dan konversi (JPEG, ASCII) adalah...", o: ["Application", "Presentation", "Session", "Transport", "Network"], a: 1},
+        {q: "Konektor yang umum digunakan pada ujung kabel UTP adalah...", o: ["RJ11", "RJ45", "BNC", "ST", "SC"], a: 1},
+        {q: "Alat untuk mengukur tingkat redaman (loss) dan mendeteksi titik putus pada kabel Fiber Optik adalah...", o: ["Power Meter", "VFL", "OTDR", "Splicer", "Cleaver"], a: 2},
+        {q: "Standar keamanan jaringan nirkabel (Wi-Fi) yang paling aman dan terbaru saat ini adalah...", o: ["WEP", "WPA", "WPA2", "WPA3", "MAC Filtering"], a: 3},
+        {q: "Perintah di Windows untuk melihat rute yang dilalui paket menuju ke host tujuan adalah...", o: ["ping", "ipconfig", "tracert", "netstat", "arp"], a: 2},
+        {q: "Fungsi utama dari VLAN (Virtual LAN) adalah...", o: ["Mempercepat kecepatan transfer", "Membagi broadcast domain dalam satu switch", "Mengenkripsi data", "Mengganti IP Address", "Memblokir virus"], a: 1},
+        {q: "Protokol yang digunakan untuk transfer file antara client dan server adalah...", o: ["HTTP", "SMTP", "FTP", "SNMP", "Telnet"], a: 2},
+        {q: "IP Address Kelas C memiliki jangkauan host per network sebanyak...", o: ["254", "256", "126", "65534", "16 juta"], a: 0},
+        {q: "Perangkat jaringan yang bekerja pada Layer 3 (Network Layer) untuk menghubungkan jaringan berbeda adalah...", o: ["Hub", "Switch", "Repeater", "Router", "Bridge"], a: 3},
+        {q: "Urutan warna kabel UTP standar T568B pada pin 1 dan 2 adalah...", o: ["Putih Orange - Orange", "Putih Hijau - Hijau", "Putih Coklat - Coklat", "Putih Biru - Biru", "Orange - Putih Orange"], a: 0},
+        {q: "Fitur MikroTik yang digunakan untuk membuat halaman login (captive portal) bagi pengguna Wi-Fi adalah...", o: ["PPP", "Hotspot", "Queue", "Firewall", "BGP"], a: 1},
+        {q: "Protokol yang digunakan untuk menerima email dari server ke client adalah...", o: ["SMTP", "POP3 / IMAP", "FTP", "HTTP", "SNMP"], a: 1},
+        {q: "Protokol yang digunakan untuk mengirim email dari client ke server adalah...", o: ["SMTP", "POP3", "IMAP", "DNS", "DHCP"], a: 0},
+        {q: "Record DNS yang digunakan untuk menunjuk Mail Server adalah...", o: ["A", "CNAME", "MX", "NS", "TXT"], a: 2},
+        {q: "Record DNS yang digunakan untuk membuat alias (nama lain) dari sebuah domain adalah...", o: ["A", "AAAA", "CNAME", "MX", "PTR"], a: 2},
+        {q: "Konsep virtualisasi di mana hypervisor berjalan langsung di atas hardware (bare-metal) disebut...", o: ["Type 1 Hypervisor", "Type 2 Hypervisor", "Container", "Emulator", "OS-level virtualization"], a: 0},
+        {q: "Layanan Cloud di mana penyedia menyewakan infrastruktur seperti server, storage, dan jaringan disebut...", o: ["SaaS", "PaaS", "IaaS", "DaaS", "XaaS"], a: 2},
+        {q: "Layanan Cloud di mana penyedia menyewakan platform untuk developer membuat aplikasi (seperti Google App Engine) disebut...", o: ["SaaS", "PaaS", "IaaS", "DBaaS", "FaaS"], a: 1},
+        {q: "Protokol yang digunakan untuk remote desktop secara grafis di Windows adalah...", o: ["SSH", "Telnet", "RDP", "VNC", "FTP"], a: 2},
+        {q: "Protokol yang digunakan untuk remote command line interface (CLI) di Linux secara aman (terenkripsi) adalah...", o: ["Telnet", "RDP", "SSH", "FTP", "SMTP"], a: 2},
+        {q: "Port default untuk layanan SSH adalah...", o: ["21", "22", "23", "25", "80"], a: 1},
+        {q: "Port default untuk layanan RDP (Remote Desktop Protocol) adalah...", o: ["3306", "3389", "8080", "1433", "5432"], a: 1},
+        {q: "Port default untuk layanan FTP (File Transfer Protocol) adalah...", o: ["20 dan 21", "22", "23", "25", "80"], a: 0},
+        {q: "Port default untuk layanan Telnet adalah...", o: ["21", "22", "23", "25", "110"], a: 2},
+        {q: "Port default untuk layanan DNS adalah...", o: ["21", "23", "53", "80", "443"], a: 2},
+        {q: "Port default untuk layanan SMTP adalah...", o: ["21", "25", "53", "80", "110"], a: 1},
+        {q: "Port default untuk layanan POP3 adalah...", o: ["25", "53", "110", "143", "443"], a: 2},
+        {q: "Port default untuk layanan IMAP adalah...", o: ["25", "53", "110", "143", "443"], a: 3},
+        {q: "Port default untuk layanan SNMP adalah...", o: ["53", "69", "123", "161", "443"], a: 3},
+        {q: "Port yang digunakan oleh DHCP Server untuk menerima request (dari client) adalah...", o: ["67", "68", "69", "123", "161"], a: 0},
+        {q: "Port yang digunakan oleh TFTP (Trivial FTP) adalah...", o: ["21", "22", "69", "80", "161"], a: 2},
+        {q: "Port yang digunakan oleh NTP (Network Time Protocol) adalah...", o: ["53", "69", "123", "161", "443"], a: 2},
+        {q: "Teknologi yang memungkinkan beberapa instance OS berjalan di atas satu OS host (seperti VirtualBox/VMware) disebut...", o: ["Type 1 Hypervisor", "Type 2 Hypervisor", "Bare Metal", "Cloud Computing", "Containerization"], a: 1},
+        {q: "Alat untuk membersihkan ujung kabel Fiber Optik sebelum di-splicing adalah...", o: ["Cleaver", "Stripper", "Alkohol & Tissue / Wipe", "VFL", "ODP"], a: 2},
+        {q: "Dalam konfigurasi Firewall MikroTik, aturan yang diproses dari atas ke bawah dan berhenti saat ada yang match disebut...", o: ["Chain", "Rule", "Action", "Order / Sequence", "NAT"], a: 3}
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+
+    const startScreen = document.getElementById('start-screen');
+    const gameScreen = document.getElementById('game-screen');
+    const resultScreen = document.getElementById('result-screen');
+    const questionText = document.getElementById('question-text');
+    const optionsGrid = document.getElementById('options-grid');
+    const nextBtn = document.getElementById('next-btn');
+    const currentQEl = document.getElementById('current-q');
+    const scoreEl = document.getElementById('score');
+    const progressBar = document.getElementById('progress-bar');
+
+    function startGame() {
+        startScreen.classList.add('hidden');
+        gameScreen.classList.remove('hidden');
+        currentQuestionIndex = 0;
+        score = 0;
+        scoreEl.innerText = score;
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        nextBtn.style.display = 'none';
+        const currentQ = questions[currentQuestionIndex];
+        questionText.innerText = `${currentQuestionIndex + 1}. ${currentQ.q}`;
+        currentQEl.innerText = currentQuestionIndex + 1;
+        
+        // Update progress bar
+        const progress = ((currentQuestionIndex) / questions.length) * 100;
+        progressBar.style.width = progress + '%';
+
+        optionsGrid.innerHTML = '';
+        const letters = ['A', 'B', 'C', 'D', 'E'];
+        
+        currentQ.o.forEach((option, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = `${letters[index]}. ${option}`;
+            btn.onclick = () => selectOption(index, btn);
+            optionsGrid.appendChild(btn);
+        });
+    }
+
+    function selectOption(selectedIndex, selectedBtn) {
+        const currentQ = questions[currentQuestionIndex];
+        const allBtns = document.querySelectorAll('.option-btn');
+        
+        // Disable all buttons
+        allBtns.forEach(btn => btn.disabled = true);
+
+        // Check answer
+        if (selectedIndex === currentQ.a) {
+            selectedBtn.classList.add('correct');
+            score++;
+            scoreEl.innerText = score;
+        } else {
+            selectedBtn.classList.add('wrong');
+            // Highlight correct answer
+            allBtns[currentQ.a].classList.add('correct');
+        }
+
+        // Show next button
+        nextBtn.style.display = 'block';
+        if (currentQuestionIndex === questions.length - 1) {
+            nextBtn.innerText = "Lihat Hasil Akhir";
+        } else {
+            nextBtn.innerText = "Soal Berikutnya →";
+        }
+    }
+
+    function nextQuestion() {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < questions.length) {
+            loadQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        gameScreen.classList.add('hidden');
+        resultScreen.style.display = 'block';
+        
+        const finalScoreEl = document.getElementById('final-score');
+        const resultMsgEl = document.getElementById('result-message');
+        
+        finalScoreEl.innerText = `${score} / 50`;
+        
+        const percentage = (score / 50) * 100;
+        let message = "";
+        let color = "";
+
+        if (percentage >= 85) {
+            message = "Luar Biasa! Anda sangat menguasai materi TKJ. Siap menghadapi UKK dan Dunia Kerja!";
+            color = "#10b981";
+        } else if (percentage >= 70) {
+            message = "Bagus! Pemahaman Anda sudah baik, pertahankan dan perdalam lagi.";
+            color = "#3b82f6";
+        } else if (percentage >= 50) {
+            message = "Cukup. Masih ada beberapa materi yang perlu dipelajari ulang.";
+            color = "#f59e0b";
+        } else {
+            message = "Perlu Belajar Lagi. Jangan menyerah, pelajari kembali materi dasar jaringan dan server!";
+            color = "#ef4444";
+        }
+
+        resultMsgEl.innerText = message;
+        resultMsgEl.style.color = color;
+        finalScoreEl.style.color = color;
+    }
+
+    function restartGame() {
+        resultScreen.style.display = 'none';
+        startScreen.classList.remove('hidden');
+    }
+</script>
+
+</body>
+</html>
