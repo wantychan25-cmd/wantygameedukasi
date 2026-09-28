@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz TKA - Kelas XII TKJ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 30px 0;
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .header h1 {
+            font-size: 2.2em;
+            background: linear-gradient(45deg, #00d2ff, #3a7bd5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #aaa;
+            font-size: 1.1em;
+        }
+
+        .start-screen {
+            text-align: center;
+            padding: 50px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .start-screen h2 {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            color: #00d2ff;
+        }
+
+        .start-screen p {
+            margin-bottom: 15px;
+            color: #ccc;
+            line-height: 1.8;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-start {
+            background: linear-gradient(45deg, #00d2ff, #3a7bd5);
+            color: #fff;
+            margin-top: 20px;
+            box-shadow: 0 5px 20px rgba(0, 210, 255, 0.3);
+        }
+
+        .btn-start:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(0, 210, 255, 0.5);
+        }
+
+        .btn-next {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: #fff;
+            margin-top: 20px;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-next:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-submit {
+            background: linear-gradient(45deg, #f093fb, #f5576c);
+            color: #fff;
+            margin-top: 20px;
+            box-shadow: 0 5px 20px rgba(245, 87, 108, 0.3);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(245, 87, 108, 0.5);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #00d2ff, #3a7bd5);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .question-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            padding: 35px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .question-number {
+            color: #00d2ff;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .question-text {
+            font-size: 1.2em;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            color: #eee;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            padding: 15px 20px;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .option:hover {
+            background: rgba(0, 210, 255, 0.1);
+            border-color: rgba(0, 210, 255, 0.3);
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            background: rgba(0, 210, 255, 0.15);
+            border-color: #00d2ff;
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.2);
+        }
+
+        .option-letter {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .option.selected .option-letter {
+            background: #00d2ff;
+            color: #1a1a2e;
+        }
+
+        .option-text {
+            font-size: 1em;
+            line-height: 1.4;
+        }
+
+        .info-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .info-bar span {
+            color: #aaa;
+            font-size: 0.95em;
+        }
+
+        .info-bar .current-q {
+            color: #00d2ff;
+            font-weight: bold;
+        }
+
+        .result-screen {
+            text-align: center;
+            padding: 50px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            animation: fadeIn 0.5s ease;
+        }
+
+        .result-screen h2 {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: #00d2ff;
+        }
+
+        .score-display {
+            font-size: 4em;
+            font-weight: bold;
+            background: linear-gradient(45deg, #00d2ff, #3a7bd5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 20px 0;
+        }
+
+        .score-detail {
+            color: #aaa;
+            font-size: 1.1em;
+            margin-bottom: 30px;
+            line-height: 1.8;
+        }
+
+        .essay-section {
+            margin-top: 30px;
+        }
+
+        .essay-question {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .essay-question h3 {
+            color: #f093fb;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .essay-question textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+            font-size: 1em;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+
+        .essay-question textarea:focus {
+            outline: none;
+            border-color: #f093fb;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            gap: 10px;
+        }
+
+        .btn-nav {
+            padding: 12px 25px;
+            font-size: 0.95em;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .btn-prev {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .btn-prev:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .btn-next-q {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: #fff;
+        }
+
+        .btn-next-q:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .timer {
+            color: #f5576c;
+            font-weight: bold;
+        }
+
+        .review-section {
+            text-align: left;
+            margin-top: 30px;
+        }
+
+        .review-item {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid;
+        }
+
+        .review-item.correct {
+            border-left-color: #00e676;
+        }
+
+        .review-item.wrong {
+            border-left-color: #f5576c;
+        }
+
+        .review-item .q-text {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #eee;
+        }
+
+        .review-item .answer-info {
+            color: #aaa;
+            font-size: 0.9em;
+            line-height: 1.6;
+        }
+
+        .review-item .answer-info span {
+            color: #00e676;
+            font-weight: bold;
+        }
+
+        .review-item .answer-info .wrong-ans {
+            color: #f5576c;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .question-card {
+                padding: 20px;
+            }
+
+            .question-text {
+                font-size: 1em;
+            }
+
+            .nav-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎮 Quiz TKA - Kelas XII TKJ</h1>
+            <p>Tes Kompetensi Akademik | Teknik Komputer & Jaringan</p>
+        </div>
+
+        <!-- Start Screen -->
+        <div id="startScreen" class="start-screen">
+            <h2>📋 Selamat Datang!</h2>
+            <p>Quiz ini terdiri dari:</p>
+            <p>✅ <strong>50 Soal Pilihan Ganda</strong> (masing-masing bernilai 1 poin)</p>
+            <p>✅ <strong>5 Soal Esai</strong> (masing-masing bernilai 10 poin)</p>
+            <p>⏱️ Waktu: <strong>90 Menit</strong></p>
+            <p>📊 Total Skor Maksimal: <strong>100 Poin</strong></p>
+            <p style="margin-top: 20px; color: #f093fb;">💡 Jawaban pilihan ganda akan diacak urutannya!</p>
+            <button class="btn btn-start" onclick="startQuiz()">🚀 Mulai Quiz</button>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quizScreen" class="hidden">
+            <div class="info-bar">
+                <span>Soal: <span class="current-q" id="currentQ">1/50</span></span>
+                <span class="timer" id="timer">⏱️ 90:00</span>
+                <span>Terjawab: <span id="answered">0</span>/50</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 2%"></div>
+            </div>
+            <div id="questionContainer"></div>
+            <div class="nav-buttons">
+                <button class="btn-nav btn-prev" id="btnPrev" onclick="prevQuestion()">← Sebelumnya</button>
+                <button class="btn-nav btn-next-q" id="btnNext" onclick="nextQuestion()">Selanjutnya →</button>
+            </div>
+        </div>
+
+        <!-- Essay Screen -->
+        <div id="essayScreen" class="hidden">
+            <div class="info-bar">
+                <span>📝 Bagian Esai</span>
+                <span class="timer" id="timerEssay">⏱️ 90:00</span>
+                <span>5 Soal Esai</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFillEssay" style="width: 0%"></div>
+            </div>
+            <div class="essay-section" id="essayContainer"></div>
+            <div style="text-align: center;">
+                <button class="btn btn-submit" onclick="submitQuiz()">📤 Kumpulkan Jawaban</button>
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div id="resultScreen" class="hidden">
+            <div class="result-screen">
+                <h2>📊 Hasil Quiz</h2>
+                <div class="score-display" id="finalScore">0</div>
+                <div class="score-detail" id="scoreDetail"></div>
+                <div class="review-section" id="reviewSection"></div>
+                <button class="btn btn-start" onclick="location.reload()" style="margin-top: 30px;">🔄 Ulangi Quiz</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data Soal Pilihan Ganda (50 Soal)
+        const questions = [
+            {
+                question: "Protokol yang digunakan untuk mengirim email adalah...",
+                options: ["SMTP", "POP3", "IMAP", "HTTP", "FTP"],
+                answer: "SMTP"
+            },
+            {
+                question: "Alamat IP versi 4 terdiri dari berapa bit?",
+                options: ["32 bit", "64 bit", "128 bit", "16 bit", "48 bit"],
+                answer: "32 bit"
+            },
+            {
+                question: "Subnet mask default untuk kelas B adalah...",
+                options: ["255.255.0.0", "255.0.0.0", "255.255.255.0", "255.255.255.255", "255.255.255.128"],
+                answer: "255.255.0.0"
+            },
+            {
+                question: "Perintah untuk memeriksa konektivitas jaringan adalah...",
+                options: ["ping", "tracert", "ipconfig", "netstat", "nslookup"],
+                answer: "ping"
+            },
+            {
+                question: "Topologi jaringan yang menggunakan hub/switch sebagai pusat koneksi adalah...",
+                options: ["Star", "Bus", "Ring", "Mesh", "Tree"],
+                answer: "Star"
+            },
+            {
+                question: "Kabel yang digunakan untuk menghubungkan dua komputer secara langsung tanpa switch adalah...",
+                options: ["Crossover", "Straight-through", "Fiber optic", "Coaxial", "Roll-over"],
+                answer: "Crossover"
+            },
+            {
+                question: "Port default untuk protokol HTTP adalah...",
+                options: ["80", "443", "21", "25", "110"],
+                answer: "80"
+            },
+            {
+                question: "Layer yang bertanggung jawab untuk routing dalam model OSI adalah...",
+                options: ["Network Layer", "Transport Layer", "Data Link Layer", "Session Layer", "Application Layer"],
+                answer: "Network Layer"
+            },
+            {
+                question: "DNS berfungsi untuk...",
+                options: ["Menerjemahkan nama domain ke IP address", "Mengirim email", "Mengamankan jaringan", "Mengatur bandwidth", "Memblokir virus"],
+                answer: "Menerjemahkan nama domain ke IP address"
+            },
+            {
+                question: "VLAN digunakan untuk...",
+                options: ["Membagi jaringan LAN secara logis", "Menambah bandwidth", "Menghubungkan antar gedung", "Mengamankan dari virus", "Mempercepat internet"],
+                answer: "Membagi jaringan LAN secara logis"
+            },
+            {
+                question: "Protokol yang digunakan untuk transfer file adalah...",
+                options: ["FTP", "SMTP", "SNMP", "DHCP", "DNS"],
+                answer: "FTP"
+            },
+            {
+                question: "IP address 192.168.1.1 termasuk kelas...",
+                options: ["C", "A", "B", "D", "E"],
+                answer: "C"
+            },
+            {
+                question: "Perintah untuk menampilkan konfigurasi IP di Windows adalah...",
+                options: ["ipconfig", "ifconfig", "netstat", "ping", "tracert"],
+                answer: "ipconfig"
+            },
+            {
+                question: "Mikrotik RouterOS adalah sistem operasi untuk...",
+                options: ["Router", "Switch", "Hub", "Repeater", "Modem"],
+                answer: "Router"
+            },
+            {
+                question: "NAT (Network Address Translation) berfungsi untuk...",
+                options: ["Menerjemahkan IP privat ke IP publik", "Mengenkripsi data", "Memfilter paket", "Mengatur bandwidth", "Membagi subnet"],
+                answer: "Menerjemahkan IP privat ke IP publik"
+            },
+            {
+                question: "Jumlah host maksimum pada subnet /24 adalah...",
+                options: ["254", "256", "255", "128", "512"],
+                answer: "254"
+            },
+            {
+                question: "Protokol yang digunakan untuk mendapatkan IP address secara otomatis adalah...",
+                options: ["DHCP", "DNS", "ARP", "RARP", "ICMP"],
+                answer: "DHCP"
+            },
+            {
+                question: "Firewall berfungsi untuk...",
+                options: ["Mengamankan jaringan dari akses tidak sah", "Mempercepat koneksi", "Menghubungkan jaringan", "Menyimpan data", "Menerjemahkan domain"],
+                answer: "Mengamankan jaringan dari akses tidak sah"
+            },
+            {
+                question: "OSI Layer ke-4 adalah...",
+                options: ["Transport", "Network", "Session", "Presentation", "Data Link"],
+                answer: "Transport"
+            },
+            {
+                question: "Konektor yang digunakan pada kabel UTP adalah...",
+                options: ["RJ-45", "RJ-11", "BNC", "Fiber", "SC"],
+                answer: "RJ-45"
+            },
+            {
+                question: "Protokol HTTPS menggunakan port...",
+                options: ["443", "80", "8080", "21", "25"],
+                answer: "443"
+            },
+            {
+                question: "Bandwidth 1 Gbps sama dengan...",
+                options: ["1000 Mbps", "100 Mbps", "10000 Mbps", "10 Mbps", "500 Mbps"],
+                answer: "1000 Mbps"
+            },
+            {
+                question: "MAC address terdiri dari berapa bit?",
+                options: ["48 bit", "32 bit", "64 bit", "128 bit", "16 bit"],
+                answer: "48 bit"
+            },
+            {
+                question: "Routing statis adalah...",
+                options: ["Routing yang dikonfigurasi secara manual", "Routing otomatis oleh protokol", "Routing tanpa tabel", "Routing dinamis", "Routing broadcast"],
+                answer: "Routing yang dikonfigurasi secara manual"
+            },
+            {
+                question: "Perintah 'tracert' digunakan untuk...",
+                options: ["Melacak rute paket ke tujuan", "Mengirim paket", "Menghapus cache DNS", "Menampilkan routing table", "Mematikan interface"],
+                answer: "Melacak rute paket ke tujuan"
+            },
+            {
+                question: "Switch bekerja pada layer berapa dalam model OSI?",
+                options: ["Data Link (Layer 2)", "Network (Layer 3)", "Transport (Layer 4)", "Physical (Layer 1)", "Application (Layer 7)"],
+                answer: "Data Link (Layer 2)"
+            },
+            {
+                question: "IP address 10.0.0.1 termasuk jenis...",
+                options: ["Private", "Public", "Multicast", "Broadcast", "Loopback"],
+                answer: "Private"
+            },
+            {
+                question: "Protokol OSPF termasuk jenis routing...",
+                options: ["Dynamic", "Static", "Default", "Manual", "Passive"],
+                answer: "Dynamic"
+            },
+            {
+                question: "Kabel fiber optic menggunakan media transmisi...",
+                options: ["Cahaya", "Listrik", "Radio", "Suara", "Magnet"],
+                answer: "Cahaya"
+            },
+            {
+                question: "Port default untuk SSH adalah...",
+                options: ["22", "23", "21", "25", "80"],
+                answer: "22"
+            },
+            {
+                question: "WAN adalah singkatan dari...",
+                options: ["Wide Area Network", "Wireless Area Network", "Web Area Network", "Wide Access Network", "World Area Network"],
+                answer: "Wide Area Network"
+            },
+            {
+                question: "Perintah untuk flush DNS cache di Windows adalah...",
+                options: ["ipconfig /flushdns", "ipconfig /release", "ipconfig /renew", "ipconfig /all", "ipconfig /displaydns"],
+                answer: "ipconfig /flushdns"
+            },
+            {
+                question: "ARP berfungsi untuk...",
+                options: ["Menerjemahkan IP ke MAC address", "Menerjemahkan domain ke IP", "Mengirim email", "Mengatur routing", "Memfilter paket"],
+                answer: "Menerjemahkan IP ke MAC address"
+            },
+            {
+                question: "Load balancing berfungsi untuk...",
+                options: ["Membagi beban trafik ke beberapa server", "Mengamankan jaringan", "Mengenkripsi data", "Mempercepat DNS", "Memfilter spam"],
+                answer: "Membagi beban trafik ke beberapa server"
+            },
+            {
+                question: "Tipe kabel UTP yang memiliki 4 pair adalah...",
+                options: ["Cat5e/Cat6", "Coaxial", "Fiber optic", "Cat3", "RG-58"],
+                answer: "Cat5e/Cat6"
+            },
+            {
+                question: "ICMP digunakan untuk...",
+                options: ["Pesan error dan kontrol dalam jaringan", "Transfer file", "Mengirim email", "Routing dinamis", "Enkripsi data"],
+                answer: "Pesan error dan kontrol dalam jaringan"
+            },
+            {
+                question: "IP address loopback adalah...",
+                options: ["127.0.0.1", "192.168.0.1", "10.0.0.1", "255.255.255.255", "0.0.0.0"],
+                answer: "127.0.0.1"
+            },
+            {
+                question: "Proxy server berfungsi untuk...",
+                options: ["Meneruskan permintaan client ke server", "Mengenkripsi data", "Mempercepat koneksi", "Menyimpan password", "Mengatur VLAN"],
+                answer: "Meneruskan permintaan client ke server"
+            },
+            {
+                question: "Jumlah octet dalam IPv4 address adalah...",
+                options: ["4", "8", "6", "2", "16"],
+                answer: "4"
+            },
+            {
+                question: "Hotspot adalah...",
+                options: ["Area yang menyediakan akses WiFi", "Perangkat keras jaringan", "Protokol keamanan", "Jenis kabel", "Tipe router"],
+                answer: "Area yang menyediakan akses WiFi"
+            },
+            {
+                question: "Mikrotik menggunakan protokol routing berikut, kecuali...",
+                options: ["HTTP", "OSPF", "BGP", "RIP", "MikroTik Proprietary"],
+                answer: "HTTP"
+            },
+            {
+                question: "Bridge berfungsi untuk...",
+                options: ["Menghubungkan dua segmen jaringan", "Mengenkripsi data", "Memfilter email", "Mengatur DNS", "Menyimpan data"],
+                answer: "Menghubungkan dua segmen jaringan"
+            },
+            {
+                question: "Broadcast address untuk jaringan 192.168.1.0/24 adalah...",
+                options: ["192.168.1.255", "192.168.1.0", "192.168.1.1", "192.168.1.254", "192.168.0.255"],
+                answer: "192.168.1.255"
+            },
+            {
+                question: "QoS (Quality of Service) berfungsi untuk...",
+                options: ["Mengatur prioritas trafik jaringan", "Mengamankan jaringan", "Mengenkripsi data", "Mempercepat DNS", "Memblokir iklan"],
+                answer: "Mengatur prioritas trafik jaringan"
+            },
+            {
+                question: "Repeater berfungsi untuk...",
+                options: ["Memperkuat sinyal jaringan", "Memfilter paket", "Mengatur IP address", "Menyimpan data", "Mengenkripsi data"],
+                answer: "Memperkuat sinyal jaringan"
+            },
+            {
+                question: "Port default untuk Telnet adalah...",
+                options: ["23", "22", "21", "25", "80"],
+                answer: "23"
+            },
+            {
+                question: "CIDR /28 menghasilkan jumlah host...",
+                options: ["14", "16", "30", "32", "62"],
+                answer: "14"
+            },
+            {
+                question: "Wi-Fi standar 802.11ac beroperasi pada frekuensi...",
+                options: ["5 GHz", "2.4 GHz", "900 MHz", "60 GHz", "3.5 GHz"],
+                answer: "5 GHz"
+            },
+            {
+                question: "SNMP digunakan untuk...",
+                options: ["Manajemen jaringan", "Transfer file", "Mengirim email", "Enkripsi data", "Routing"],
+                answer: "Manajemen jaringan"
+            },
+            {
+                question: "Port default untuk FTP adalah...",
+                options: ["21", "20", "22", "23", "25"],
+                answer: "21"
+            }
+        ];
+
+        // Soal Esai (5 Soal)
+        const essayQuestions = [
+            {
+                question: "Jelaskan perbedaan antara topologi Star, Bus, dan Ring beserta kelebihan dan kekurangan masing-masing!",
+                keywords: ["star", "bus", "ring", "kelebihan", "kekurangan", "hub", "kabel", "terminator"]
+            },
+            {
+                question: "Bagaimana cara melakukan subnetting pada IP address 192.168.10.0/24 menjadi 4 subnet? Jelaskan proses dan hasilnya!",
+                keywords: ["subnet", "192.168.10", "4 subnet", "subnet mask", "host", "network", "broadcast", "255.255.255.192"]
+            },
+            {
+                question: "Jelaskan 7 layer model OSI beserta fungsi masing-masing layer!",
+                keywords: ["physical", "data link", "network", "transport", "session", "presentation", "application", "fungsi"]
+            },
+            {
+                question: "Apa yang dimaksud dengan VLAN? Jelaskan manfaat dan cara konfigurasi dasar VLAN pada switch!",
+                keywords: ["vlan", "virtual", "lan", "switch", "manfaat", "konfigurasi", "port", "trunk", "access"]
+            },
+            {
+                question: "Jelaskan proses kerja protokol DHCP (Dynamic Host Configuration Protocol) mulai dari client meminta IP hingga mendapatkan alamat IP!",
+                keywords: ["dhcp", "discover", "offer", "request", "acknowledge", "dora", "ip", "lease", "server", "client"]
+            }
+        ];
+
+        let currentQuestion = 0;
+        let userAnswers = new Array(50).fill(null);
+        let essayAnswers = new Array(5).fill("");
+        let timerInterval;
+        let timeLeft = 90 * 60; // 90 minutes in seconds
+        let shuffledQuestions = [];
+        let shuffledOptions = [];
+
+        // Shuffle array function
+        function shuffleArray(array) {
+            let shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function startQuiz() {
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('quizScreen').classList.remove('hidden');
+
+            // Shuffle questions
+            shuffledQuestions = shuffleArray([...Array(50).keys()]);
+
+            // Shuffle options for each question
+            shuffledOptions = questions.map(q => {
+                let options = [...q.options];
+                return shuffleArray(options);
+            });
+
+            renderQuestion();
+            startTimer();
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                let minutes = Math.floor(timeLeft / 60);
+                let seconds = timeLeft % 60;
+                let timeStr = `⏱️ ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                document.getElementById('timer').textContent = timeStr;
+                document.getElementById('timerEssay').textContent = timeStr;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    submitQuiz();
+                }
+            }, 1000);
+        }
+
+        function renderQuestion() {
+            let qIndex = shuffledQuestions[currentQuestion];
+            let q = questions[qIndex];
+            let options = shuffledOptions[qIndex];
+
+            document.getElementById('currentQ').textContent = `${currentQuestion + 1}/50`;
+            document.getElementById('progressFill').style.width = `${((currentQuestion + 1) / 50) * 100}%`;
+
+            let answeredCount = userAnswers.filter(a => a !== null).length;
+            document.getElementById('answered').textContent = answeredCount;
+
+            let html = `
+                <div class="question-card">
+                    <div class="question-number">Soal ${currentQuestion + 1} dari 50</div>
+                    <div class="question-text">${q.question}</div>
+                    <div class="options">
+            `;
+
+            const letters = ['A', 'B', 'C', 'D', 'E'];
+            options.forEach((opt, idx) => {
+                let selected = userAnswers[currentQuestion] === opt ? 'selected' : '';
+                html += `
+                    <div class="option ${selected}" onclick="selectOption('${opt.replace(/'/g, "\\'")}')">
+                        <div class="option-letter">${letters[idx]}</div>
+                        <div class="option-text">${opt}</div>
+                    </div>
+                `;
+            });
+
+            html += `</div></div>`;
+            document.getElementById('questionContainer').innerHTML = html;
+
+            // Update navigation buttons
+            document.getElementById('btnPrev').style.visibility = currentQuestion === 0 ? 'hidden' : 'visible';
+            document.getElementById('btnNext').textContent = currentQuestion === 49 ? '📝 Lanjut ke Esai →' : 'Selanjutnya →';
+        }
+
+        function selectOption(option) {
+            userAnswers[currentQuestion] = option;
+            renderQuestion();
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < 49) {
+                currentQuestion++;
+                renderQuestion();
+            } else {
+                // Go to essay section
+                document.getElementById('quizScreen').classList.add('hidden');
+                document.getElementById('essayScreen').classList.remove('hidden');
+                renderEssay();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                renderQuestion();
+            }
+        }
+
+        function renderEssay() {
+            let html = '';
+            essayQuestions.forEach((eq, idx) => {
+                html += `
+                    <div class="essay-question">
+                        <h3>Esai ${idx + 1}</h3>
+                        <p style="margin-bottom: 15px; color: #eee; line-height: 1.6;">${eq.question}</p>
+                        <textarea id="essay${idx}" placeholder="Tulis jawaban Anda di sini..." oninput="saveEssay(${idx}, this.value)">${essayAnswers[idx]}</textarea>
+                    </div>
+                `;
+            });
+            document.getElementById('essayContainer').innerHTML = html;
+            document.getElementById('progressFillEssay').style.width = '100%';
+        }
+
+        function saveEssay(idx, value) {
+            essayAnswers[idx] = value;
+        }
+
+        function submitQuiz() {
+            clearInterval(timerInterval);
+
+            // Calculate multiple choice score
+            let mcScore = 0;
+            let reviewHtml = '<h3 style="color: #00d2ff; margin-bottom: 20px; text-align: left;">📋 Review Jawaban Pilihan Ganda:</h3>';
+
+            shuffledQuestions.forEach((qIndex, i) => {
+                let q = questions[qIndex];
+                let userAns = userAnswers[i];
+                let isCorrect = userAns === q.answer;
+                if (isCorrect) mcScore++;
+
+                let statusClass = isCorrect ? 'correct' : 'wrong';
+                let userAnsText = userAns || '<em>Tidak dijawab</em>';
+
+                reviewHtml += `
+                    <div class="review-item ${statusClass}">
+                        <div class="q-text">${i + 1}. ${q.question}</div>
+                        <div class="answer-info">
+                            Jawaban Anda: <span class="${isCorrect ? '' : 'wrong-ans'}">${userAnsText}</span><br>
+                            Jawaban Benar: <span>${q.answer}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Calculate essay score (keyword-based)
+            let essayScore = 0;
+            let essayReviewHtml = '<h3 style="color: #f093fb; margin: 30px 0 20px; text-align: left;">📝 Review Jawaban Esai:</h3>';
+
+            essayQuestions.forEach((eq, idx) => {
+                let answer = essayAnswers[idx].toLowerCase();
+                let keywordCount = 0;
+                let foundKeywords = [];
+
+                eq.keywords.forEach(kw => {
+                    if (answer.includes(kw.toLowerCase())) {
+                        keywordCount++;
+                        foundKeywords.push(kw);
+                    }
+                });
+
+                let score = Math.round((keywordCount / eq.keywords.length) * 10);
+                essayScore += score;
+
+                essayReviewHtml += `
+                    <div class="review-item ${score >= 5 ? 'correct' : 'wrong'}">
+                        <div class="q-text">Esai ${idx + 1}: ${eq.question}</div>
+                        <div class="answer-info">
+                            Jawaban Anda: ${essayAnswers[idx] || '<em>Tidak dijawab</em>'}<br>
+                            Skor: <span>${score}/10</span> (Kata kunci ditemukan: ${foundKeywords.join(', ') || 'tidak ada'})
+                        </div>
+                    </div>
+                `;
+            });
+
+            let totalScore = mcScore + essayScore;
+
+            // Display results
+            document.getElementById('quizScreen').classList.add('hidden');
+            document.getElementById('essayScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.remove('hidden');
+
+            document.getElementById('finalScore').textContent = totalScore;
+            document.getElementById('scoreDetail').innerHTML = `
+                Pilihan Ganda: <strong>${mcScore}/50</strong> poin<br>
+                Esai: <strong>${essayScore}/50</strong> poin<br>
+                <br>
+                ${getGrade(totalScore)}
+            `;
+            document.getElementById('reviewSection').innerHTML = reviewHtml + essayReviewHtml;
+        }
+
+        function getGrade(score) {
+            if (score >= 90) return '🏆 <strong style="color: #00e676;">Luar Biasa! Nilai: A</strong>';
+            if (score >= 80) return '🌟 <strong style="color: #00e676;">Sangat Baik! Nilai: B+</strong>';
+            if (score >= 70) return '👍 <strong style="color: #66bb6a;">Baik! Nilai: B</strong>';
+            if (score >= 60) return '📚 <strong style="color: #ffa726;">Cukup! Nilai: C+</strong>';
+            if (score >= 50) return '💪 <strong style="color: #ffa726;">Perlu Belajar Lagi! Nilai: C</strong>';
+            return '📖 <strong style="color: #f5576c;">Perlu Belajar Lebih Giat! Nilai: D</strong>';
+        }
+    </script>
+</body>
+</html>
