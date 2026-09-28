@@ -6,3 +6,4 @@ https://wantychan25-cmd.github.io/wantygameedukasi/GAME%20TJKT%20SEM%201%20MAT%2
 https://wantychan25-cmd.github.io/wantygameedukasi/SOAL-SOAL%20TKA.html
 
 https://wantychan25-cmd.github.io/wantygameedukasi/GAME%20TKA%201.html
+https://wantychan25-cmd.github.io/wantygameedukasi/SOAL%20TKA%20DAN%20ESAY.html
