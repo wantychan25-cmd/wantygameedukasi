@@ -8,3 +8,4 @@ https://wantychan25-cmd.github.io/wantygameedukasi/SOAL-SOAL%20TKA.html
 https://wantychan25-cmd.github.io/wantygameedukasi/GAME%20TKA%201.html
 
 https://wantychan25-cmd.github.io/wantygameedukasi/SOAL%20TKA%20DAN%20ESAY.html
+https://wantychan25-cmd.github.io/wantygameedukasi/GAME%20SOAL%20KELAS%20XII%20TKJ.html
