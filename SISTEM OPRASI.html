@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Edukasi Sistem Operasi - X TKJ SMK Budi Mulya</title>
+    <style>
+        :root {
+            --primary: #00f2fe;
+            --secondary: #4facfe;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --text-light: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+        body {
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            background-image: radial-gradient(circle at 10% 20%, rgba(79, 172, 254, 0.1) 0%, transparent 40%),
+                              radial-gradient(circle at 90% 80%, rgba(0, 242, 254, 0.1) 0%, transparent 40%);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        header p { color: var(--text-muted); font-size: 1.1rem; }
+
+        .screen { display: none; animation: fadeIn 0.5s ease; }
+        .screen.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.05);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--bg-dark);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 5px;
+        }
+
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0, 242, 254, 0.4); }
+        .btn-secondary { background: #334155; color: var(--text-light); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .menu-card {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .menu-card:hover { transform: scale(1.05); border-color: var(--primary); }
+        .menu-card h3 { color: var(--primary); margin-bottom: 10px; font-size: 1.5rem; }
+        .menu-card p { color: var(--text-muted); }
+        .menu-card .icon { font-size: 3rem; margin-bottom: 15px; }
+
+        /* Materi Styles */
+        .tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+        .tab-btn {
+            padding: 10px 20px; background: #334155; border: none; color: var(--text-light);
+            border-radius: 8px; cursor: pointer; transition: 0.3s;
+        }
+        .tab-btn.active { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: var(--bg-dark); font-weight: bold; }
+        .tab-content { display: none; line-height: 1.8; color: var(--text-muted); }
+        .tab-content.active { display: block; }
+        .tab-content h4 { color: var(--primary); margin: 15px 0 10px; }
+        .tab-content ul { padding-left: 20px; }
+
+        /* Quiz Styles */
+        .progress-bar { width: 100%; height: 10px; background: #334155; border-radius: 5px; margin-bottom: 20px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); transition: width 0.3s; }
+        
+        .question-box { margin-bottom: 20px; }
+        .question-box h3 { margin-bottom: 15px; color: var(--text-light); }
+        
+        .options label {
+            display: block; padding: 12px 15px; background: #334155; margin-bottom: 10px;
+            border-radius: 8px; cursor: pointer; transition: 0.3s; border: 1px solid transparent;
+        }
+        .options label:hover { background: #475569; }
+        .options input { margin-right: 10px; }
+        .options input:checked + span { color: var(--primary); font-weight: bold; }
+        .options label.selected { border-color: var(--primary); background: rgba(0, 242, 254, 0.1); }
+
+        .essay-box textarea {
+            width: 100%; min-height: 100px; background: #334155; border: 1px solid #475569;
+            color: var(--text-light); padding: 15px; border-radius: 8px; font-size: 1rem; resize: vertical;
+        }
+        .essay-box textarea:focus { outline: none; border-color: var(--primary); }
+
+        .nav-buttons { display: flex; justify-content: space-between; margin-top: 20px; }
+
+        /* Result Styles */
+        .result-score {
+            text-align: center; padding: 40px;
+        }
+        .score-circle {
+            width: 150px; height: 150px; border-radius: 50%; 
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 3rem; font-weight: bold; color: var(--bg-dark);
+            margin: 0 auto 20px;
+        }
+
+        .review-item { background: #334155; padding: 15px; border-radius: 8px; margin-bottom: 10px; }
+        .review-item.correct { border-left: 5px solid var(--success); }
+        .review-item.incorrect { border-left: 5px solid var(--danger); }
+
+        @media (max-width: 600px) {
+            header h1 { font-size: 1.8rem; }
+            .container { padding: 10px; }
+            .card { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>🎮 GAME EDUKASI SISTEM OPERASI</h1>
+        <p>Kelas X TKJ | SMK Budi Mulya | Semester 1</p>
+    </header>
+
+    <!-- HOME SCREEN -->
+    <div id="home-screen" class="screen active">
+        <div class="card" style="text-align:center;">
+            <h2 style="margin-bottom:10px;">Selamat Datang, Siswa Hebat! 🚀</h2>
+            <p style="color:var(--text-muted); margin-bottom:20px;">Uji pemahamanmu tentang Sistem Operasi melalui game interaktif ini. Pilih menu di bawah untuk memulai petualangan belajarmu!</p>
+            <input type="text" id="studentName" placeholder="Masukkan Nama Kamu..." style="padding:12px; width:80%; max-width:400px; border-radius:8px; border:1px solid #475569; background:#334155; color:white; text-align:center; font-size:1rem; margin-bottom:20px;">
+            <div class="menu-grid">
+                <div class="menu-card" onclick="showScreen('materi-screen')">
+                    <div class="icon">📚</div>
+                    <h3>Materi</h3>
+                    <p>Pelajari 4 Pertemuan Materi Sistem Operasi</p>
+                </div>
+                <div class="menu-card" onclick="startPG()">
+                    <div class="icon">🎯</div>
+                    <h3>Kuis Pilihan Ganda</h3>
+                    <p>30 Soal Tantangan Pengetahuanmu</p>
+                </div>
+                <div class="menu-card" onclick="startEssay()">
+                    <div class="icon">✍️</div>
+                    <h3>Uraian / Essay</h3>
+                    <p>5 Soal Analisis & Pemahaman Mendalam</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MATERI SCREEN -->
+    <div id="materi-screen" class="screen">
+        <div class="card">
+            <h2 style="margin-bottom:20px;">📚 Materi Sistem Operasi (4 Pertemuan)</h2>
+            <div class="tabs">
+                <button class="tab-btn active" onclick="showTab(0)">Pertemuan 1</button>
+                <button class="tab-btn" onclick="showTab(1)">Pertemuan 2</button>
+                <button class="tab-btn" onclick="showTab(2)">Pertemuan 3</button>
+                <button class="tab-btn" onclick="showTab(3)">Pertemuan 4</button>
+            </div>
+
+            <div class="tab-content active">
+                <h4>Pertemuan 1: Konsep Dasar Sistem Operasi</h4>
+                <p><b>Pengertian:</b> Sistem Operasi (OS) adalah perangkat lunak sistem yang mengelola perangkat keras (hardware) dan perangkat lunak (software), serta menjembatani interaksi pengguna dengan komputer.</p>
+                <h4>Fungsi Utama OS:</h4>
+                <ul>
+                    <li><b>Resource Manager:</b> Mengelola memori, prosesor, dan perangkat I/O.</li>
+                    <li><b>Manajemen File:</b> Mengatur struktur dan keamanan data.</li>
+                    <li><b>User Interface:</b> Menyediakan antarmuka (GUI/CLI) untuk pengguna.</li>
+                    <li><b>Manajemen Proses:</b> Mengatur aplikasi yang berjalan (multitasking).</li>
+                </ul>
+                <h4>Istilah Penting:</h4>
+                <ul>
+                    <li><b>Kernel:</b> Inti dari sistem operasi.</li>
+                    <li><b>GUI (Graphical User Interface):</b> Antarmuka grafis (ikon, jendela).</li>
+                    <li><b>CLI (Command Line Interface):</b> Antarmuka berbasis teks/perintah.</li>
+                </ul>
+            </div>
+
+            <div class="tab-content">
+                <h4>Pertemuan 2: Sistem Operasi Jaringan & Open Source</h4>
+                <p><b>OS Jaringan:</b> OS yang dirancang khusus untuk mengelola jaringan komputer, server, dan layanan jaringan (contoh: Windows Server, Linux Ubuntu Server).</p>
+                <h4>Open Source vs Closed Source:</h4>
+                <ul>
+                    <li><b>Open Source:</b> Kode sumber terbuka, gratis, bisa dimodifikasi (Contoh: Linux, Ubuntu, Debian).</li>
+                    <li><b>Closed Source:</b> Kode sumber tertutup, berbayar/berlisensi, tidak bisa dimodifikasi sembarangan (Contoh: Windows, macOS).</li>
+                </ul>
+                <h4>Lisensi:</h4>
+                <p>GNU/GPL adalah lisensi populer untuk software open source yang mengizinkan penggunaan, modifikasi, dan distribusi ulang secara bebas.</p>
+            </div>
+
+            <div class="tab-content">
+                <h4>Pertemuan 3: Instalasi Sistem Operasi</h4>
+                <p>Proses pemasangan OS ke dalam hardisk komputer agar dapat digunakan.</p>
+                <h4>Langkah-langkah Instalasi:</h4>
+                <ul>
+                    <li><b>Setting BIOS/UEFI:</b> Mengatur Boot Priority agar komputer booting dari Flashdisk/CD.</li>
+                    <li><b>Partisi Hardisk:</b> Membagi hardisk menjadi beberapa bagian (Primary, Extended, Logical).</li>
+                    <li><b>Formatting:</b> Memberi sistem file pada partisi (NTFS untuk Windows, ext4 untuk Linux).</li>
+                    <li><b>Copying File & Instalasi:</b> Proses penyalinan file OS dan konfigurasi awal.</li>
+                </ul>
+                <p><b>Catatan:</b> Di Linux, terdapat partisi khusus bernama <b>Swap</b> yang berfungsi sebagai RAM cadangan.</p>
+            </div>
+
+            <div class="tab-content">
+                <h4>Pertemuan 4: Konfigurasi Dasar & Manajemen File</h4>
+                <p>Mengenal perintah dasar untuk mengelola file dan folder melalui CLI (Command Line Interface).</p>
+                <h4>Perintah Dasar Windows (CMD):</h4>
+                <ul>
+                    <li><b>cd:</b> Pindah direktori.</li>
+                    <li><b>dir:</b> Melihat isi folder.</li>
+                    <li><b>md / mkdir:</b> Membuat folder.</li>
+                    <li><b>del:</b> Menghapus file.</li>
+                    <li><b>copy:</b> Menyalin file.</li>
+                </ul>
+                <h4>Perintah Dasar Linux (Terminal):</h4>
+                <ul>
+                    <li><b>ls:</b> Melihat isi direktori.</li>
+                    <li><b>pwd:</b> Melihat posisi direktori saat ini.</li>
+                    <li><b>rm:</b> Menghapus file.</li>
+                    <li><b>cat:</b> Melihat isi file teks.</li>
+                    <li><b>sudo:</b> Menjalankan perintah dengan hak akses administrator (root).</li>
+                </ul>
+            </div>
+
+            <div style="text-align:center; margin-top:20px;">
+                <button class="btn btn-secondary" onclick="showScreen('home-screen')">← Kembali ke Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- KUIS PG SCREEN -->
+    <div id="kuis-pg-screen" class="screen">
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h2>🎯 Kuis Pilihan Ganda</h2>
+                <span id="pg-counter" style="color:var(--primary); font-weight:bold;">Soal 1 / 30</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="pg-progress" style="width: 3.33%"></div></div>
+            
+            <div id="pg-question-area"></div>
+
+            <div class="nav-buttons">
+                <button class="btn btn-secondary" id="pg-prev" onclick="prevPG()" disabled>← Sebelumnya</button>
+                <button class="btn" id="pg-next" onclick="nextPG()">Selanjutnya →</button>
+                <button class="btn btn-success" id="pg-submit" onclick="submitPG()" style="display:none;">Selesai & Lihat Nilai</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- KUIS ESSAY SCREEN -->
+    <div id="kuis-essay-screen" class="screen">
+        <div class="card">
+            <h2 style="margin-bottom:20px;">✍️ Uraian / Essay</h2>
+            <p style="color:var(--text-muted); margin-bottom:20px;">Jawablah pertanyaan berikut dengan jelas dan tepat. Jawaban akan dievaluasi oleh Guru Produktif.</p>
+            
+            <div id="essay-area"></div>
+
+            <div class="nav-buttons" style="margin-top:30px;">
+                <button class="btn btn-secondary" onclick="showScreen('home-screen')">← Kembali</button>
+                <button class="btn btn-success" onclick="submitEssay()">Kirim Jawaban</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- HASIL SCREEN -->
+    <div id="hasil-screen" class="screen">
+        <div class="card">
+            <div class="result-score">
+                <h2 id="result-title">Hasil Kuis Pilihan Ganda</h2>
+                <div class="score-circle" id="score-display">0</div>
+                <h3 id="result-message" style="margin-bottom:20px;"></h3>
+                <p id="student-greeting" style="color:var(--text-muted); margin-bottom:30px;"></p>
+                
+                <div id="review-area" style="text-align:left; margin-top:30px;"></div>
+
+                <button class="btn" onclick="showScreen('home-screen')" style="margin-top:20px;">Kembali ke Menu Utama</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==================== DATA SOAL ====================
+    const pgQuestions = [
+        // Pertemuan 1 (1-8)
+        { q: "Perangkat lunak sistem yang mengelola hardware dan software serta menjembatani pengguna dengan komputer disebut...", o: ["Aplikasi", "Sistem Operasi", "Utility", "Bahasa Pemrograman"], a: 1 },
+        { q: "Inti dari sistem operasi yang bertugas mengelola sumber daya sistem secara langsung disebut...", o: ["Shell", "Kernel", "GUI", "Driver"], a: 1 },
+        { q: "Antarmuka pengguna yang menggunakan ikon, jendela, dan mouse disebut...", o: ["CLI", "VUI", "GUI", "API"], a: 2 },
+        { q: "Fungsi sistem operasi sebagai pengelola alokasi memori RAM disebut...", o: ["Manajemen File", "Manajemen Proses", "Resource Manager", "User Manager"], a: 2 },
+        { q: "Kemampuan sistem operasi untuk menjalankan beberapa aplikasi secara bersamaan disebut...", o: ["Multiprocessing", "Multitasking", "Multithreading", "Multiuser"], a: 1 },
+        { q: "Antarmuka berbasis teks atau perintah ketik pada sistem operasi disebut...", o: ["GUI", "CLI", "TUI", "NUI"], a: 1 },
+        { q: "Sistem operasi bawaan yang umum digunakan pada PC/Laptop di sekolah adalah...", o: ["Android", "iOS", "Windows", "macOS"], a: 2 },
+        { q: "Perangkat lunak yang berfungsi menerjemahkan perintah OS ke dalam bahasa hardware disebut...", o: ["Driver", "Compiler", "Interpreter", "Antivirus"], a: 0 },
+        
+        // Pertemuan 2 (9-15)
+        { q: "Sistem operasi yang dirancang khusus untuk mengelola jaringan dan server disebut...", o: ["OS Desktop", "OS Mobile", "OS Jaringan", "OS Embedded"], a: 2 },
+        { q: "Sistem operasi yang kode sumbernya terbuka dan dapat dimodifikasi secara bebas disebut...", o: ["Closed Source", "Open Source", "Freeware", "Shareware"], a: 1 },
+        { q: "Berikut ini yang termasuk contoh sistem operasi Open Source adalah...", o: ["Windows 10", "macOS Ventura", "Ubuntu Linux", "iOS 16"], a: 2 },
+        { q: "Lisensi yang mengizinkan penggunaan, modifikasi, dan distribusi ulang software secara bebas adalah...", o: ["EULA", "GNU/GPL", "Copyright", "Trademark"], a: 1 },
+        { q: "Salah satu keunggulan utama menggunakan sistem operasi Open Source adalah...", o: ["Harus membayar lisensi mahal", "Tidak bisa dimodifikasi", "Bebas digunakan dan dimodifikasi", "Hanya bisa diinstal di server"], a: 2 },
+        { q: "Sistem operasi jaringan yang dikembangkan oleh Microsoft adalah...", o: ["Windows Server", "Red Hat", "Debian", "CentOS"], a: 0 },
+        { q: "Distro Linux yang sangat populer dan ramah untuk pemula adalah...", o: ["Slackware", "Gentoo", "Ubuntu", "Arch Linux"], a: 2 },
+
+        // Pertemuan 3 (16-24)
+        { q: "Langkah pertama yang harus dilakukan sebelum menginstal sistem operasi adalah...", o: ["Format Hardisk", "Setting BIOS/UEFI", "Install Aplikasi", "Buat Partisi"], a: 1 },
+        { q: "Proses membagi hardisk menjadi beberapa bagian logis disebut...", o: ["Formatting", "Partitioning", "Defragmenting", "Cloning"], a: 1 },
+        { q: "Sistem file default yang digunakan oleh sistem operasi Windows modern adalah...", o: ["FAT32", "ext4", "NTFS", "HFS+"], a: 2 },
+        { q: "Sistem file yang umum digunakan pada sistem operasi Linux adalah...", o: ["NTFS", "FAT16", "ext4", "exFAT"], a: 2 },
+        { q: "Partisi khusus di Linux yang berfungsi sebagai memori cadangan (RAM virtual) adalah...", o: ["Root (/)", "Home (/home)", "Swap", "Boot (/boot)"], a: 2 },
+        { q: "Fitur di BIOS/UEFI yang mengatur urutan perangkat booting disebut...", o: ["Boot Priority", "Secure Boot", "Fast Boot", "Virtualization"], a: 0 },
+        { q: "Media yang paling umum digunakan saat ini untuk melakukan instalasi OS adalah...", o: ["Floppy Disk", "Kaset", "Flashdisk", "Pita Magnetik"], a: 2 },
+        { q: "Pengganti BIOS pada komputer modern yang mendukung hardisk kapasitas besar dan booting lebih cepat adalah...", o: ["CMOS", "UEFI", "RAM", "ROM"], a: 1 },
+        { q: "Mode booting Windows yang hanya memuat driver esensial untuk perbaikan error disebut...", o: ["Normal Mode", "Safe Mode", "Sleep Mode", "Hibernate"], a: 1 },
+
+        // Pertemuan 4 (25-30)
+        { q: "Perintah di CMD Windows untuk membuat folder baru adalah...", o: ["fd", "md", "cd", "rd"], a: 1 },
+        { q: "Perintah di Linux untuk melihat daftar file dan folder dalam sebuah direktori adalah...", o: ["pwd", "cd", "ls", "cat"], a: 2 },
+        { q: "Perintah di Linux untuk menghapus sebuah file adalah...", o: ["del", "rm", "rd", "erase"], a: 1 },
+        { q: "Perintah di Windows CMD untuk melihat alamat IP komputer adalah...", o: ["ipconfig", "ifconfig", "ping", "netstat"], a: 0 },
+        { q: "Perintah di Linux untuk melihat isi dari sebuah file teks adalah...", o: ["ls", "cat", "pwd", "mkdir"], a: 1 },
+        { q: "Perintah di Linux untuk menjalankan program dengan hak akses administrator (root) adalah...", o: ["admin", "root", "sudo", "su"], a: 2 }
+    ];
+
+    const essayQuestions = [
+        "Jelaskan 3 fungsi utama dari Sistem Operasi pada sebuah komputer!",
+        "Sebutkan dan jelaskan perbedaan mendasar antara Sistem Operasi Open Source dan Closed Source! Berikan masing-masing 2 contohnya.",
+        "Apa yang dimaksud dengan partisi hardisk? Sebutkan dan jelaskan jenis-jenis partisi pada hardisk!",
+        "Jelaskan langkah-langkah mengatur Boot Priority di BIOS/UEFI agar komputer dapat melakukan instalasi OS melalui Flashdisk!",
+        "Sebutkan dan jelaskan 5 perintah dasar pada CLI (Command Line Interface) Linux untuk manajemen file/folder beserta fungsinya!"
+    ];
+
+    // ==================== STATE & VARIABLES ====================
+    let currentPG = 0;
+    let userAnswers = new Array(pgQuestions.length).fill(-1);
+    let studentName = "";
+
+    // ==================== NAVIGATION ====================
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        window.scrollTo(0, 0);
+    }
+
+    function showTab(index) {
+        document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === index));
+        document.querySelectorAll('.tab-content').forEach((c, i) => c.classList.toggle('active', i === index));
+    }
+
+    // ==================== KUIS PG LOGIC ====================
+    function startPG() {
+        studentName = document.getElementById('studentName').value.trim() || "Siswa";
+        currentPG = 0;
+        userAnswers.fill(-1);
+        showScreen('kuis-pg-screen');
+        renderPG();
+    }
+
+    function renderPG() {
+        const q = pgQuestions[currentPG];
+        const area = document.getElementById('pg-question-area');
+        
+        let optionsHTML = q.o.map((opt, i) => `
+            <label class="${userAnswers[currentPG] === i ? 'selected' : ''}" onclick="selectOption(${i})">
+                <input type="radio" name="pg-opt" value="${i}" ${userAnswers[currentPG] === i ? 'checked' : ''}>
+                <span>${opt}</span>
+            </label>
+        `).join('');
+
+        area.innerHTML = `
+            <div class="question-box">
+                <h3>${currentPG + 1}. ${q.q}</h3>
+                <div class="options">${optionsHTML}</div>
+            </div>
+        `;
+
+        document.getElementById('pg-counter').innerText = `Soal ${currentPG + 1} / ${pgQuestions.length}`;
+        document.getElementById('pg-progress').style.width = `${((currentPG + 1) / pgQuestions.length) * 100}%`;
+        
+        document.getElementById('pg-prev').disabled = currentPG === 0;
+        document.getElementById('pg-next').style.display = currentPG === pgQuestions.length - 1 ? 'none' : 'inline-block';
+        document.getElementById('pg-submit').style.display = currentPG === pgQuestions.length - 1 ? 'inline-block' : 'none';
+    }
+
+    function selectOption(index) {
+        userAnswers[currentPG] = index;
+        renderPG();
+    }
+
+    function nextPG() { if (currentPG < pgQuestions.length - 1) { currentPG++; renderPG(); } }
+    function prevPG() { if (currentPG > 0) { currentPG--; renderPG(); } }
+
+    function submitPG() {
+        let score = 0;
+        let reviewHTML = "";
+        
+        pgQuestions.forEach((q, i) => {
+            const isCorrect = userAnswers[i] === q.a;
+            if (isCorrect) score++;
+            
+            reviewHTML += `
+                <div class="review-item ${isCorrect ? 'correct' : 'incorrect'}">
+                    <p><b>${i + 1}. ${q.q}</b></p>
+                    <p style="color:${isCorrect ? 'var(--success)' : 'var(--danger)'}">
+                        Jawaban Anda: ${userAnswers[i] !== -1 ? q.o[userAnswers[i]] : 'Tidak dijawab'}
+                    </p>
+                    ${!isCorrect ? `<p style="color:var(--success)">Kunci Jawaban: ${q.o[q.a]}</p>` : ''}
+                </div>
+            `;
+        });
+
+        const finalScore = Math.round((score / pgQuestions.length) * 100);
+        document.getElementById('score-display').innerText = finalScore;
+        document.getElementById('result-title').innerText = "Hasil Kuis Pilihan Ganda";
+        document.getElementById('student-greeting').innerText = `Selamat ${studentName}! Kamu menjawab benar ${score} dari ${pgQuestions.length} soal.`;
+        
+        let msg = "";
+        if (finalScore >= 85) msg = "🌟 LUAR BIASA! Kamu menguasai materi dengan sangat baik!";
+        else if (finalScore >= 70) msg = "👍 BAGUS! Pertahankan dan tingkatkan lagi!";
+        else if (finalScore >= 50) msg = "💪 CUKUP! Ayo pelajari kembali materinya.";
+        else msg = "📚 SEMANGAT! Jangan menyerah, baca kembali materinya ya!";
+        
+        document.getElementById('result-message').innerText = msg;
+        document.getElementById('review-area').innerHTML = "<h3 style='margin-bottom:15px;'>Pembahasan:</h3>" + reviewHTML;
+        
+        showScreen('hasil-screen');
+    }
+
+    // ==================== KUIS ESSAY LOGIC ====================
+    function startEssay() {
+        studentName = document.getElementById('studentName').value.trim() || "Siswa";
+        const area = document.getElementById('essay-area');
+        
+        let html = essayQuestions.map((q, i) => `
+            <div class="essay-box" style="margin-bottom:25px;">
+                <h4 style="margin-bottom:10px; color:var(--primary);">${i + 1}. ${q}</h4>
+                <textarea id="essay-${i}" placeholder="Tulis jawabanmu di sini..."></textarea>
+            </div>
+        `).join('');
+        
+        area.innerHTML = html;
+        showScreen('kuis-essay-screen');
+    }
+
+    function submitEssay() {
+        let answered = 0;
+        essayQuestions.forEach((_, i) => {
+            if (document.getElementById(`essay-${i}`).value.trim() !== "") answered++;
+        });
+
+        if (answered === 0) {
+            alert("Kamu belum menjawab satupun soal essay!");
+            return;
+        }
+
+        document.getElementById('score-display').innerText = "✓";
+        document.getElementById('result-title').innerText = "Jawaban Essay Terkirim!";
+        document.getElementById('student-message').innerText = "";
+        document.getElementById('student-greeting').innerText = `Terima kasih ${studentName}! Kamu telah menjawab ${answered} dari ${essayQuestions.length} soal essay. Jawabanmu akan segera diperiksa dan dinilai oleh Guru Produktif SMK Budi Mulya.`;
+        document.getElementById('result-message').innerText = "📝 Silakan tunggu feedback dari gurumu!";
+        document.getElementById('review-area').innerHTML = "";
+        
+        showScreen('hasil-screen');
+    }
+</script>
+
+</body>
+</html>
