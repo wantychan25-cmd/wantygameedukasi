@@ -1,0 +1,1837 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎮 OS Installer Quest - Kelas X TKJ</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+
+:root {
+--primary: #6c5ce7;
+--secondary: #00cec9;
+--accent: #fd79a8;
+--success: #00b894;
+--warning: #fdcb6e;
+--danger: #e17055;
+--dark: #2d3436;
+--light: #dfe6e9;
+--bg: #0a0a1a;
+--card: #12122a;
+--card2: #1a1a3e;
+--text: #e0e0ff;
+--glow1: rgba(108, 92, 231, 0.3);
+--glow2: rgba(0, 206, 201, 0.3);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+font-family: 'Poppins', sans-serif;
+background: var(--bg);
+color: var(--text);
+min-height: 100vh;
+overflow-x: hidden;
+}
+
+body::before {
+content: '';
+position: fixed;
+top: 0; left: 0;
+width: 100%; height: 100%;
+background:
+radial-gradient(ellipse at 20% 50%, var(--glow1) 0%, transparent 50%),
+radial-gradient(ellipse at 80% 20%, var(--glow2) 0%, transparent 50%),
+radial-gradient(ellipse at 50% 80%, rgba(253, 121, 168, 0.15) 0%, transparent 50%);
+pointer-events: none;
+z-index: 0;
+}
+
+.particles {
+position: fixed;
+top: 0; left: 0;
+width: 100%; height: 100%;
+pointer-events: none;
+z-index: 0;
+overflow: hidden;
+}
+
+.particle {
+position: absolute;
+width: 3px; height: 3px;
+background: var(--secondary);
+border-radius: 50%;
+animation: float linear infinite;
+opacity: 0.5;
+}
+
+@keyframes float {
+0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+10% { opacity: 0.5; }
+90% { opacity: 0.5; }
+100% { transform: translateY(-10vh) rotate(720deg); opacity: 0; }
+}
+
+.container {
+position: relative;
+z-index: 1;
+max-width: 1100px;
+margin: 0 auto;
+padding: 20px;
+}
+
+/* HEADER */
+.game-header {
+text-align: center;
+padding: 30px 20px;
+margin-bottom: 20px;
+background: linear-gradient(135deg, var(--card), var(--card2));
+border-radius: 20px;
+border: 1px solid rgba(108, 92, 231, 0.3);
+box-shadow: 0 0 40px var(--glow1);
+position: relative;
+overflow: hidden;
+}
+
+.game-header::before {
+content: '';
+position: absolute;
+top: -50%; left: -50%;
+width: 200%; height: 200%;
+background: conic-gradient(from 0deg, transparent, var(--primary), transparent, var(--secondary), transparent);
+animation: rotateBorder 8s linear infinite;
+opacity: 0.1;
+}
+
+@keyframes rotateBorder {
+100% { transform: rotate(360deg); }
+}
+
+.game-header h1 {
+font-size: 2.2em;
+font-weight: 900;
+background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+background-clip: text;
+margin-bottom: 5px;
+position: relative;
+}
+
+.game-header .subtitle {
+font-size: 0.95em;
+color: var(--light);
+opacity: 0.8;
+position: relative;
+}
+
+/* STATS BAR */
+.stats-bar {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+gap: 12px;
+margin-bottom: 25px;
+}
+
+.stat-card {
+background: linear-gradient(135deg, var(--card), var(--card2));
+border-radius: 15px;
+padding: 15px;
+text-align: center;
+border: 1px solid rgba(255,255,255,0.05);
+transition: all 0.3s;
+}
+
+.stat-card:hover {
+transform: translateY(-3px);
+box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.stat-card .stat-icon { font-size: 1.8em; margin-bottom: 5px; }
+.stat-card .stat-value {
+font-size: 1.5em;
+font-weight: 800;
+background: linear-gradient(135deg, var(--secondary), var(--primary));
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+background-clip: text;
+}
+.stat-card .stat-label { font-size: 0.75em; opacity: 0.7; }
+
+/* XP BAR */
+.xp-container {
+background: var(--card);
+border-radius: 15px;
+padding: 15px 20px;
+margin-bottom: 25px;
+border: 1px solid rgba(255,255,255,0.05);
+}
+
+.xp-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 8px;
+}
+
+.xp-level {
+font-weight: 700;
+color: var(--warning);
+font-size: 0.95em;
+}
+
+.xp-text { font-size: 0.8em; opacity: 0.7; }
+
+.xp-bar-bg {
+width: 100%;
+height: 12px;
+background: rgba(255,255,255,0.1);
+border-radius: 10px;
+overflow: hidden;
+}
+
+.xp-bar-fill {
+height: 100%;
+background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+border-radius: 10px;
+transition: width 0.8s ease;
+position: relative;
+}
+
+.xp-bar-fill::after {
+content: '';
+position: absolute;
+top: 0; left: 0;
+width: 100%; height: 100%;
+background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+0% { transform: translateX(-100%); }
+100% { transform: translateX(100%); }
+}
+
+/* NAVIGATION */
+.nav-tabs {
+display: flex;
+gap: 8px;
+margin-bottom: 25px;
+flex-wrap: wrap;
+}
+
+.nav-tab {
+padding: 10px 20px;
+background: var(--card);
+border: 1px solid rgba(255,255,255,0.1);
+border-radius: 12px;
+color: var(--text);
+cursor: pointer;
+font-family: 'Poppins', sans-serif;
+font-weight: 600;
+font-size: 0.85em;
+transition: all 0.3s;
+}
+
+.nav-tab:hover {
+background: var(--card2);
+border-color: var(--primary);
+}
+
+.nav-tab.active {
+background: linear-gradient(135deg, var(--primary), var(--secondary));
+border-color: transparent;
+color: white;
+box-shadow: 0 5px 20px var(--glow1);
+}
+
+/* SECTIONS */
+.section { display: none; animation: fadeIn 0.5s ease; }
+.section.active { display: block; }
+
+@keyframes fadeIn {
+from { opacity: 0; transform: translateY(20px); }
+to { opacity: 1; transform: translateY(0); }
+}
+
+/* MEETING CARDS */
+.meeting-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+gap: 15px;
+margin-bottom: 25px;
+}
+
+.meeting-card {
+background: linear-gradient(135deg, var(--card), var(--card2));
+border-radius: 18px;
+padding: 25px;
+cursor: pointer;
+border: 1px solid rgba(255,255,255,0.05);
+transition: all 0.4s;
+position: relative;
+overflow: hidden;
+}
+
+.meeting-card::before {
+content: '';
+position: absolute;
+top: 0; left: 0;
+width: 100%; height: 3px;
+background: linear-gradient(90deg, var(--primary), var(--secondary));
+transform: scaleX(0);
+transition: transform 0.4s;
+}
+
+.meeting-card:hover::before { transform: scaleX(1); }
+
+.meeting-card:hover {
+transform: translateY(-5px);
+box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+border-color: var(--primary);
+}
+
+.meeting-card.completed {
+border-color: var(--success);
+}
+
+.meeting-card.completed::after {
+content: '✅';
+position: absolute;
+top: 10px; right: 10px;
+font-size: 1.2em;
+}
+
+.meeting-card .meeting-num {
+font-size: 2.5em;
+font-weight: 900;
+background: linear-gradient(135deg, var(--primary), var(--secondary));
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+background-clip: text;
+line-height: 1;
+}
+
+.meeting-card .meeting-title {
+font-size: 1em;
+font-weight: 700;
+margin: 8px 0 5px;
+}
+
+.meeting-card .meeting-desc {
+font-size: 0.78em;
+opacity: 0.6;
+line-height: 1.5;
+}
+
+/* MATERIAL VIEW */
+.material-view {
+background: linear-gradient(135deg, var(--card), var(--card2));
+border-radius: 20px;
+padding: 30px;
+border: 1px solid rgba(255,255,255,0.05);
+margin-bottom: 20px;
+}
+
+.material-view h2 {
+font-size: 1.5em;
+margin-bottom: 5px;
+background: linear-gradient(135deg, var(--primary), var(--secondary));
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+background-clip: text;
+}
+
+.material-view .meeting-badge {
+display: inline-block;
+padding: 4px 14px;
+background: linear-gradient(135deg, var(--primary), var(--accent));
+border-radius: 20px;
+font-size: 0.75em;
+font-weight: 600;
+color: white;
+margin-bottom: 20px;
+}
+
+.material-content {
+line-height: 1.8;
+font-size: 0.92em;
+}
+
+.material-content h3 {
+color: var(--secondary);
+margin: 20px 0 10px;
+font-size: 1.1em;
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+.material-content p {
+margin-bottom: 12px;
+opacity: 0.9;
+}
+
+.material-content ul {
+margin: 10px 0 15px 20px;
+}
+
+.material-content ul li {
+margin-bottom: 6px;
+opacity: 0.85;
+}
+
+.material-content .info-box {
+background: rgba(108, 92, 231, 0.1);
+border-left: 4px solid var(--primary);
+padding: 15px;
+border-radius: 0 12px 12px 0;
+margin: 15px 0;
+font-size: 0.9em;
+}
+
+.material-content .tip-box {
+background: rgba(0, 206, 201, 0.1);
+border-left: 4px solid var(--secondary);
+padding: 15px;
+border-radius: 0 12px 12px 0;
+margin: 15px 0;
+font-size: 0.9em;
+}
+
+.material-content .warn-box {
+background: rgba(253, 203, 110, 0.1);
+border-left: 4px solid var(--warning);
+padding: 15px;
+border-radius: 0 12px 12px 0;
+margin: 15px 0;
+font-size: 0.9em;
+}
+
+.material-content code {
+background: rgba(108, 92, 231, 0.2);
+padding: 2px 8px;
+border-radius: 5px;
+font-size: 0.9em;
+color: var(--secondary);
+}
+
+.material-content table {
+width: 100%;
+border-collapse: collapse;
+margin: 15px 0;
+font-size: 0.88em;
+}
+
+.material-content table th {
+background: rgba(108, 92, 231, 0.2);
+padding: 10px;
+text-align: left;
+border: 1px solid rgba(255,255,255,0.1);
+}
+
+.material-content table td {
+padding: 10px;
+border: 1px solid rgba(255,255,255,0.05);
+}
+
+.btn {
+padding: 12px 28px;
+border: none;
+border-radius: 12px;
+font-family: 'Poppins', sans-serif;
+font-weight: 600;
+font-size: 0.9em;
+cursor: pointer;
+transition: all 0.3s;
+display: inline-flex;
+align-items: center;
+gap: 8px;
+}
+
+.btn-primary {
+background: linear-gradient(135deg, var(--primary), #a29bfe);
+color: white;
+box-shadow: 0 5px 20px var(--glow1);
+}
+
+.btn-primary:hover {
+transform: translateY(-2px);
+box-shadow: 0 8px 30px var(--glow1);
+}
+
+.btn-secondary {
+background: linear-gradient(135deg, var(--secondary), #81ecec);
+color: var(--dark);
+}
+
+.btn-secondary:hover { transform: translateY(-2px); }
+
+.btn-accent {
+background: linear-gradient(135deg, var(--accent), #fab1a0);
+color: white;
+}
+
+.btn-success {
+background: linear-gradient(135deg, var(--success), #55efc4);
+color: var(--dark);
+}
+
+.btn-back {
+background: rgba(255,255,255,0.1);
+color: var(--text);
+border: 1px solid rgba(255,255,255,0.1);
+}
+
+.btn-back:hover { background: rgba(255,255,255,0.15); }
+
+.btn-group {
+display: flex;
+gap: 10px;
+margin-top: 25px;
+flex-wrap: wrap;
+}
+
+/* QUIZ */
+.quiz-container {
+background: linear-gradient(135deg, var(--card), var(--card2));
+border-radius: 20px;
+padding: 30px;
+border: 1px solid rgba(255,255,255,0.05);
+}
+
+.quiz-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 25px;
+flex-wrap: wrap;
+gap: 10px;
+}
+
+.quiz-progress {
+display: flex;
+align-items: center;
+gap: 10px;
+}
+
+.quiz-progress-bar {
+width: 200px;
+height: 8px;
+background: rgba(255,255,255,0.1);
+border-radius: 10px;
+overflow: hidden;
+}
+
+.quiz-progress-fill {
+height: 100%;
+background: linear-gradient(90deg, var(--primary), var(--secondary));
+border-radius: 10px;
+transition: width 0.5s;
+}
+
+.question-card {
+animation: fadeIn 0.4s ease;
+}
+
+.question-num {
+font-size: 0.8em;
+color: var(--secondary);
+font-weight: 600;
+margin-bottom: 8px;
+}
+
+.question-text {
+font-size: 1.05em;
+font-weight: 600;
+margin-bottom: 20px;
+line-height: 1.6;
+}
+
+.options-list {
+display: flex;
+flex-direction: column;
+gap: 10px;
+margin-bottom: 20px;
+}
+
+.option-btn {
+padding: 14px 18px;
+background: rgba(255,255,255,0.05);
+border: 2px solid rgba(255,255,255,0.1);
+border-radius: 12px;
+color: var(--text);
+cursor: pointer;
+font-family: 'Poppins', sans-serif;
+font-size: 0.9em;
+text-align: left;
+transition: all 0.3s;
+display: flex;
+align-items: center;
+gap: 12px;
+}
+
+.option-btn:hover {
+border-color: var(--primary);
+background: rgba(108, 92, 231, 0.1);
+}
+
+.option-btn.selected {
+border-color: var(--primary);
+background: rgba(108, 92, 231, 0.15);
+}
+
+.option-btn.correct {
+border-color: var(--success) !important;
+background: rgba(0, 184, 148, 0.15) !important;
+}
+
+.option-btn.wrong {
+border-color: var(--danger) !important;
+background: rgba(225, 112, 85, 0.15) !important;
+}
+
+.option-letter {
+width: 32px; height: 32px;
+border-radius: 8px;
+background: rgba(255,255,255,0.1);
+display: flex;
+align-items: center;
+justify-content: center;
+font-weight: 700;
+font-size: 0.85em;
+flex-shrink: 0;
+}
+
+.option-btn.selected .option-letter {
+background: var(--primary);
+color: white;
+}
+
+.option-btn.correct .option-letter {
+background: var(--success);
+color: white;
+}
+
+.option-btn.wrong .option-letter {
+background: var(--danger);
+color: white;
+}
+
+/* ESSAY */
+.essay-textarea {
+width: 100%;
+min-height: 150px;
+background: rgba(255,255,255,0.05);
+border: 2px solid rgba(255,255,255,0.1);
+border-radius: 12px;
+padding: 15px;
+color: var(--text);
+font-family: 'Poppins', sans-serif;
+font-size: 0.9em;
+resize: vertical;
+transition: border-color 0.3s;
+line-height: 1.6;
+}
+
+.essay-textarea:focus {
+outline: none;
+border-color: var(--primary);
+}
+
+.essay-textarea::placeholder { color: rgba(255,255,255,0.3); }
+
+/* REVIEW */
+.review-card {
+background: rgba(255,255,255,0.03);
+border-radius: 15px;
+padding: 20px;
+margin-bottom: 15px;
+border: 1px solid rgba(255,255,255,0.05);
+}
+
+.review-card.correct-review { border-left: 4px solid var(--success); }
+.review-card.wrong-review { border-left: 4px solid var(--danger); }
+.review-card.essay-review { border-left: 4px solid var(--secondary); }
+
+.review-q {
+font-weight: 600;
+margin-bottom: 10px;
+font-size: 0.95em;
+}
+
+.review-answer {
+font-size: 0.85em;
+margin: 5px 0;
+padding: 5px 10px;
+border-radius: 8px;
+}
+
+.review-answer.your-ans { background: rgba(225, 112, 85, 0.1); }
+.review-answer.correct-ans { background: rgba(0, 184, 148, 0.1); }
+.review-answer.essay-ans { background: rgba(0, 206, 201, 0.1); }
+
+.review-explanation {
+font-size: 0.85em;
+opacity: 0.8;
+margin-top: 8px;
+padding: 10px;
+background: rgba(108, 92, 231, 0.08);
+border-radius: 8px;
+line-height: 1.6;
+}
+
+/* SCORE DISPLAY */
+.score-display {
+text-align: center;
+padding: 40px 20px;
+}
+
+.score-circle {
+width: 150px; height: 150px;
+border-radius: 50%;
+background: conic-gradient(var(--primary) 0%, var(--secondary) 50%, var(--accent) 100%);
+display: flex;
+align-items: center;
+justify-content: center;
+margin: 0 auto 20px;
+position: relative;
+animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+0%, 100% { box-shadow: 0 0 20px var(--glow1); }
+50% { box-shadow: 0 0 40px var(--glow1), 0 0 60px var(--glow2); }
+}
+
+.score-circle-inner {
+width: 130px; height: 130px;
+border-radius: 50%;
+background: var(--card);
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+}
+
+.score-number {
+font-size: 2.5em;
+font-weight: 900;
+background: linear-gradient(135deg, var(--primary), var(--secondary));
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+background-clip: text;
+}
+
+.score-label { font-size: 0.75em; opacity: 0.7; }
+
+.score-message {
+font-size: 1.2em;
+font-weight: 700;
+margin: 15px 0;
+}
+
+.score-detail {
+font-size: 0.9em;
+opacity: 0.7;
+margin-bottom: 20px;
+}
+
+/* ACHIEVEMENT POPUP */
+.achievement-popup {
+position: fixed;
+top: 20px;
+right: 20px;
+background: linear-gradient(135deg, var(--card), var(--card2));
+border: 2px solid var(--warning);
+border-radius: 15px;
+padding: 15px 25px;
+z-index: 1000;
+animation: slideInRight 0.5s ease, slideOutRight 0.5s ease 3s forwards;
+box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+display: flex;
+align-items: center;
+gap: 12px;
+}
+
+@keyframes slideInRight {
+from { transform: translateX(120%); opacity: 0; }
+to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOutRight {
+from { transform: translateX(0); opacity: 1; }
+to { transform: translateX(120%); opacity: 0; }
+}
+
+.achievement-popup .ach-icon { font-size: 2em; }
+.achievement-popup .ach-text { font-size: 0.85em; }
+.achievement-popup .ach-title { font-weight: 700; color: var(--warning); }
+
+/* QUIZ TYPE SELECTOR */
+.quiz-type-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+gap: 15px;
+margin: 20px 0;
+}
+
+.quiz-type-card {
+background: rgba(255,255,255,0.03);
+border: 2px solid rgba(255,255,255,0.1);
+border-radius: 15px;
+padding: 25px;
+text-align: center;
+cursor: pointer;
+transition: all 0.3s;
+}
+
+.quiz-type-card:hover {
+border-color: var(--primary);
+transform: translateY(-3px);
+background: rgba(108, 92, 231, 0.05);
+}
+
+.quiz-type-card .qt-icon { font-size: 2.5em; margin-bottom: 10px; }
+.quiz-type-card .qt-title { font-weight: 700; margin-bottom: 5px; }
+.quiz-type-card .qt-desc { font-size: 0.8em; opacity: 0.6; }
+
+/* MODAL */
+.modal-overlay {
+position: fixed;
+top: 0; left: 0;
+width: 100%; height: 100%;
+background: rgba(0,0,0,0.7);
+z-index: 999;
+display: flex;
+align-items: center;
+justify-content: center;
+padding: 20px;
+animation: fadeIn 0.3s;
+}
+
+.modal-content {
+background: linear-gradient(135deg, var(--card), var(--card2));
+border-radius: 20px;
+padding: 30px;
+max-width: 500px;
+width: 100%;
+border: 1px solid rgba(255,255,255,0.1);
+text-align: center;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+.game-header h1 { font-size: 1.5em; }
+.stats-bar { grid-template-columns: repeat(2, 1fr); }
+.nav-tabs { gap: 5px; }
+.nav-tab { padding: 8px 14px; font-size: 0.78em; }
+.material-view, .quiz-container { padding: 20px; }
+.meeting-grid { grid-template-columns: 1fr; }
+}
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb {
+background: var(--primary);
+border-radius: 10px;
+}
+
+/* TIMER */
+.timer {
+display: flex;
+align-items: center;
+gap: 5px;
+font-weight: 600;
+color: var(--warning);
+font-size: 0.95em;
+}
+
+.timer.warning { color: var(--danger); animation: blink 0.5s infinite; }
+
+@keyframes blink {
+50% { opacity: 0.5; }
+}
+
+.badge-container {
+display: flex;
+gap: 8px;
+flex-wrap: wrap;
+margin-top: 10px;
+}
+
+.badge {
+padding: 5px 12px;
+border-radius: 20px;
+font-size: 0.75em;
+font-weight: 600;
+background: rgba(253, 203, 110, 0.15);
+color: var(--warning);
+border: 1px solid rgba(253, 203, 110, 0.3);
+}
+
+.badge.locked {
+opacity: 0.3;
+filter: grayscale(1);
+}
+
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="particles" id="particles"></div>
+
+<div class="container">
+<!-- HEADER -->
+<div class="game-header">
+<h1>🖥️ OS INSTALLER QUEST</h1>
+<p class="subtitle">Game Edukasi Instalasi Sistem Operasi • Kelas X TKJ • Semester 1</p>
+</div>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+<div class="stat-card">
+<div class="stat-icon">⭐</div>
+<div class="stat-value" id="totalXP">0</div>
+<div class="stat-label">Total XP</div>
+</div>
+<div class="stat-card">
+<div class="stat-icon">🏆</div>
+<div class="stat-value" id="totalScore">0</div>
+<div class="stat-label">Skor Tertinggi</div>
+</div>
+<div class="stat-card">
+<div class="stat-icon">📚</div>
+<div class="stat-value" id="meetingsCompleted">0/4</div>
+<div class="stat-label">Materi Selesai</div>
+</div>
+<div class="stat-card">
+<div class="stat-icon">🎯</div>
+<div class="stat-value" id="quizDone">0</div>
+<div class="stat-label">Kuis Selesai</div>
+</div>
+</div>
+
+<!-- XP BAR -->
+<div class="xp-container">
+<div class="xp-header">
+<span class="xp-level" id="levelText">🎮 Level 1 - Newbie</span>
+<span class="xp-text" id="xpText">0 / 100 XP</span>
+</div>
+<div class="xp-bar-bg">
+<div class="xp-bar-fill" id="xpBar" style="width: 0%"></div>
+</div>
+<div class="badge-container" id="badgeContainer">
+<span class="badge locked" data-badge="first-read">📖 Pembaca Pertama</span>
+<span class="badge locked" data-badge="quiz-master">🎯 Quiz Master</span>
+<span class="badge locked" data-badge="essay-pro">✍️ Essay Pro</span>
+<span class="badge locked" data-badge="perfect-score">💯 Perfect Score</span>
+<span class="badge locked" data-badge="all-clear">🏆 All Clear</span>
+</div>
+</div>
+
+<!-- NAVIGATION -->
+<div class="nav-tabs">
+<button class="nav-tab active" onclick="showSection('home')">🏠 Beranda</button>
+<button class="nav-tab" onclick="showSection('material')">📚 Materi</button>
+<button class="nav-tab" onclick="showSection('quiz')">🎯 Kuis</button>
+<button class="nav-tab" onclick="showSection('review')">📋 Review</button>
+</div>
+
+<!-- HOME SECTION -->
+<div class="section active" id="section-home">
+<h2 style="margin-bottom:15px; font-size:1.3em;">📌 Pilih Pertemuan untuk Belajar</h2>
+<div class="meeting-grid" id="meetingGrid"></div>
+<div style="margin-top:20px; text-align:center;">
+<button class="btn btn-accent" onclick="showSection('quiz')" style="font-size:1em; padding:15px 35px;">
+🚀 Mulai Kuis Sekarang
+</button>
+</div>
+</div>
+
+<!-- MATERIAL SECTION -->
+<div class="section" id="section-material">
+<div id="materialList">
+<h2 style="margin-bottom:15px; font-size:1.3em;">📚 Materi Pembelajaran</h2>
+<div class="meeting-grid" id="meetingGrid2"></div>
+</div>
+<div id="materialDetail" class="hidden"></div>
+</div>
+
+<!-- QUIZ SECTION -->
+<div class="section" id="section-quiz">
+<div id="quizMenu">
+<h2 style="margin-bottom:15px; font-size:1.3em;">🎯 Pilih Jenis Kuis</h2>
+<div class="quiz-type-grid">
+<div class="quiz-type-card" onclick="startQuiz('pg')">
+<div class="qt-icon">🔘</div>
+<div class="qt-title">Pilihan Ganda</div>
+<div class="qt-desc">20 soal dari 4 pertemuan<br>⏱️ 30 menit</div>
+</div>
+<div class="quiz-type-card" onclick="startQuiz('essay')">
+<div class="qt-icon">✍️</div>
+<div class="qt-title">Essay</div>
+<div class="qt-desc">5 soal uraian<br>⏱️ 45 menit</div>
+</div>
+<div class="quiz-type-card" onclick="startQuiz('mixed')">
+<div class="qt-icon">🎲</div>
+<div class="qt-title">Campuran</div>
+<div class="qt-desc">10 PG + 3 Essay<br>⏱️ 40 menit</div>
+</div>
+</div>
+</div>
+<div id="quizArea" class="hidden"></div>
+</div>
+
+<!-- REVIEW SECTION -->
+<div class="section" id="section-review">
+<div id="reviewContent">
+<h2 style="margin-bottom:15px; font-size:1.3em;">📋 Review Jawaban</h2>
+<p style="opacity:0.6; margin-bottom:20px;">Selesaikan kuis terlebih dahulu untuk melihat review jawabanmu.</p>
+<div id="reviewList"></div>
+</div>
+</div>
+</div>
+
+<script>
+// ==================== GAME STATE ====================
+let gameState = {
+xp: 0,
+level: 1,
+highScore: 0,
+meetingsRead: [],
+quizzesDone: 0,
+badges: [],
+lastQuizResults: null,
+timerInterval: null,
+timeLeft: 0
+};
+
+// ==================== MATERIALS DATA ====================
+const materials = [
+{
+id: 1,
+title: "Pengenalan Sistem Operasi",
+icon: "💻",
+desc: "Memahami konsep dasar, jenis, dan fungsi sistem operasi",
+content: `
+<span class="meeting-badge">Pertemuan 1</span>
+<h2>💻 Pengenalan Sistem Operasi</h2>
+<div class="material-content">
+<h3>📌 Apa itu Sistem Operasi?</h3>
+<p>Sistem Operasi (Operating System/OS) adalah <strong>perangkat lunak sistem</strong> yang bertugas mengelola sumber daya perangkat keras (hardware) dan perangkat lunak (software), serta menyediakan layanan umum untuk program aplikasi.</p>
+<div class="info-box">
+💡 <strong>Analogi:</strong> Sistem operasi ibarat "manajer" dalam sebuah perusahaan yang mengatur semua sumber daya agar bekerja secara efisien dan terkoordinasi.
+</div>
+
+<h3>📌 Fungsi Utama Sistem Operasi</h3>
+<ul>
+<li><strong>Manajemen Proses:</strong> Mengatur eksekusi program, penjadwalan CPU, dan multitasking</li>
+<li><strong>Manajemen Memori:</strong> Mengalokasikan dan mengelola RAM untuk setiap program</li>
+<li><strong>Manajemen File:</strong> Mengatur penyimpanan, pembacaan, dan penulisan data pada media penyimpanan</li>
+<li><strong>Manajemen Perangkat I/O:</strong> Mengontrol perangkat input/output seperti keyboard, mouse, printer</li>
+<li><strong>Keamanan:</strong> Melindungi data dan sistem dari akses tidak sah</li>
+<li><strong>Antarmuka Pengguna (UI):</strong> Menyediakan GUI atau CLI untuk interaksi pengguna</li>
+</ul>
+
+<h3>📌 Jenis-Jenis Sistem Operasi</h3>
+<table>
+<tr><th>Sistem Operasi</th><th>Pengembang</th><th>Karakteristik</th></tr>
+<tr><td>Windows</td><td>Microsoft</td><td>GUI user-friendly, berbayar, dominan di PC</td></tr>
+<tr><td>Linux</td><td>Open Source</td><td>Gratis, stabil, aman, banyak distro</td></tr>
+<tr><td>macOS</td><td>Apple</td><td>Eksklusif untuk Mac, desain elegan</td></tr>
+<tr><td>Android</td><td>Google</td><td>Mobile OS, berbasis Linux kernel</td></tr>
+<tr><td>iOS</td><td>Apple</td><td>Mobile OS eksklusif iPhone/iPad</td></tr>
+</table>
+
+<h3>📌 Sejarah Singkat Perkembangan OS</h3>
+<ul>
+<li><strong>Generasi 1 (1945-1955):</strong> Belum ada OS, komputer dioperasikan langsung dengan bahasa mesin</li>
+<li><strong>Generasi 2 (1955-1965):</strong> Batch Processing System, pekerjaan dikumpulkan dan diproses secara berkelompok</li>
+<li><strong>Generasi 3 (1965-1980):</strong> Multi-programming, time-sharing, muncul UNIX</li>
+<li><strong>Generasi 4 (1980-sekarang):</strong> GUI, networking, muncul Windows, macOS, Linux</li>
+</ul>
+
+<h3>📌 Contoh Distro Linux Populer</h3>
+<ul>
+<li><strong>Ubuntu:</strong> Ramah pemula, komunitas besar</li>
+<li><strong>Debian:</strong> Stabil, basis banyak distro lain</li>
+<li><strong>Fedora:</strong> Cutting-edge, didukung Red Hat</li>
+<li><strong>Linux Mint:</strong> Tampilan mirip Windows, mudah digunakan</li>
+<li><strong>Kali Linux:</strong> Khusus untuk penetration testing</li>
+</ul>
+
+<div class="tip-box">
+💡 <strong>Tips:</strong> Sebagai siswa TKJ, penting untuk menguasai minimal 2 sistem operasi: Windows dan salah satu distro Linux (disarankan Ubuntu atau Debian).
+</div>
+</div>
+`
+},
+{
+id: 2,
+title: "Persiapan Instalasi Sistem Operasi",
+icon: "⚙️",
+desc: "Spesifikasi hardware, partisi, file system, dan media instalasi",
+content: `
+<span class="meeting-badge">Pertemuan 2</span>
+<h2>⚙️ Persiapan Instalasi Sistem Operasi</h2>
+<div class="material-content">
+<h3>📌 Spesifikasi Hardware Minimum</h3>
+<p>Sebelum menginstal sistem operasi, pastikan hardware memenuhi spesifikasi minimum yang dibutuhkan.</p>
+<table>
+<tr><th>Komponen</th><th>Windows 10/11 Min.</th><th>Ubuntu 22.04 Min.</th></tr>
+<tr><td>Prosesor</td><td>1 GHz (64-bit)</td><td>2 GHz dual-core</td></tr>
+<tr><td>RAM</td><td>4 GB (64-bit)</td><td>4 GB</td></tr>
+<tr><td>Storage</td><td>64 GB</td><td>25 GB</td></tr>
+<tr><td>Display</td><td>800x600</td><td>1024x768</td></tr>
+<tr><td>TPM</td><td>TPM 2.0 (Win 11)</td><td>Tidak wajib</td></tr>
+</table>
+
+<h3>📌 Partisi Harddisk</h3>
+<p>Partisi adalah proses membagi harddisk menjadi beberapa bagian logis yang masing-masing berfungsi sebagai drive terpisah.</p>
+<ul>
+<li><strong>Partisi Primer:</strong> Partisi utama, maksimal 4 partisi primer per disk</li>
+<li><strong>Partisi Extended:</strong> Partisi tambahan yang bisa dibagi menjadi beberapa logical partition</li>
+<li><strong>Partisi Logical:</strong> Partisi di dalam extended partition</li>
+</ul>
+<div class="info-box">
+💡 <strong>Rekomendasi Partisi Windows:</strong><br>
+• Drive C: (System) = 100-150 GB<br>
+• Drive D: (Data) = Sisa kapasitas<br>
+• Recovery Partition = 500 MB - 1 GB
+</div>
+
+<h3>📌 Sistem File (File System)</h3>
+<table>
+<tr><th>File System</th><th>Penggunaan</th><th>Max File Size</th><th>Kelebihan</th></tr>
+<tr><td>NTFS</td><td>Windows</td><td>16 TB</td><td>Keamanan, journaling, kompresi</td></tr>
+<tr><td>FAT32</td><td>Flashdisk/USB</td><td>4 GB</td><td>Kompatibel semua OS</td></tr>
+<tr><td>exFAT</td><td>USB modern</td><td>16 EB</td><td>Tidak ada limit 4GB</td></tr>
+<tr><td>ext4</td><td>Linux</td><td>16 TB</td><td>Stabil, journaling, cepat</td></tr>
+<tr><td>APFS</td><td>macOS</td><td>8 EB</td><td>Optimasi SSD, enkripsi</td></tr>
+</table>
+
+<h3>📌 Media Instalasi</h3>
+<ul>
+<li><strong>DVD/CD:</strong> Media tradisional, kapasitas terbatas (4.7-8.5 GB)</li>
+<li><strong>USB Flashdisk:</strong> Paling umum digunakan, minimal 8 GB</li>
+<li><strong>File ISO:</strong> Image file yang bisa di-burn ke DVD atau USB</li>
+<li><strong>Network/PXE Boot:</strong> Instalasi melalui jaringan</li>
+</ul>
+
+<h3>📌 Tools Pembuat Bootable USB</h3>
+<ul>
+<li><strong>Rufus:</strong> Ringan, cepat, khusus Windows</li>
+<li><strong>balenaEtcher:</strong> Cross-platform, antarmuka sederhana</li>
+<li><strong>UNetbootin:</strong> Mendukung banyak distro Linux</li>
+<li><strong>Windows Media Creation Tool:</strong> Resmi dari Microsoft</li>
+</ul>
+
+<h3>📌 Pengaturan BIOS/UEFI</h3>
+<p>Sebelum instalasi, perlu mengatur BIOS/UEFI agar komputer boot dari media instalasi:</p>
+<ul>
+<li>Masuk BIOS dengan menekan <code>Del</code>, <code>F2</code>, <code>F10</code>, atau <code>F12</code> saat booting</li>
+<li>Ubah <strong>Boot Order</strong> agar USB/DVD menjadi prioritas pertama</li>
+<li>Untuk Windows 11: aktifkan <strong>Secure Boot</strong> dan <strong>TPM 2.0</strong></li>
+<li>Untuk Linux: mungkin perlu menonaktifkan <strong>Secure Boot</strong></li>
+<li>Mode: <strong>UEFI</strong> (modern) atau <strong>Legacy/CSM</strong> (lama)</li>
+</ul>
+
+<div class="warn-box">
+⚠️ <strong>Peringatan:</strong> Selalu backup data penting sebelum melakukan instalasi atau partisi harddisk! Kesalahan partisi dapat menyebabkan kehilangan data permanen.
+</div>
+</div>
+`
+},
+{
+id: 3,
+title: "Proses Instalasi Sistem Operasi",
+icon: "🔧",
+desc: "Langkah instalasi Windows, Linux, dual boot, dan troubleshooting",
+content: `
+<span class="meeting-badge">Pertemuan 3</span>
+<h2>🔧 Proses Instalasi Sistem Operasi</h2>
+<div class="material-content">
+<h3>📌 Langkah Instalasi Windows 10/11</h3>
+<ul>
+<li><strong>1.</strong> Boot dari media instalasi USB/DVD</li>
+<li><strong>2.</strong> Pilih bahasa, waktu, dan keyboard → klik <em>Next</em></li>
+<li><strong>3.</strong> Klik <em>Install Now</em></li>
+<li><strong>4.</strong> Masukkan product key (atau pilih "I don't have a product key")</li>
+<li><strong>5.</strong> Pilih edisi Windows (Home/Pro/Education)</li>
+<li><strong>6.</strong> Accept license terms</li>
+<li><strong>7.</strong> Pilih tipe instalasi:
+<ul>
+<li><em>Upgrade:</em> Memperbarui Windows yang sudah ada</li>
+<li><em>Custom (Advanced):</em> Instalasi bersih (clean install)</li>
+</ul>
+</li>
+<li><strong>8.</strong> Atur partisi harddisk (buat, hapus, format)</li>
+<li><strong>9.</strong> Pilih partisi tujuan instalasi → klik <em>Next</em></li>
+<li><strong>10.</strong> Tunggu proses copying files dan instalasi (restart otomatis)</li>
+<li><strong>11.</strong> Konfigurasi awal: region, keyboard, akun Microsoft/lokal</li>
+<li><strong>12.</strong> Setup selesai, masuk ke desktop Windows</li>
+</ul>
+
+<h3>📌 Langkah Instalasi Ubuntu Linux</h3>
+<ul>
+<li><strong>1.</strong> Boot dari USB/DVD installer Ubuntu</li>
+<li><strong>2.</strong> Pilih <em>Try Ubuntu</em> atau <em>Install Ubuntu</em></li>
+<li><strong>3.</strong> Pilih bahasa instalasi</li>
+<li><strong>4.</strong> Pilih layout keyboard</li>
+<li><strong>5.</strong> Hubungkan ke WiFi (opsional, untuk download update saat instalasi)</li>
+<li><strong>6.</strong> Pilih tipe instalasi:
+<ul>
+<li><em>Erase disk and install Ubuntu:</em> Hapus semua, instal Ubuntu saja</li>
+<li><em>Install alongside Windows:</em> Dual boot</li>
+<li><em>Something else:</em> Partisi manual</li>
+</ul>
+</li>
+<li><strong>7.</strong> Atur zona waktu</li>
+<li><strong>8.</strong> Buat user account (nama, username, password)</li>
+<li><strong>9.</strong> Tunggu proses instalasi selesai</li>
+<li><strong>10.</strong> Restart dan cabut USB installer</li>
+</ul>
+
+<h3>📌 Dual Boot (Windows + Linux)</h3>
+<p>Dual boot memungkinkan dua sistem operasi terinstal dalam satu komputer. Saat booting, pengguna memilih OS mana yang akan digunakan melalui <strong>bootloader</strong> (GRUB untuk Linux).</p>
+<div class="info-box">
+💡 <strong>Langkah Dual Boot:</strong><br>
+1. Instal Windows terlebih dahulu<br>
+2. Sisakan ruang kosong (unallocated space) di harddisk<br>
+3. Boot dari installer Linux<br>
+4. Pilih "Install alongside Windows"<br>
+5. GRUB akan otomatis terinstal sebagai bootloader
+</div>
+
+<h3>📌 Troubleshooting Instalasi</h3>
+<table>
+<tr><th>Masalah</th><th>Kemungkinan Penyebab</th><th>Solusi</th></tr>
+<tr><td>Boot gagal dari USB</td><td>Boot order salah / USB tidak bootable</td><td>Cek BIOS, buat ulang bootable USB</td></tr>
+<tr><td>BSOD saat instalasi</td><td>RAM rusak / driver tidak kompatibel</td><td>Test RAM, gunakan media instalasi baru</td></tr>
+<tr><td>Disk tidak terdeteksi</td><td>Driver storage kurang / mode SATA salah</td><td>Ubah mode SATA ke AHCI, load driver</td></tr>
+<tr><td>Instalasi stuck/hang</td><td>Media instalasi corrupt</td><td>Download ulang ISO, cek checksum</td></tr>
+<tr><td>GRUB tidak muncul</td><td>Windows overwrite bootloader</td><td>Gunakan Boot Repair dari Live USB Linux</td></tr>
+</table>
+
+<div class="tip-box">
+💡 <strong>Tips:</strong> Selalu verifikasi checksum (MD5/SHA256) file ISO yang diunduh untuk memastikan file tidak corrupt sebelum membuat bootable USB.
+</div>
+</div>
+`
+},
+{
+id: 4,
+title: "Konfigurasi Pasca Instalasi",
+icon: "🛠️",
+desc: "Driver, update, aplikasi, backup, dan aktivasi sistem operasi",
+content: `
+<span class="meeting-badge">Pertemuan 4</span>
+<h2>🛠️ Konfigurasi Pasca Instalasi</h2>
+<div class="material-content">
+<h3>📌 Instalasi Driver</h3>
+<p>Driver adalah perangkat lunak yang memungkinkan sistem operasi berkomunikasi dengan perangkat keras. Setelah instalasi OS, beberapa driver mungkin belum terinstal.</p>
+<ul>
+<li><strong>Driver Chipset:</strong> Mengatur komunikasi antara CPU, RAM, dan komponen motherboard</li>
+<li><strong>Driver VGA/GPU:</strong> Untuk tampilan grafis optimal (NVIDIA, AMD, Intel)</li>
+<li><strong>Driver Audio:</strong> Untuk output suara (Realtek, dll)</li>
+<li><strong>Driver Network:</strong> Untuk koneksi LAN/WiFi</li>
+<li><strong>Driver Peripheral:</strong> Printer, scanner, webcam, dll</li>
+</ul>
+<div class="info-box">
+💡 <strong>Sumber Driver:</strong><br>
+• Website resmi manufacturer (disarankan)<br>
+• Windows Update (otomatis)<br>
+• CD/DVD bawaan motherboard/laptop<br>
+• Linux: umumnya driver sudah included dalam kernel
+</div>
+
+<h3>📌 Update Sistem Operasi</h3>
+<ul>
+<li><strong>Windows Update:</strong> Settings → Update & Security → Check for updates</li>
+<li><strong>Linux (Ubuntu/Debian):</strong> <code>sudo apt update && sudo apt upgrade</code></li>
+<li><strong>Pentingnya Update:</strong>
+<ul>
+<li>Menambal celah keamanan (security patches)</li>
+<li>Memperbaiki bug</li>
+<li>Menambahkan fitur baru</li>
+<li>Meningkatkan kompatibilitas hardware</li>
+</ul>
+</li>
+</ul>
+
+<h3>📌 Instalasi Aplikasi Esensial</h3>
+<table>
+<tr><th>Kategori</th><th>Windows</th><th>Linux</th></tr>
+<tr><td>Browser</td><td>Chrome, Firefox, Edge</td><td>Firefox, Chrome, Chromium</td></tr>
+<tr><td>Office</td><td>MS Office, LibreOffice</td><td>LibreOffice, WPS Office</td></tr>
+<tr><td>Antivirus</td><td>Windows Defender, Avast</td><td>ClamAV (opsional)</td></tr>
+<tr><td>Media Player</td><td>VLC, MPC-HC</td><td>VLC, MPV</td></tr>
+<tr><td>Archive</td><td>7-Zip, WinRAR</td><td>File Roller, 7z</td></tr>
+<tr><td>Remote</td><td>TeamViewer, AnyDesk</td><td>Remmina, AnyDesk</td></tr>
+</table>
+
+<h3>📌 Backup dan Restore</h3>
+<p>Backup adalah proses menyalin data untuk melindungi dari kehilangan data. Restore adalah proses mengembalikan data dari backup.</p>
+<ul>
+<li><strong>Jenis Backup:</strong>
+<ul>
+<li><em>Full Backup:</em> Menyalin semua data</li>
+<li><em>Incremental Backup:</em> Hanya data yang berubah sejak backup terakhir</li>
+<li><em>Differential Backup:</em> Data yang berubah sejak full backup terakhir</li>
+</ul>
+</li>
+<li><strong>Tools Backup:</strong>
+<ul>
+<li>Windows: File History, System Image, Macrium Reflect</li>
+<li>Linux: Timeshift, rsync, Deja Dup</li>
+</ul>
+</li>
+<li><strong>System Restore Point (Windows):</strong> Menyimpan snapshot konfigurasi sistem yang bisa dikembalikan jika terjadi masalah</li>
+</ul>
+
+<h3>📌 Aktivasi Sistem Operasi</h3>
+<ul>
+<li><strong>Windows:</strong> Memasukkan product key (25 karakter) atau aktivasi digital melalui akun Microsoft</li>
+<li><strong>Linux:</strong> Sebagian besar distro Linux gratis dan open source, tidak perlu aktivasi</li>
+</ul>
+
+<div class="warn-box">
+⚠️ <strong>Penting:</strong> Gunakan software original dan legal! Menggunakan software bajakan melanggar hukum dan berisiko keamanan (malware, virus, tidak mendapat update).
+</div>
+
+<h3>📌 Checklist Pasca Instalasi</h3>
+<ul>
+<li>✅ Instal semua driver yang diperlukan</li>
+<li>✅ Update sistem operasi ke versi terbaru</li>
+<li>✅ Instal antivirus dan lakukan scan pertama</li>
+<li>✅ Instal aplikasi esensial</li>
+<li>✅ Konfigurasi firewall</li>
+<li>✅ Buat restore point / backup pertama</li>
+<li>✅ Aktivasi sistem operasi</li>
+<li>✅ Konfigurasi user account dan password</li>
+<li>✅ Atur display resolution dan pengaturan personalisasi</li>
+<li>✅ Test semua hardware berfungsi dengan baik</li>
+</ul>
+
+<div class="tip-box">
+💡 <strong>Tips Pro:</strong> Buat "golden image" — sistem yang sudah dikonfigurasi lengkap dengan semua driver dan aplikasi, lalu buat image backup. Ini akan menghemat waktu jika perlu reinstall di masa depan.
+</div>
+</div>
+`
+}
+];
+
+// ==================== QUIZ DATA ====================
+const pgQuestions = [
+// Pertemuan 1
+{ q: "Apa fungsi utama sistem operasi?", options: ["Mengedit dokumen", "Mengelola sumber daya hardware dan software", "Membuat program", "Mendesain website"], answer: 1, meeting: 1, explanation: "Sistem operasi berfungsi sebagai pengelola sumber daya perangkat keras dan perangkat lunak serta menyediakan layanan untuk program aplikasi." },
+{ q: "Sistem operasi yang bersifat open source dan gratis adalah...", options: ["Windows 11", "macOS", "Linux", "iOS"], answer: 2, meeting: 1, explanation: "Linux adalah sistem operasi open source yang bisa digunakan secara gratis dan kode sumbernya terbuka untuk dimodifikasi." },
+{ q: "Generasi keberapa sistem operasi mulai menggunakan GUI?", options: ["Generasi 1", "Generasi 2", "Generasi 3", "Generasi 4"], answer: 3, meeting: 1, explanation: "GUI (Graphical User Interface) mulai muncul pada generasi ke-4 (1980-sekarang) dengan munculnya Windows, macOS, dan Linux desktop." },
+{ q: "Distro Linux yang dirancang khusus untuk penetration testing adalah...", options: ["Ubuntu", "Linux Mint", "Kali Linux", "Fedora"], answer: 2, meeting: 1, explanation: "Kali Linux adalah distro Linux yang dirancang khusus untuk keamanan siber dan penetration testing." },
+{ q: "Manajemen memori dalam sistem operasi bertugas untuk...", options: ["Mengatur tampilan layar", "Mengalokasikan dan mengelola RAM", "Mengontrol printer", "Mengatur koneksi internet"], answer: 1, meeting: 1, explanation: "Manajemen memori bertanggung jawab mengalokasikan dan mengelola penggunaan RAM untuk setiap program yang berjalan." },
+// Pertemuan 2
+{ q: "Spesifikasi RAM minimum untuk Windows 11 (64-bit) adalah...", options: ["1 GB", "2 GB", "4 GB", "8 GB"], answer: 2, meeting: 2, explanation: "Windows 11 membutuhkan minimal 4 GB RAM untuk versi 64-bit." },
+{ q: "File system yang digunakan secara default oleh Windows adalah...", options: ["ext4", "FAT32", "NTFS", "APFS"], answer: 2, meeting: 2, explanation: "NTFS (New Technology File System) adalah file system default Windows yang mendukung fitur keamanan, journaling, dan kompresi." },
+{ q: "Berapa jumlah maksimal partisi primer dalam satu harddisk?", options: ["2", "4", "8", "16"], answer: 1, meeting: 2, explanation: "Dalam skema partisi MBR, satu harddisk maksimal memiliki 4 partisi primer." },
+{ q: "Tools yang digunakan untuk membuat bootable USB di Windows adalah...", options: ["Photoshop", "Rufus", "Notepad", "Calculator"], answer: 1, meeting: 2, explanation: "Rufus adalah tool ringan dan cepat untuk membuat bootable USB dari file ISO di Windows." },
+{ q: "Tombol yang umum digunakan untuk masuk ke BIOS saat booting adalah...", options: ["Ctrl + C", "Del atau F2", "Alt + Tab", "Shift + Enter"], answer: 1, meeting: 2, explanation: "Tombol Del atau F2 adalah yang paling umum digunakan untuk masuk ke BIOS/UEFI saat proses booting." },
+// Pertemuan 3
+{ q: "Tipe instalasi Windows yang menghapus semua data dan menginstal dari awal disebut...", options: ["Upgrade", "Custom (Clean Install)", "Repair", "Rollback"], answer: 1, meeting: 3, explanation: "Custom Install atau Clean Install adalah tipe instalasi yang menghapus semua data di partisi tujuan dan menginstal Windows dari awal." },
+{ q: "Bootloader yang digunakan oleh Linux untuk dual boot adalah...", options: ["BIOS", "UEFI", "GRUB", "NTLDR"], answer: 2, meeting: 3, explanation: "GRUB (GRand Unified Bootloader) adalah bootloader yang digunakan oleh Linux untuk mengelola pilihan boot, termasuk dual boot." },
+{ q: "Perintah Linux untuk update paket di Ubuntu/Debian adalah...", options: ["yum update", "sudo apt update", "pacman -Syu", "dnf upgrade"], answer: 1, meeting: 3, explanation: "Di Ubuntu/Debian, perintah 'sudo apt update' digunakan untuk memperbarui daftar paket dari repository." },
+{ q: "Jika harddisk tidak terdeteksi saat instalasi Windows, solusi yang tepat adalah...", options: ["Ganti monitor", "Ubah mode SATA ke AHCI di BIOS", "Tambah RAM", "Ganti keyboard"], answer: 1, meeting: 3, explanation: "Mengubah mode SATA dari IDE/RAID ke AHCI di BIOS sering kali menyelesaikan masalah harddisk tidak terdeteksi saat instalasi." },
+{ q: "Saat dual boot, sistem operasi yang sebaiknya diinstal terlebih dahulu adalah...", options: ["Linux", "Windows", "macOS", "Bebas, tidak ada urutan"], answer: 1, meeting: 3, explanation: "Windows sebaiknya diinstal terlebih dahulu karena installer Windows cenderung menimpa bootloader, sedangkan installer Linux (GRUB) bisa mendeteksi Windows." },
+// Pertemuan 4
+{ q: "Driver yang mengatur komunikasi antara CPU, RAM, dan komponen motherboard adalah...", options: ["Driver VGA", "Driver Audio", "Driver Chipset", "Driver Network"], answer: 2, meeting: 4, explanation: "Driver Chipset mengatur komunikasi antara CPU, RAM, dan berbagai komponen yang terhubung ke motherboard." },
+{ q: "Jenis backup yang hanya menyalin data yang berubah sejak backup terakhir disebut...", options: ["Full Backup", "Incremental Backup", "Differential Backup", "Mirror Backup"], answer: 1, meeting: 4, explanation: "Incremental Backup hanya menyalin data yang telah berubah sejak backup terakhir (baik full maupun incremental)." },
+{ q: "Perintah untuk upgrade paket di Ubuntu/Debian setelah update adalah...", options: ["sudo apt upgrade", "sudo apt install", "sudo apt remove", "sudo apt search"], answer: 0, meeting: 4, explanation: "'sudo apt upgrade' digunakan untuk meng-upgrade paket yang sudah terinstal ke versi terbaru setelah 'sudo apt update'." },
+{ q: "Fitur Windows yang menyimpan snapshot konfigurasi sistem disebut...", options: ["Windows Update", "System Restore Point", "Task Manager", "Disk Cleanup"], answer: 1, meeting: 4, explanation: "System Restore Point menyimpan snapshot konfigurasi sistem yang bisa dikembalikan jika terjadi masalah setelah perubahan." },
+{ q: "Mengapa penting menggunakan software original dan legal?", options: ["Agar tampilan lebih bagus", "Menghindari malware dan mendapat update keamanan", "Agar komputer lebih cepat", "Agar bisa main game"], answer: 1, meeting: 4, explanation: "Software original menjamin keamanan dari malware, mendapat update keamanan rutin, dan sesuai dengan hukum yang berlaku." }
+];
+
+const essayQuestions = [
+{ q: "Jelaskan perbedaan antara sistem operasi Windows dan Linux dari segi lisensi, keamanan, dan kemudahan penggunaan!", meeting: 1, keywords: ["lisensi", "open source", "berbayar", "gratis", "keamanan", "virus", "malware", "gui", "cli", "user friendly"], sampleAnswer: "Windows adalah OS berbayar (proprietary) dengan lisensi komersial dari Microsoft, memiliki GUI yang user-friendly sehingga mudah digunakan pemula, namun lebih rentan terhadap virus dan malware. Linux adalah OS open source dan gratis, memiliki tingkat keamanan yang lebih tinggi karena sifat open source-nya memungkinkan banyak developer memeriksa kode, namun beberapa distro memerlukan pemahaman command line (CLI) yang lebih dalam." },
+{ q: "Sebutkan dan jelaskan langkah-langkah persiapan yang harus dilakukan sebelum menginstal sistem operasi pada komputer!", meeting: 2, keywords: ["spesifikasi", "hardware", "backup", "partisi", "bootable", "usb", "bios", "uefi", "iso", "driver"], sampleAnswer: "Langkah persiapan instalasi OS: 1) Periksa spesifikasi hardware apakah memenuhi syarat minimum OS yang akan diinstal. 2) Backup semua data penting ke media penyimpanan eksternal. 3) Siapkan media instalasi (buat bootable USB dari file ISO menggunakan Rufus atau tools sejenis). 4) Atur BIOS/UEFI untuk boot dari USB terlebih dahulu. 5) Rencanakan skema partisi harddisk. 6) Siapkan driver yang mungkin dibutuhkan." },
+{ q: "Jelaskan proses instalasi Windows 10/11 secara clean install dari awal hingga masuk ke desktop!", meeting: 3, keywords: ["boot", "usb", "install now", "product key", "custom", "partisi", "format", "copying", "restart", "konfigurasi", "akun"], sampleAnswer: "Proses clean install Windows 10/11: 1) Boot komputer dari USB installer. 2) Pilih bahasa dan klik Next, lalu Install Now. 3) Masukkan product key atau lewati. 4) Pilih edisi Windows. 5) Accept license terms. 6) Pilih Custom (Advanced) untuk clean install. 7) Atur partisi harddisk (hapus partisi lama, buat baru, format). 8) Pilih partisi tujuan dan klik Next. 9) Tunggu proses copying files dan instalasi, komputer akan restart otomatis. 10) Lakukan konfigurasi awal: region, keyboard, buat akun, atur privasi. 11) Setup selesai dan masuk ke desktop Windows." },
+{ q: "Apa yang dimaksud dengan dual boot? Jelaskan langkah-langkah membuat konfigurasi dual boot Windows dan Linux!", meeting: 3, keywords: ["dua sistem operasi", "satu komputer", "bootloader", "grub", "windows dulu", "partisi", "unallocated", "alongside"], sampleAnswer: "Dual boot adalah konfigurasi di mana dua sistem operasi terinstal dalam satu komputer dan pengguna dapat memilih OS mana yang akan digunakan saat booting. Langkah-langkah: 1) Instal Windows terlebih dahulu pada partisi yang sudah ditentukan. 2) Sisakan ruang kosong (unallocated space) di harddisk untuk Linux. 3) Boot dari installer Linux (misalnya Ubuntu). 4) Pilih opsi 'Install alongside Windows'. 5) Atur ukuran partisi untuk Linux. 6) Selesaikan instalasi Linux. 7) GRUB akan otomatis terinstal sebagai bootloader dan menampilkan pilihan OS saat booting." },
+{ q: "Jelaskan pentingnya melakukan konfigurasi pasca instalasi sistem operasi dan sebutkan minimal 5 hal yang harus dilakukan setelah instalasi OS!", meeting: 4, keywords: ["driver", "update", "antivirus", "aplikasi", "backup", "restore point", "aktivasi", "firewall", "keamanan", "kinerja"], sampleAnswer: "Konfigurasi pasca instalasi sangat penting untuk memastikan sistem berjalan optimal, aman, dan siap digunakan. 5 hal yang harus dilakukan: 1) Instal semua driver hardware (chipset, VGA, audio, network) agar semua perangkat berfungsi optimal. 2) Update sistem operasi ke versi terbaru untuk menambal celah keamanan dan memperbaiki bug. 3) Instal dan aktifkan antivirus untuk melindungi dari malware. 4) Instal aplikasi esensial yang dibutuhkan (browser, office, media player). 5) Buat System Restore Point atau backup pertama sebagai titik pemulihan jika terjadi masalah di kemudian hari." }
+];
+
+// ==================== INITIALIZATION ====================
+function init() {
+createParticles();
+renderMeetingCards();
+updateStats();
+}
+
+function createParticles() {
+const container = document.getElementById('particles');
+for (let i = 0; i < 30; i++) {
+const p = document.createElement('div');
+p.className = 'particle';
+p.style.left = Math.random() * 100 + '%';
+p.style.animationDuration = (8 + Math.random() * 12) + 's';
+p.style.animationDelay = Math.random() * 10 + 's';
+p.style.width = p.style.height = (2 + Math.random() * 3) + 'px';
+container.appendChild(p);
+}
+}
+
+function renderMeetingCards() {
+const grid1 = document.getElementById('meetingGrid');
+const grid2 = document.getElementById('meetingGrid2');
+let html = '';
+materials.forEach(m => {
+const completed = gameState.meetingsRead.includes(m.id);
+html += `
+<div class="meeting-card ${completed ? 'completed' : ''}" onclick="openMaterial(${m.id})">
+<div class="meeting-num">${m.icon}</div>
+<div class="meeting-title">Pertemuan ${m.id}: ${m.title}</div>
+<div class="meeting-desc">${m.desc}</div>
+</div>
+`;
+});
+grid1.innerHTML = html;
+grid2.innerHTML = html;
+}
+
+// ==================== NAVIGATION ====================
+function showSection(id) {
+document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+document.getElementById('section-' + id).classList.add('active');
+document.querySelectorAll('.nav-tab').forEach(t => {
+if (t.textContent.toLowerCase().includes(
+id === 'home' ? 'beranda' : id === 'material' ? 'materi' : id === 'quiz' ? 'kuis' : 'review'
+)) t.classList.add('active');
+});
+
+if (id === 'material') {
+document.getElementById('materialList').classList.remove('hidden');
+document.getElementById('materialDetail').classList.add('hidden');
+}
+if (id === 'quiz') {
+document.getElementById('quizMenu').classList.remove('hidden');
+document.getElementById('quizArea').classList.add('hidden');
+}
+}
+
+// ==================== MATERIAL ====================
+function openMaterial(id) {
+const m = materials.find(x => x.id === id);
+if (!m) return;
+
+if (!gameState.meetingsRead.includes(id)) {
+gameState.meetingsRead.push(id);
+addXP(25);
+showAchievement('📖', 'Pembaca Pertama!', `Materi Pertemuan ${id} selesai dibaca! +25 XP`);
+checkBadge('first-read');
+if (gameState.meetingsRead.length === 4) checkBadge('all-clear');
+updateStats();
+renderMeetingCards();
+}
+
+showSection('material');
+document.getElementById('materialList').classList.add('hidden');
+const detail = document.getElementById('materialDetail');
+detail.classList.remove('hidden');
+detail.innerHTML = `
+<div class="material-view">
+${m.content}
+<div class="btn-group">
+<button class="btn btn-back" onclick="backToMaterialList()">← Kembali ke Daftar</button>
+${id < 4 ? `<button class="btn btn-primary" onclick="openMaterial(${id + 1})">Pertemuan Berikutnya →</button>` : ''}
+<button class="btn btn-secondary" onclick="showSection('quiz')">🎯 Kerjakan Kuis</button>
+</div>
+</div>
+`;
+window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function backToMaterialList() {
+document.getElementById('materialList').classList.remove('hidden');
+document.getElementById('materialDetail').classList.add('hidden');
+}
+
+// ==================== QUIZ SYSTEM ====================
+let currentQuiz = { type: '', questions: [], current: 0, answers: [], score: 0, startTime: null };
+
+function startQuiz(type) {
+clearInterval(gameState.timerInterval);
+currentQuiz = { type, questions: [], current: 0, answers: [], score: 0, startTime: Date.now() };
+
+if (type === 'pg') {
+currentQuiz.questions = shuffleArray([...pgQuestions]).slice(0, 20);
+currentQuiz.timeLimit = 30 * 60;
+} else if (type === 'essay') {
+currentQuiz.questions = shuffleArray([...essayQuestions]).slice(0, 5);
+currentQuiz.timeLimit = 45 * 60;
+} else {
+const pg = shuffleArray([...pgQuestions]).slice(0, 10);
+const es = shuffleArray([...essayQuestions]).slice(0, 3);
+currentQuiz.questions = [...pg.map(q => ({...q, qType: 'pg'})), ...es.map(q => ({...q, qType: 'essay'}))];
+currentQuiz.timeLimit = 40 * 60;
+}
+
+currentQuiz.questions.forEach(q => { if (!q.qType) q.qType = type === 'essay' ? 'essay' : 'pg'; });
+
+document.getElementById('quizMenu').classList.add('hidden');
+const area = document.getElementById('quizArea');
+area.classList.remove('hidden');
+
+gameState.timeLeft = currentQuiz.timeLimit;
+startTimer();
+renderQuestion();
+}
+
+function startTimer() {
+clearInterval(gameState.timerInterval);
+gameState.timerInterval = setInterval(() => {
+gameState.timeLeft--;
+updateTimerDisplay();
+if (gameState.timeLeft <= 0) {
+clearInterval(gameState.timerInterval);
+finishQuiz();
+}
+}, 1000);
+}
+
+function updateTimerDisplay() {
+const el = document.getElementById('quizTimer');
+if (!el) return;
+const m = Math.floor(gameState.timeLeft / 60);
+const s = gameState.timeLeft % 60;
+el.textContent = `⏱️ ${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+el.className = 'timer' + (gameState.timeLeft < 60 ? ' warning' : '');
+}
+
+function renderQuestion() {
+const area = document.getElementById('quizArea');
+const q = currentQuiz.questions[currentQuiz.current];
+const total = currentQuiz.questions.length;
+const progress = ((currentQuiz.current) / total) * 100;
+const letters = ['A', 'B', 'C', 'D'];
+
+let html = `
+<div class="quiz-container">
+<div class="quiz-header">
+<div class="quiz-progress">
+<span style="font-size:0.85em; opacity:0.7;">Soal ${currentQuiz.current + 1}/${total}</span>
+<div class="quiz-progress-bar"><div class="quiz-progress-fill" style="width:${progress}%"></div></div>
+</div>
+<div class="timer" id="quizTimer">⏱️ --:--</div>
+</div>
+<div class="question-card">
+<div class="question-num">Pertemuan ${q.meeting} • ${q.qType === 'pg' ? 'Pilihan Ganda' : 'Essay'}</div>
+<div class="question-text">${q.q}</div>
+`;
+
+if (q.qType === 'pg') {
+html += `<div class="options-list">`;
+q.options.forEach((opt, i) => {
+html += `
+<button class="option-btn" onclick="selectOption(this, ${i})" data-idx="${i}">
+<span class="option-letter">${letters[i]}</span>
+<span>${opt}</span>
+</button>
+`;
+});
+html += `</div>`;
+} else {
+html += `<textarea class="essay-textarea" id="essayInput" placeholder="Tulis jawabanmu di sini..."></textarea>`;
+}
+
+html += `
+<div class="btn-group">
+${currentQuiz.current > 0 ? `<button class="btn btn-back" onclick="prevQuestion()">← Sebelumnya</button>` : ''}
+${currentQuiz.current < total - 1
+? `<button class="btn btn-primary" onclick="nextQuestion()">Selanjutnya →</button>`
+: `<button class="btn btn-success" onclick="finishQuiz()">✅ Selesai & Lihat Hasil</button>`
+}
+</div>
+</div>
+</div>
+`;
+
+area.innerHTML = html;
+updateTimerDisplay();
+
+// Restore previous answer
+if (currentQuiz.answers[currentQuiz.current] !== undefined) {
+if (q.qType === 'pg') {
+const btns = area.querySelectorAll('.option-btn');
+btns[currentQuiz.answers[currentQuiz.current]].classList.add('selected');
+} else {
+document.getElementById('essayInput').value = currentQuiz.answers[currentQuiz.current];
+}
+}
+}
+
+function selectOption(btn, idx) {
+document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+btn.classList.add('selected');
+currentQuiz.answers[currentQuiz.current] = idx;
+}
+
+function nextQuestion() {
+if (currentQuiz.questions[currentQuiz.current].qType === 'essay') {
+const input = document.getElementById('essayInput');
+if (input) currentQuiz.answers[currentQuiz.current] = input.value;
+}
+currentQuiz.current++;
+renderQuestion();
+}
+
+function prevQuestion() {
+if (currentQuiz.questions[currentQuiz.current].qType === 'essay') {
+const input = document.getElementById('essayInput');
+if (input) currentQuiz.answers[currentQuiz.current] = input.value;
+}
+currentQuiz.current--;
+renderQuestion();
+}
+
+function finishQuiz() {
+clearInterval(gameState.timerInterval);
+
+// Save last essay answer
+if (currentQuiz.questions[currentQuiz.current]?.qType === 'essay') {
+const input = document.getElementById('essayInput');
+if (input) currentQuiz.answers[currentQuiz.current] = input.value;
+}
+
+let pgCorrect = 0, pgTotal = 0, essayCount = 0;
+const results = [];
+
+currentQuiz.questions.forEach((q, i) => {
+if (q.qType === 'pg') {
+pgTotal++;
+const userAns = currentQuiz.answers[i];
+const isCorrect = userAns === q.answer;
+if (isCorrect) pgCorrect++;
+results.push({
+type: 'pg',
+question: q.q,
+userAnswer: userAns !== undefined ? q.options[userAns] : 'Tidak dijawab',
+correctAnswer: q.options[q.answer],
+isCorrect,
+explanation: q.explanation,
+meeting: q.meeting
+});
+} else {
+essayCount++;
+const userAns = currentQuiz.answers[i] || '';
+const score = gradeEssay(userAns, q.keywords);
+results.push({
+type: 'essay',
+question: q.q,
+userAnswer: userAns,
+sampleAnswer: q.sampleAnswer,
+score: score,
+maxScore: 100,
+meeting: q.meeting
+});
+}
+});
+
+const pgScore = pgTotal > 0 ? Math.round((pgCorrect / pgTotal) * 100) : 0;
+const essayAvg = essayCount > 0 ? Math.round(results.filter(r => r.type === 'essay').reduce((a, b) => a + b.score, 0) / essayCount) : 0;
+const finalScore = Math.round((pgScore * 0.6) + (essayAvg * 0.4)) || pgScore || essayAvg;
+
+const xpEarned = Math.round(finalScore / 2) + 10;
+addXP(xpEarned);
+gameState.quizzesDone++;
+if (finalScore > gameState.highScore) gameState.highScore = finalScore;
+
+gameState.lastQuizResults = results;
+
+if (finalScore >= 80) checkBadge('quiz-master');
+if (essayCount > 0) checkBadge('essay-pro');
+if (finalScore === 100) checkBadge('perfect-score');
+if (gameState.meetingsRead.length === 4 && gameState.quizzesDone >= 4) checkBadge('all-clear');
+
+updateStats();
+showScoreScreen(finalScore, pgCorrect, pgTotal, essayAvg, xpEarned);
+}
+
+function gradeEssay(answer, keywords) {
+if (!answer || answer.trim().length < 20) return 10;
+const lower = answer.toLowerCase();
+let matchCount = 0;
+keywords.forEach(kw => {
+if (lower.includes(kw.toLowerCase())) matchCount++;
+});
+const keywordScore = (matchCount / keywords.length) * 60;
+const lengthScore = Math.min(30, (answer.length / 500) * 30);
+const structureScore = answer.includes('.') && answer.includes(',') ? 10 : 5;
+return Math.min(100, Math.round(keywordScore + lengthScore + structureScore));
+}
+
+function showScoreScreen(score, pgCorrect, pgTotal, essayAvg, xpEarned) {
+const area = document.getElementById('quizArea');
+let message = '', emoji = '';
+if (score >= 90) { message = 'Luar Biasa! Kamu Master OS! 🎉'; emoji = '🏆'; }
+else if (score >= 75) { message = 'Hebat! Kamu Sudah Paham! 💪'; emoji = '⭐'; }
+else if (score >= 60) { message = 'Cukup Baik, Terus Belajar! 📚'; emoji = '👍'; }
+else { message = 'Ayo Belajar Lagi! Kamu Pasti Bisa! 💪'; emoji = '📖'; }
+
+area.innerHTML = `
+<div class="quiz-container">
+<div class="score-display">
+<div class="score-circle">
+<div class="score-circle-inner">
+<div class="score-number">${score}</div>
+<div class="score-label">NILAI</div>
+</div>
+</div>
+<div class="score-message">${emoji} ${message}</div>
+<div class="score-detail">
+${pgTotal > 0 ? `Pilihan Ganda: ${pgCorrect}/${pgTotal} benar` : ''}
+${pgTotal > 0 && essayAvg > 0 ? ' | ' : ''}
+${essayAvg > 0 ? `Essay: ${essayAvg}/100` : ''}
+</div>
+<p style="color:var(--warning); font-weight:600; margin-bottom:20px;">+${xpEarned} XP diperoleh!</p>
+<div class="btn-group" style="justify-content:center;">
+<button class="btn btn-primary" onclick="showSection('review')">📋 Lihat Review</button>
+<button class="btn btn-secondary" onclick="showSection('quiz')">🔄 Kuis Lagi</button>
+<button class="btn btn-back" onclick="showSection('home')">🏠 Beranda</button>
+</div>
+</div>
+</div>
+`;
+}
+
+// ==================== REVIEW ====================
+function showSection(id) {
+document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+document.getElementById('section-' + id).classList.add('active');
+
+const tabMap = { home: 'beranda', material: 'materi', quiz: 'kuis', review: 'review' };
+document.querySelectorAll('.nav-tab').forEach(t => {
+if (t.textContent.toLowerCase().includes(tabMap[id])) t.classList.add('active');
+});
+
+if (id === 'material') {
+document.getElementById('materialList').classList.remove('hidden');
+document.getElementById('materialDetail').classList.add('hidden');
+}
+if (id === 'quiz') {
+document.getElementById('quizMenu').classList.remove('hidden');
+document.getElementById('quizArea').classList.add('hidden');
+}
+if (id === 'review') renderReview();
+}
+
+function renderReview() {
+const container = document.getElementById('reviewList');
+if (!gameState.lastQuizResults || gameState.lastQuizResults.length === 0) {
+container.innerHTML = '<p style="opacity:0.5; text-align:center; padding:40px;">Belum ada hasil kuis. Selesaikan kuis terlebih dahulu! 🎯</p>';
+return;
+}
+
+let html = '';
+gameState.lastQuizResults.forEach((r, i) => {
+if (r.type === 'pg') {
+html += `
+<div class="review-card ${r.isCorrect ? 'correct-review' : 'wrong-review'}">
+<div class="review-q">${i + 1}. ${r.question}</div>
+<div class="review-answer your-ans">📝 Jawabanmu: <strong>${r.userAnswer}</strong> ${r.isCorrect ? '✅' : '❌'}</div>
+${!r.isCorrect ? `<div class="review-answer correct-ans">✅ Jawaban Benar: <strong>${r.correctAnswer}</strong></div>` : ''}
+<div class="review-explanation">💡 <strong>Pembahasan:</strong> ${r.explanation}</div>
+</div>
+`;
+} else {
+html += `
+<div class="review-card essay-review">
+<div class="review-q">${i + 1}. ${r.question}</div>
+<div class="review-answer essay-ans">📝 <strong>Jawabanmu (Skor: ${r.score}/100):</strong><br>${r.userAnswer || '<em>Tidak dijawab</em>'}</div>
+<div class="review-answer correct-ans">📖 <strong>Contoh Jawaban Ideal:</strong><br>${r.sampleAnswer}</div>
+</div>
+`;
+}
+});
+
+container.innerHTML = html;
+}
+
+// ==================== XP & LEVEL SYSTEM ====================
+function addXP(amount) {
+gameState.xp += amount;
+const levelThresholds = [0, 100, 250, 450, 700, 1000, 1500, 2000, 3000, 5000];
+let newLevel = 1;
+for (let i = levelThresholds.length - 1; i >= 0; i--) {
+if (gameState.xp >= levelThresholds[i]) { newLevel = i + 1; break; }
+}
+if (newLevel > gameState.level) {
+gameState.level = newLevel;
+showAchievement('🎮', `Level Up! Level ${newLevel}`, `Kamu naik ke level ${getLevelName(newLevel)}!`);
+}
+gameState.level = newLevel;
+updateStats();
+}
+
+function getLevelName(lvl) {
+const names = ['', 'Newbie', 'Learner', 'Student', 'Apprentice', 'Technician', 'Expert', 'Master', 'Guru', 'Legend', 'OS Wizard'];
+return names[lvl] || 'OS Wizard';
+}
+
+function updateStats() {
+document.getElementById('totalXP').textContent = gameState.xp;
+document.getElementById('totalScore').textContent = gameState.highScore;
+document.getElementById('meetingsCompleted').textContent = gameState.meetingsRead.length + '/4';
+document.getElementById('quizDone').textContent = gameState.quizzesDone;
+
+const thresholds = [0, 100, 250, 450, 700, 1000, 1500, 2000, 3000, 5000];
+const currentThreshold = thresholds[gameState.level - 1] || 0;
+const nextThreshold = thresholds[gameState.level] || thresholds[thresholds.length - 1];
+const progress = ((gameState.xp - currentThreshold) / (nextThreshold - currentThreshold)) * 100;
+
+document.getElementById('xpBar').style.width = Math.min(100, progress) + '%';
+document.getElementById('levelText').textContent = `🎮 Level ${gameState.level} - ${getLevelName(gameState.level)}`;
+document.getElementById('xpText').textContent = `${gameState.xp} / ${nextThreshold} XP`;
+
+// Update badges
+document.querySelectorAll('.badge').forEach(b => {
+const key = b.dataset.badge;
+if (gameState.badges.includes(key)) b.classList.remove('locked');
+});
+}
+
+function checkBadge(id) {
+if (!gameState.badges.includes(id)) {
+gameState.badges.push(id);
+}
+}
+
+function showAchievement(icon, title, text) {
+const popup = document.createElement('div');
+popup.className = 'achievement-popup';
+popup.innerHTML = `
+<div class="ach-icon">${icon}</div>
+<div class="ach-text">
+<div class="ach-title">${title}</div>
+<div>${text}</div>
+</div>
+`;
+document.body.appendChild(popup);
+setTimeout(() => popup.remove(), 4000);
+}
+
+// ==================== UTILITIES ====================
+function shuffleArray(arr) {
+for (let i = arr.length - 1; i > 0; i--) {
+const j = Math.floor(Math.random() * (i + 1));
+[arr[i], arr[j]] = [arr[j], arr[i]];
+}
+return arr;
+}
+
+// ==================== START ====================
+init();
+</script>
+</body>
+</html>
