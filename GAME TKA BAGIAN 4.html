@@ -1,0 +1,114 @@
+<!DOCTYPE html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>TKA TJKT - SMKS Budi Mulya Kasiman</title>
+<style>
+:root{--bg:#f4f6fb;--c:#fff;--t:#1b2233;--m:#5b6475;--p:#2563eb;--ok:#16a34a;--no:#dc2626;--b:#d9deea;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1420;--c:#182030;--t:#e8ecf5;--m:#9aa5b8;--p:#60a5fa;--b:#2a3550}}
+:root[data-theme="dark"]{--bg:#0f1420;--c:#182030;--t:#e8ecf5;--m:#9aa5b8;--p:#60a5fa;--b:#2a3550}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.w{max-width:760px;margin:0 auto;padding:16px}
+header{text-align:center;padding:8px 0 12px}h1{margin:0;font-size:1.35rem}header p{margin:4px 0 0;color:var(--m);font-size:.9rem}
+nav{display:flex;gap:6px;margin:10px 0}nav button{flex:1;padding:10px;border:1px solid var(--b);background:var(--c);color:var(--t);border-radius:10px;font-weight:600;cursor:pointer}
+nav button.on{background:var(--p);color:#fff;border-color:var(--p)}
+.card{background:var(--c);border:1px solid var(--b);border-radius:14px;padding:16px;margin:10px 0}
+.btn{background:var(--p);color:#fff;border:0;border-radius:10px;padding:10px 16px;font-weight:600;cursor:pointer;font-size:1rem}
+.btn.g{background:transparent;color:var(--t);border:1px solid var(--b)}
+input,textarea{width:100%;padding:10px;border:1px solid var(--b);border-radius:10px;background:var(--bg);color:var(--t);font:inherit}
+details{border:1px solid var(--b);border-radius:12px;background:var(--c);margin:8px 0;padding:10px 14px}summary{font-weight:700;cursor:pointer}
+details p,details li{margin:6px 0;font-size:.95rem}
+.opt{display:block;width:100%;text-align:left;margin:8px 0;padding:12px;border:1px solid var(--b);background:var(--bg);color:var(--t);border-radius:10px;cursor:pointer;font:inherit}
+.opt.ok{background:var(--ok);color:#fff;border-color:var(--ok)}.opt.no{background:var(--no);color:#fff;border-color:var(--no)}
+.bar{height:8px;background:var(--b);border-radius:8px;overflow:hidden}.bar i{display:block;height:100%;background:var(--p);width:0;transition:width .3s}
+.row{display:flex;justify-content:space-between;gap:8px;color:var(--m);font-size:.9rem;margin:6px 0}
+.big{font-size:2.4rem;font-weight:800;text-align:center;color:var(--p)}.hide{display:none}.k{background:var(--bg);border-left:4px solid var(--ok);padding:8px 12px;border-radius:8px;margin:8px 0;font-size:.95rem}
+</style></head><body><div class="w">
+<header><h1>🖧 Game TKA - Teknik Jaringan Komputer & Telekomunikasi</h1><p>Kelas XII SMKS Budi Mulya Kasiman</p></header>
+<nav><button data-t="m" class="on">📚 Materi</button><button data-t="q">🎮 40 Soal PG</button><button data-t="e">✍️ 15 Esai</button></nav>
+<div id="m"></div><div id="q" class="hide"></div><div id="e" class="hide"></div>
+<p style="text-align:center;color:var(--m);font-size:.8rem">Soal latihan disusun dari kurikulum umum TJKT; cocokkan dengan kisi-kisi resmi TKA Pusmendik.</p></div>
+<script>
+const $=id=>document.getElementById(id);
+const MAT=[
+["1. Konsep Jaringan & Topologi","<ul><li>LAN (area kecil), MAN (kota), WAN (luas, mis. internet).</li><li>Client-server (terpusat) vs peer-to-peer (setara).</li><li>Topologi: bus, star (titik pusat switch), ring, mesh (semua saling terhubung), tree.</li></ul>"],
+["2. Model OSI & TCP/IP","<ul><li>7 layer OSI (1→7): Physical, Data Link, Network, Transport, Session, Presentation, Application.</li><li>TCP/IP 4 layer: Network Access, Internet, Transport, Application.</li><li>TCP: andal, three-way handshake. UDP: cepat, tanpa jaminan.</li><li>Switch = layer 2 (MAC), router = layer 3 (IP).</li></ul>"],
+["3. Pengalamatan IP & Subnetting","<ul><li>IPv4 32 bit, IPv6 128 bit, MAC 48 bit.</li><li>Kelas A 1-126 (/8), B 128-191 (/16), C 192-223 (/24).</li><li>IP privat: 10.x.x.x, 172.16-31.x.x, 192.168.x.x.</li><li>Jumlah host = 2ⁿ − 2 (n = bit host). Blok subnet = 256 − oktet mask. Contoh /26 = 255.255.255.192, blok 64, 62 host.</li></ul>"],
+["4. Perangkat & Media Transmisi","<ul><li>Hub (broadcast), switch (berdasar MAC), router (antar jaringan), access point (WLAN), modem.</li><li>UTP Cat5e/Cat6 + RJ-45. T568B: putih-oranye, oranye, putih-hijau, biru, putih-biru, hijau, putih-coklat, coklat.</li><li>Straight: beda perangkat (PC-switch). Crossover: sejenis (PC-PC).</li><li>Fiber optik: transmisi cahaya, kebal interferensi EMI, jarak jauh. Single-mode & multimode.</li><li>Alat: crimping tool, LAN tester, stripper, OTDR/power meter (fiber).</li></ul>"],
+["5. Layanan & Protokol","<ul><li>DHCP (IP otomatis, proses DORA), DNS (nama→IP, port 53).</li><li>HTTP 80, HTTPS 443, FTP 21, SSH 22, Telnet 23, SMTP 25, POP3 110, IMAP 143.</li><li>Server: web, file, mail, proxy.</li></ul>"],
+["6. Routing, VLAN, NAT & Mikrotik","<ul><li>Routing statis (manual) vs dinamis (RIP distance-vector, OSPF link-state).</li><li>VLAN: memisahkan broadcast domain secara logika.</li><li>NAT: IP privat ↔ publik. Gateway: pintu keluar jaringan.</li><li>Mikrotik: RouterOS, konfigurasi via Winbox. Simulasi: Cisco Packet Tracer.</li><li>Wireless: IEEE 802.11 (2,4/5 GHz), keamanan WPA2/WPA3.</li></ul>"],
+["7. Keamanan Jaringan","<ul><li>Prinsip CIA: Confidentiality, Integrity, Availability.</li><li>Ancaman: malware, phishing, sniffing, DoS/DDoS, brute force.</li><li>Pertahanan: firewall, antivirus, VPN, enkripsi, password kuat, update berkala.</li></ul>"],
+["8. Troubleshooting & K3","<ul><li>Perintah: ping (cek konektivitas), ipconfig/ifconfig, tracert (jalur), nslookup (DNS), netstat.</li><li>Alur: cek fisik/kabel → IP → gateway → DNS → layanan.</li><li>K3: ESD wrist strap, tidak merokok/makan di ruang server, ikuti SOP, rapikan kabel, cek listrik.</li></ul>"]];
+const PG=[
+["Perangkat yang menghubungkan dua jaringan berbeda dan memilih jalur paket adalah...",["Hub","Switch","Router","Repeater"],2],
+["Layer OSI yang menangani pengalamatan logis (IP) adalah...",["Data Link","Network","Transport","Session"],1],
+["Jumlah layer pada model OSI adalah...",["4","5","6","7"],3],
+["Protokol yang memberi alamat IP secara otomatis adalah...",["DNS","DHCP","FTP","SMTP"],1],
+["Protokol penerjemah nama domain menjadi IP adalah...",["DNS","DHCP","HTTP","SNMP"],0],
+["Port default HTTPS adalah...",["21","80","443","25"],2],
+["IP 192.168.1.10 termasuk kelas...",["A","B","C","D"],2],
+["Subnet mask untuk prefix /24 adalah...",["255.0.0.0","255.255.0.0","255.255.255.0","255.255.255.128"],2],
+["Jumlah host valid pada jaringan /24 adalah...",["256","255","254","253"],2],
+["Topologi dengan satu titik pusat (switch) adalah...",["Bus","Star","Ring","Mesh"],1],
+["Kabel UTP straight umumnya dipakai untuk menghubungkan...",["PC ke PC","PC ke switch","Switch ke switch (lama)","Router ke router"],1],
+["Kabel crossover digunakan untuk menghubungkan...",["PC ke PC","PC ke switch","Switch ke router","AP ke modem"],0],
+["Konektor standar kabel UTP adalah...",["BNC","RJ-11","RJ-45","SC"],2],
+["Susunan kabel T568B diawali dengan warna...",["Putih hijau","Putih oranye","Biru","Coklat"],1],
+["Switch bekerja berdasarkan alamat...",["IP","MAC","Port TCP","Domain"],1],
+["Panjang alamat MAC adalah...",["32 bit","48 bit","64 bit","128 bit"],1],
+["Panjang alamat IPv6 adalah...",["32 bit","64 bit","128 bit","256 bit"],2],
+["VLAN berfungsi untuk...",["Menambah kecepatan fisik","Memisahkan broadcast domain secara logika","Menguatkan sinyal","Menyimpan data"],1],
+["Fiber optik mentransmisikan data dalam bentuk...",["Listrik","Gelombang radio","Cahaya","Suara analog"],2],
+["Alat untuk memasang konektor RJ-45 ke kabel adalah...",["LAN tester","Crimping tool","Multimeter","Obeng"],1],
+["Alat untuk menguji sambungan kabel UTP adalah...",["LAN tester","Solder","Tang potong","Clamp meter"],0],
+["Perintah untuk mengecek konektivitas ke host lain adalah...",["ping","format","dir","cls"],0],
+["Perintah Windows untuk melacak jalur paket adalah...",["traceroute","tracert","route print","arp"],1],
+["Protokol untuk transfer file adalah...",["FTP","SMTP","DNS","ICMP"],0],
+["Port default SSH adalah...",["21","22","23","53"],1],
+["Fungsi utama firewall adalah...",["Mempercepat internet","Menyaring lalu lintas jaringan","Menyimpan email","Memberi IP"],1],
+["Serangan yang membanjiri server dari banyak sumber disebut...",["Phishing","DDoS","Spoofing","Backup"],1],
+["Standar jaringan nirkabel WLAN adalah...",["IEEE 802.3","IEEE 802.11","IEEE 802.1Q","IEEE 802.5"],1],
+["Standar Ethernet kabel adalah...",["IEEE 802.3","IEEE 802.11","IEEE 802.15","IEEE 802.16"],0],
+["Sistem operasi router Mikrotik adalah...",["IOS","RouterOS","Junos","OpenWrt"],1],
+["Aplikasi GUI untuk konfigurasi Mikrotik adalah...",["Winbox","Wireshark","Putty","Nmap"],0],
+["Simulator jaringan buatan Cisco adalah...",["VirtualBox","Packet Tracer","GNS only","Proxmox"],1],
+["NAT berfungsi untuk...",["Menerjemahkan IP privat ke IP publik","Mengenkripsi data","Menamai domain","Mengatur VLAN"],0],
+["Berikut yang termasuk IP privat adalah...",["8.8.8.8","172.16.5.4","202.1.1.1","100.200.1.1"],1],
+["Protokol pengiriman email adalah...",["SMTP","FTP","SNMP","TFTP"],0],
+["Saat merakit hardware, K3 yang perlu digunakan untuk mencegah listrik statis adalah...",["Sarung tangan wol","ESD wrist strap","Kacamata renang","Helm"],1],
+["Satuan bandwidth jaringan adalah...",["bps","Hertz","Ohm","Volt"],0],
+["Topologi dengan setiap perangkat terhubung ke semua perangkat lain adalah...",["Star","Bus","Mesh","Tree"],2],
+["OSPF termasuk protokol routing jenis...",["Statis","Link-state","Distance-vector","Hybrid L1"],1],
+["Alamat yang digunakan host untuk keluar ke jaringan lain disebut...",["Broadcast","Gateway","Loopback","Network ID"],1]];
+const ES=[
+["Jelaskan perbedaan LAN, MAN, dan WAN!","LAN: area kecil (ruang/gedung/sekolah). MAN: area kota. WAN: area sangat luas lintas kota/negara, contohnya internet."],
+["Sebutkan 7 layer OSI beserta urutannya!","1 Physical, 2 Data Link, 3 Network, 4 Transport, 5 Session, 6 Presentation, 7 Application."],
+["Jelaskan perbedaan TCP dan UDP!","TCP: connection-oriented, andal, ada handshake dan retransmisi (web, email). UDP: connectionless, cepat, tanpa jaminan (streaming, DNS, VoIP)."],
+["Tentukan subnet mask, jumlah host, network ID dan broadcast untuk 192.168.10.0/26!","Mask 255.255.255.192; host 2⁶−2 = 62; network 192.168.10.0; broadcast 192.168.10.63; rentang host .1 - .62."],
+["Jelaskan langkah membuat kabel UTP straight!","Kupas selubung kabel, urai 4 pasang, susun urutan T568B, ratakan/potong, masukkan ke RJ-45, crimping, uji dengan LAN tester."],
+["Jelaskan cara kerja DNS!","Client meminta nama domain ke DNS resolver, resolver mencari ke root, TLD, lalu authoritative server, lalu mengembalikan alamat IP ke client (dan cache)."],
+["Jelaskan fungsi dan tahapan kerja DHCP!","DHCP memberi IP otomatis. Tahap DORA: Discover, Offer, Request, Acknowledge."],
+["Bedakan hub, switch, dan router!","Hub: mengirim ke semua port (layer 1). Switch: meneruskan berdasar MAC (layer 2). Router: menghubungkan jaringan berbeda berdasar IP (layer 3)."],
+["Sebutkan keunggulan fiber optik dibanding kabel UTP!","Bandwidth besar, jarak jauh, redaman kecil, kebal interferensi elektromagnetik, lebih aman dari penyadapan."],
+["Jelaskan konsep dan manfaat VLAN!","VLAN membagi satu switch menjadi beberapa jaringan logis. Manfaat: broadcast domain lebih kecil, keamanan, pengelolaan lebih mudah, fleksibel."],
+["Sebutkan 3 ancaman keamanan jaringan dan cara pencegahannya!","Contoh: malware (antivirus, update), phishing (edukasi, filter email), DDoS (firewall, rate limiting); juga password kuat dan VPN."],
+["Langkah troubleshooting PC yang tidak bisa mengakses internet!","Cek kabel/lampu link, cek IP (ipconfig), ping gateway, ping IP publik (8.8.8.8), ping domain (cek DNS), cek konfigurasi router/ISP."],
+["Jelaskan fungsi NAT!","NAT menerjemahkan IP privat ke IP publik agar banyak host berbagi satu IP publik; menghemat IPv4 dan menyembunyikan jaringan internal."],
+["Jelaskan penerapan K3 saat bekerja di bidang jaringan!","Gunakan ESD strap, matikan listrik sebelum bongkar, rapikan kabel, pakai APD (kacamata/sarung tangan saat fiber), ikuti SOP, jaga ventilasi ruang server."],
+["Rancang secara singkat jaringan lab sekolah 40 PC!","Switch 48 port/dua switch, kabel UTP Cat6, 1 router + gateway, subnet /24 (atau VLAN), DHCP server, AP untuk WiFi, firewall, dokumentasi topologi star."]];
+// TABS
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x==b));["m","q","e"].forEach(i=>$(i).classList.toggle("hide",i!=b.dataset.t))});
+// MATERI
+$("m").innerHTML="<div class='card'>Pelajari ringkasan materi di bawah, lalu uji di tab <b>Soal PG</b> dan <b>Esai</b>.</div>"+MAT.map(x=>"<details><summary>"+x[0]+"</summary>"+x[1]+"</details>").join("");
+// QUIZ
+const sh=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+let Q,i,sc,st,best,name="";
+function home(){$("q").innerHTML="<div class='card'><p>Masukkan namamu lalu mulai 40 soal pilihan ganda. Benar = +25 poin, bonus streak!</p><input id='nm' placeholder='Nama siswa' value='"+name+"'><p><button class='btn' id='go'>Mulai Game 🚀</button></p></div>";$("go").onclick=()=>{name=$("nm").value.trim()||"Siswa";Q=sh(PG).map(x=>{const o=x[1].map((t,k)=>[t,k==x[2]]);return[x[0],sh(o)]});i=0;sc=0;st=0;best=0;ask()}}
+function ask(){const q=Q[i];$("q").innerHTML="<div class='card'><div class='bar'><i style='width:"+i/40*100+"%'></i></div><div class='row'><span>Soal "+(i+1)+"/40</span><span>🔥 "+st+" | ⭐ "+sc+"</span></div><p><b>"+q[0]+"</b></p>"+q[1].map((o,k)=>"<button class='opt' data-k='"+k+"'>"+String.fromCharCode(65+k)+". "+o[0]+"</button>").join("")+"<div id='fb'></div></div>";document.querySelectorAll(".opt").forEach(b=>b.onclick=()=>pick(+b.dataset.k))}
+function pick(k){const o=Q[i][1],bs=document.querySelectorAll(".opt");bs.forEach((b,x)=>{b.disabled=true;if(o[x][1])b.classList.add("ok")});if(o[k][1]){st++;best=Math.max(best,st);sc+=25+(st>2?5:0)}else{st=0;bs[k].classList.add("no");Q[i].w=1}
+$("fb").innerHTML="<button class='btn' id='nx'>"+(i<39?"Lanjut ➜":"Lihat Hasil 🏁")+"</button>";$("nx").onclick=()=>{i++;i<40?ask():done()}}
+function done(){const r=Q.filter(x=>!x.w).length,p=r/40*100,t=p>=85?"🏆 Jaringan Master!":p>=70?"👍 Teknisi Handal":p>=50?"📈 Terus Berlatih":"📚 Pelajari Materi Lagi";$("q").innerHTML="<div class='card'><div class='big'>"+sc+" poin</div><p style='text-align:center'><b>"+name+"</b>: "+r+"/40 benar ("+p.toFixed(0)+"%)<br>Streak terbaik: "+best+"<br><b>"+t+"</b></p><p style='text-align:center'><button class='btn' id='re'>Main Lagi</button></p></div>";$("re").onclick=home}
+home();
+// ESSAY
+let ok=0,no=0;
+$("e").innerHTML="<div class='card'>Tulis jawabanmu dulu, lalu buka kunci dan nilai diri sendiri. <b id='tl'>Paham 0 | Belum 0</b></div>"+ES.map((x,n)=>"<div class='card'><b>"+(n+1)+". "+x[0]+"</b><p><textarea rows='3' placeholder='Jawabanmu...'></textarea></p><button class='btn g' data-n='"+n+"'>🔑 Lihat kunci</button><div class='hide' id='k"+n+"'><div class='k'>"+x[1]+"</div><button class='btn' data-s='1'>✅ Paham</button> <button class='btn g' data-s='0'>❌ Belum</button></div></div>").join("");
+document.querySelectorAll("[data-n]").forEach(b=>b.onclick=()=>{b.classList.add("hide");$("k"+b.dataset.n).classList.remove("hide")});
+document.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{+b.dataset.s?ok++:no++;b.parentNode.innerHTML="<div class='k'>"+(+b.dataset.s?"Tercatat: paham":"Tercatat: perlu belajar lagi")+"</div>"+b.parentNode.firstChild.outerHTML;$("tl").textContent="Paham "+ok+" | Belum "+no});
+</script></body></html>
