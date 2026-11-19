@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hardware Hero — SMK Budi Mulya</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Chakra+Petch:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Nunito:ital,wght@0,600;0,800;1,600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07231a; --panel:#0c3123; --panel2:#0e3a2b; --line:#1c5b41; --line2:#2a7a57;
+  --copper:#e89b3c; --copper-l:#f7c064; --mint:#3fe08f; --mint-d:#1f8f5c;
+  --cream:#f4efdd; --dim:#8fb8a4; --red:#ff6157; --ink:#04140e;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Chakra Petch',sans-serif;color:var(--cream);min-height:100vh;overflow-x:hidden;
+  background:
+    radial-gradient(900px 480px at 12% -8%, rgba(63,224,143,.14), transparent 60%),
+    radial-gradient(800px 520px at 96% 108%, rgba(232,155,60,.14), transparent 55%),
+    repeating-linear-gradient(0deg, transparent 0 33px, rgba(63,224,143,.045) 33px 34px),
+    repeating-linear-gradient(90deg, transparent 0 33px, rgba(63,224,143,.045) 33px 34px),
+    var(--bg);
+}
+.chipfx{position:fixed;inset:0;pointer-events:none;z-index:0;font-size:30px;opacity:.12}
+.chipfx span{position:absolute;animation:floaty 12s ease-in-out infinite alternate}
+@keyframes floaty{from{transform:translateY(-12px) rotate(-6deg)}to{transform:translateY(14px) rotate(7deg)}}
+#stage{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:16px 14px 48px}
+.pix{font-family:'Silkscreen',monospace;letter-spacing:1px}
+
+/* ===== HUD ===== */
+.hud{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.school{display:flex;align-items:center;gap:8px;background:var(--panel);border:2px solid var(--line);
+  border-radius:10px;padding:7px 12px;box-shadow:inset 0 0 0 1px rgba(63,224,143,.12)}
+.school .ic{font-size:18px}
+.school .tx{font-family:'Silkscreen';font-size:10px;color:var(--mint);line-height:1.5}
+.school .tx small{display:block;color:var(--dim);font-size:8px}
+.progressbox{flex:1;min-width:180px;background:var(--panel);border:2px solid var(--line);border-radius:10px;padding:7px 12px}
+.progressbox .pt{display:flex;justify-content:space-between;font-family:'Silkscreen';font-size:9px;color:var(--copper-l);margin-bottom:5px}
+.pbar{height:9px;border-radius:99px;background:#062018;border:1px solid var(--line);overflow:hidden}
+.pbar i{display:block;height:100%;width:0;border-radius:99px;transition:width .5s cubic-bezier(.4,1.4,.5,1);
+  background:repeating-linear-gradient(45deg,var(--mint) 0 8px,var(--mint-d) 8px 16px)}
+.pills{display:flex;gap:8px}
+.pill{background:var(--panel);border:2px solid var(--line);border-radius:10px;padding:6px 12px;text-align:center;min-width:74px}
+.pill .pl{font-size:8px;font-family:'Silkscreen';color:var(--dim)}
+.pill .pv{font-family:'Silkscreen';font-size:15px;color:var(--copper-l)}
+.pill.streak .pv{color:var(--mint)}
+.pill.pop .pv{animation:popN .35s}
+@keyframes popN{40%{transform:scale(1.35);color:#fff}}
+#muteBtn{background:var(--panel);border:2px solid var(--line);border-radius:10px;width:42px;height:42px;
+  font-size:17px;cursor:pointer;transition:transform .12s}
+#muteBtn:hover{transform:translateY(-2px);border-color:var(--copper)}
+
+/* timer */
+.timerwrap{background:var(--panel);border:2px solid var(--line);border-radius:10px;padding:6px 10px;margin-bottom:14px;
+  display:flex;align-items:center;gap:10px}
+.timerwrap .tl{font-family:'Silkscreen';font-size:9px;color:var(--dim)}
+.timerbar{flex:1;height:12px;border-radius:99px;background:#062018;border:1px solid var(--line);overflow:hidden}
+#tfill{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--mint),#7ce89a);transition:width 1s linear}
+#tfill.warn{background:linear-gradient(90deg,#f7c064,#e89b3c)}
+#tfill.danger{background:linear-gradient(90deg,#ff8a6b,var(--red));animation:blink .5s steps(2) infinite}
+@keyframes blink{50%{opacity:.55}}
+#tnum{font-family:'Silkscreen';font-size:11px;color:var(--copper-l);min-width:34px;text-align:right}
+
+/* ===== QUESTION CARD ===== */
+.qcard{background:linear-gradient(180deg,var(--panel2),var(--panel));border:2px solid var(--line);border-radius:16px;
+  overflow:hidden;box-shadow:0 0 0 1px rgba(63,224,143,.1),0 14px 34px rgba(0,0,0,.45)}
+.qcard.reveal{animation:riseIn .4s ease}
+@keyframes riseIn{from{opacity:0;transform:translateY(16px)}}
+.qtop{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 16px;border-bottom:2px solid var(--line);
+  background:rgba(63,224,143,.05)}
+.toptag{font-family:'Silkscreen';font-size:9px;color:var(--ink);background:var(--copper);padding:5px 10px;border-radius:6px;
+  box-shadow:0 3px 0 #9a5f1c}
+.qcount{margin-left:auto;font-family:'Silkscreen';font-size:10px;color:var(--dim)}
+.qbody{padding:18px 18px 20px}
+.q-en{font-size:clamp(16px,2.6vw,21px);font-weight:700;line-height:1.5}
+.q-id{font-family:'Nunito';font-style:italic;color:var(--mint);opacity:.85;font-size:clamp(12.5px,2vw,15px);margin:6px 0 16px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.opt{display:flex;gap:11px;align-items:center;text-align:left;background:#0a2b1f;border:2px solid var(--line);
+  border-left:6px solid var(--copper);border-radius:11px;padding:11px 13px;cursor:pointer;color:var(--cream);
+  font-family:'Chakra Petch';transition:transform .13s,box-shadow .13s,border-color .13s,background .2s}
+.opt:hover:not(:disabled){transform:translateY(-3px);border-color:var(--copper);
+  box-shadow:0 6px 0 rgba(0,0,0,.35),0 0 16px rgba(232,155,60,.25);background:#0d3527}
+.opt:disabled{cursor:default}
+.opt .letter{flex:0 0 32px;height:32px;border-radius:8px;display:grid;place-items:center;
+  font-family:'Silkscreen';font-size:12px;background:#062018;color:var(--copper-l);border:2px solid var(--line)}
+.opt .otext b{display:block;font-size:clamp(13px,2vw,15.5px);line-height:1.35}
+.opt .otext i{font-family:'Nunito';font-style:italic;color:var(--dim);font-size:clamp(11px,1.7vw,13px)}
+.opt.good{background:#0e3d28;border-color:var(--mint);border-left-color:var(--mint);
+  box-shadow:0 0 0 2px var(--mint),0 0 22px rgba(63,224,143,.4)}
+.opt.good .letter{background:var(--mint);color:var(--ink);border-color:var(--mint)}
+.opt.bad{background:#3a1512;border-color:var(--red);border-left-color:var(--red);animation:shakeX .4s}
+.opt.bad .letter{background:var(--red);color:#2b0505;border-color:var(--red)}
+.opt.dim{opacity:.45}
+@keyframes shakeX{20%{transform:translateX(-7px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+
+.feedback{margin-top:16px;border:2px solid var(--line);border-radius:12px;padding:13px 15px;display:none;
+  background:#0a2b1f;animation:riseIn .35s}
+.feedback.on{display:block}
+.feedback.ok{border-color:var(--mint);box-shadow:inset 0 0 24px rgba(63,224,143,.12)}
+.feedback.no{border-color:var(--red);box-shadow:inset 0 0 24px rgba(255,97,87,.1)}
+.fb-main{font-family:'Silkscreen';font-size:clamp(11px,2vw,14px)}
+.feedback.ok .fb-main{color:var(--mint)}.feedback.no .fb-main{color:#ffb0a8}
+.fb-pts{color:var(--copper-l);font-size:10px;margin-left:8px}
+.fb-ans{font-size:13px;margin-top:6px;color:#ffd0c9}
+.fb-fact{margin-top:9px;font-size:12.5px;color:#d9f2e3;border-top:1px dashed var(--line2);padding-top:9px;line-height:1.55}
+.fb-fact i{font-family:'Nunito';display:block;color:var(--dim);font-size:12px;margin-top:3px}
+#nextBtn{margin-top:13px;width:100%;font-family:'Silkscreen';font-size:13px;color:var(--ink);
+  background:linear-gradient(180deg,var(--copper-l),var(--copper));border:2px solid #9a5f1c;border-radius:10px;
+  padding:12px;cursor:pointer;box-shadow:0 5px 0 #7a4a13;transition:transform .12s;letter-spacing:1px}
+#nextBtn:hover{transform:translateY(-2px)}
+#nextBtn:active{transform:translateY(3px);box-shadow:0 1px 0 #7a4a13}
+
+/* ===== OVERLAYS ===== */
+.overlay{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;
+  background:rgba(3,17,12,.9);backdrop-filter:blur(4px);padding:16px;overflow:auto}
+.overlay.hidden{display:none}
+.panel{background:linear-gradient(180deg,var(--panel2),var(--panel));border:2px solid var(--line);border-radius:18px;
+  max-width:660px;width:100%;padding:26px 26px 30px;text-align:center;position:relative;
+  box-shadow:0 0 0 1px rgba(63,224,143,.12),0 24px 60px rgba(0,0,0,.6)}
+.bootlines{text-align:left;font-family:'Silkscreen';font-size:9.5px;color:var(--mint);background:#04170f;
+  border:2px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:18px;line-height:2;overflow:hidden}
+.bootlines div{opacity:0;animation:bootIn .05s forwards}
+@keyframes bootIn{to{opacity:1}}
+.bootlines .cu{color:var(--copper-l)}
+.bigtitle{font-family:'Silkscreen';font-size:clamp(24px,6vw,42px);line-height:1.25;text-shadow:0 4px 0 var(--ink)}
+.bigtitle .mint{color:var(--mint)}.bigtitle .cop{color:var(--copper-l)}
+.subtitle{margin-top:8px;font-weight:600;color:var(--dim);font-size:clamp(12px,2vw,14.5px);line-height:1.6}
+.subtitle b{color:var(--cream)}
+.inforow{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:18px 0 4px}
+.info{background:#0a2b1f;border:2px solid var(--line);border-radius:10px;padding:8px 14px;font-size:12px;color:var(--dim)}
+.info b{color:var(--copper-l);font-family:'Silkscreen';font-size:11px;display:block;margin-bottom:2px}
+.rules{text-align:left;margin:16px auto 2px;max-width:480px;background:#08281c;border:2px dashed var(--line2);
+  border-radius:12px;padding:13px 18px;font-size:13px;line-height:1.9;color:#cfe8d8}
+.rules b{color:var(--copper-l)}
+.bigbtn{margin-top:20px;font-family:'Silkscreen';font-size:clamp(13px,2.4vw,16px);
+  background:linear-gradient(180deg,var(--copper-l),var(--copper));border:3px solid #9a5f1c;border-radius:12px;
+  padding:14px 30px;cursor:pointer;color:var(--ink);box-shadow:0 6px 0 #7a4a13;transition:transform .12s;letter-spacing:1px}
+.bigbtn:hover{transform:translateY(-3px)}
+.bigbtn:active{transform:translateY(3px);box-shadow:0 2px 0 #7a4a13}
+
+.badge{font-size:58px;line-height:1;animation:bounceIn .6s cubic-bezier(.3,1.6,.5,1)}
+@keyframes bounceIn{from{transform:scale(0)}}
+.rankname{font-family:'Silkscreen';font-size:clamp(17px,4vw,26px);color:var(--copper-l);margin-top:8px;text-shadow:0 3px 0 var(--ink)}
+.bigscore{font-family:'Silkscreen';font-size:clamp(30px,8vw,52px);color:var(--mint);margin-top:6px;text-shadow:0 4px 0 var(--ink)}
+.stats{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+.stat{background:#0a2b1f;border:2px solid var(--line);border-radius:11px;padding:9px 16px;min-width:110px}
+.stat .sn{font-family:'Silkscreen';font-size:8px;color:var(--dim)}
+.stat .sv{font-family:'Silkscreen';font-size:16px;color:var(--copper-l);margin-top:4px}
+.review{margin-top:18px;text-align:left;max-height:230px;overflow:auto;background:#08281c;
+  border:2px solid var(--line);border-radius:12px;padding:12px 14px}
+.review h4{font-family:'Silkscreen';font-size:10px;color:var(--red);margin-bottom:8px}
+.review.allgood h4{color:var(--mint)}
+.revitem{font-size:12.5px;padding:8px 0;border-bottom:1px dashed var(--line)}
+.revitem:last-child{border-bottom:0}
+.revitem .rq{font-weight:700}
+.revitem .rans{color:var(--mint);margin-top:3px}
+.revitem .rid{font-family:'Nunito';font-style:italic;color:var(--dim);font-size:11.5px}
+.review::-webkit-scrollbar{width:8px}.review::-webkit-scrollbar-thumb{background:var(--line2);border-radius:8px}
+.popfx{position:fixed;z-index:60;font-family:'Silkscreen';pointer-events:none;animation:floatUp 1s ease-out forwards}
+@keyframes floatUp{to{transform:translateY(-70px);opacity:0}}
+
+@media(max-width:640px){
+  .opts{grid-template-columns:1fr}
+  .pill{min-width:60px;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+<div class="chipfx" id="chipfx"></div>
+<div id="stage">
+
+  <header class="hud" id="hud">
+    <div class="school"><span class="ic">🖥️</span><span class="tx">SMK BUDI MULYA<small>KOMPUTER &amp; JARINGAN DASAR · X</small></span></div>
+    <div class="progressbox">
+      <div class="pt"><span id="ptext">SOAL 00/25</span><span id="ptopic">—</span></div>
+      <div class="pbar"><i id="pfill"></i></div>
+    </div>
+    <div class="pills">
+      <div class="pill" id="scorePill"><div class="pl">SKOR</div><div class="pv" id="scoreV">0</div></div>
+      <div class="pill streak" id="streakPill"><div class="pl">COMBO</div><div class="pv" id="streakV">🔥0</div></div>
+    </div>
+    <button id="muteBtn" title="Suara">🔊</button>
+  </header>
+
+  <div class="timerwrap">
+    <span class="tl">⏱ WAKTU</span>
+    <div class="timerbar"><i id="tfill"></i></div>
+    <span id="tnum">30s</span>
+  </div>
+
+  <section class="qcard" id="qcard">
+    <div class="qtop">
+      <span class="toptag" id="topicTag">MATERI</span>
+      <span class="qcount" id="qCount">Q 01 / 25</span>
+    </div>
+    <div class="qbody">
+      <p class="q-en" id="qEn">Tekan START GAME untuk memulai.</p>
+      <p class="q-id" id="qId"></p>
+      <div class="opts" id="opts"></div>
+      <div class="feedback" id="feedback">
+        <div class="fb-main" id="fbMain"></div>
+        <div class="fb-ans" id="fbAns"></div>
+        <div class="fb-fact" id="fbFact"></div>
+        <button id="nextBtn">LANJUT ➜</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- INTRO -->
+<div class="overlay" id="intro">
+  <div class="panel">
+    <div class="bootlines" id="bootlines"></div>
+    <div class="bigtitle"><span class="mint">HARDWARE</span> <span class="cop">HERO</span></div>
+    <div class="subtitle">Game Edukasi <b>Komponen Komputer</b><br>SMK BUDI MULYA · Kelas X · Komputer dan Jaringan Dasar</div>
+    <div class="inforow">
+      <div class="info"><b>25</b>Soal Pilihan Ganda</div>
+      <div class="info"><b>30s</b>Per Soal</div>
+      <div class="info"><b>EN 🇬🇧</b>+ Translit 🇮🇩</div>
+    </div>
+    <div class="rules">
+      🕹️ Pilih jawaban dengan klik atau tombol <b>1–4 / A–D</b>.<br>
+      ✅ Jawaban benar = <b>+100 poin</b>, bonus combo jika beruntun (+25 bertingkat).<br>
+      ⏱️ Waktu habis = dianggap salah, jawaban benar akan ditampilkan.<br>
+      📖 Setiap soal punya <b>pembahasan</b> (Inggris + Indonesia).<br>
+      🏅 Raih rank tertinggi: <b>MASTER TEKNISI</b> (23–25 benar)!
+    </div>
+    <button class="bigbtn" id="startBtn">▶ START GAME</button>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div class="overlay hidden" id="result">
+  <div class="panel">
+    <div class="badge" id="rBadge">🏆</div>
+    <div class="rankname" id="rRank">MASTER TEKNISI</div>
+    <div class="bigscore" id="rScore">0 PTS</div>
+    <div class="stats">
+      <div class="stat"><div class="sn">BENAR</div><div class="sv" id="rCorrect">0/25</div></div>
+      <div class="stat"><div class="sn">AKURASI</div><div class="sv" id="rAcc">0%</div></div>
+      <div class="stat"><div class="sn">COMBO MAX</div><div class="sv" id="rStreak">0</div></div>
+      <div class="stat"><div class="sn">WAKTU</div><div class="sv" id="rTime">0s</div></div>
+    </div>
+    <div class="review" id="review"></div>
+    <button class="bigbtn" id="replayBtn">🔄 MAIN LAGI (SOAL DIACAK)</button>
+  </div>
+</div>
+
+<script>
+/* ================= BANK SOAL — 25 PG berdasarkan Materi Komponen Komputer ================= */
+const QUESTIONS=[
+{t:"Sistem Komputer",
+ en:"A computer system has three interdependent elements. Which element refers to the people who operate, maintain, and manage the computer?",
+ id:"Sistem komputer memiliki tiga unsur yang saling bergantung. Unsur yang merujuk pada manusia yang mengoperasikan, merawat, dan mengelola komputer adalah?",
+ opts:[{en:"Hardware",id:"Perangkat keras"},{en:"Software",id:"Perangkat lunak"},{en:"Brainware",id:"Pengguna (manusia)",c:1},{en:"Firmware",id:"Perangkat tegar"}],
+ fe:"Brainware is the human element: operators, technicians, and network administrators.",
+ fi:"Brainware adalah unsur manusia: operator, teknisi, dan administrator jaringan."},
+{t:"Sistem Komputer",
+ en:"Which of the following is an example of hardware?",
+ id:"Berikut ini yang merupakan contoh hardware (perangkat keras) adalah?",
+ opts:[{en:"Windows",id:"Windows"},{en:"Motherboard",id:"Motherboard",c:1},{en:"Linux",id:"Linux"},{en:"Google Chrome",id:"Google Chrome"}],
+ fe:"Hardware is a physical component you can see and touch. Windows, Linux, and Chrome are software.",
+ fi:"Hardware adalah komponen fisik yang dapat dilihat dan disentuh. Windows, Linux, dan Chrome adalah software."},
+{t:"Alur Kerja Komputer",
+ en:"What is the correct order of the data processing cycle in a computer?",
+ id:"Urutan siklus pengolahan data pada komputer yang benar adalah?",
+ opts:[{en:"Input → Process → Output",id:"Masukan → Proses → Keluaran",c:1},{en:"Process → Input → Output",id:"Proses → Masukan → Keluaran"},
+  {en:"Output → Process → Input",id:"Keluaran → Proses → Masukan"},{en:"Input → Output → Process",id:"Masukan → Keluaran → Proses"}],
+ fe:"Data enters through input, is processed by the CPU with help from RAM, and the result appears as output. Storage supports the process.",
+ fi:"Data masuk melalui input, diproses CPU dengan bantuan RAM, lalu hasilnya muncul sebagai output. Storage mendukung proses tersebut."},
+{t:"Casing",
+ en:"Which of the following is NOT a case (chassis) form factor?",
+ id:"Berikut ini yang BUKAN termasuk ukuran (form factor) casing adalah?",
+ opts:[{en:"Full Tower",id:"Full Tower"},{en:"Mid Tower",id:"Mid Tower"},{en:"Ultra Tower",id:"Ultra Tower",c:1},{en:"Small Form Factor (SFF)",id:"Faktor Kecil (SFF)"}],
+ fe:"Case form factors are Full Tower, Mid Tower, Mini Tower, and SFF. The case size must match the motherboard size.",
+ fi:"Ukuran casing adalah Full Tower, Mid Tower, Mini Tower, dan SFF. Ukuran casing harus sesuai dengan ukuran motherboard."},
+{t:"PSU",
+ en:"What is the main job of a Power Supply Unit (PSU)?",
+ id:"Apa tugas utama Power Supply Unit (PSU)?",
+ opts:[{en:"Convert AC from PLN into low-voltage DC",id:"Mengubah arus AC dari PLN menjadi DC bertegangan rendah",c:1},
+  {en:"Convert DC into AC",id:"Mengubah DC menjadi AC"},{en:"Store electricity like a battery",id:"Menyimpan listrik seperti baterai"},
+  {en:"Cool down the processor",id:"Mendinginkan prosesor"}],
+ fe:"The PSU outputs low-voltage DC (+3.3V, +5V, +12V) needed by computer components.",
+ fi:"PSU menghasilkan arus DC bertegangan rendah (+3,3V, +5V, +12V) yang dibutuhkan komponen komputer."},
+{t:"PSU",
+ en:"Which PSU connector delivers power to the processor?",
+ id:"Konektor PSU mana yang menyuplai daya ke prosesor?",
+ opts:[{en:"24-pin ATX",id:"24-pin ATX"},{en:"4/8-pin CPU",id:"4/8-pin CPU",c:1},{en:"SATA power",id:"Daya SATA"},{en:"PCIe 6/8-pin",id:"PCIe 6/8-pin"}],
+ fe:"24-pin ATX powers the motherboard, 4/8-pin CPU powers the processor, SATA power feeds storage, and PCIe 6/8-pin feeds the VGA.",
+ fi:"24-pin ATX untuk motherboard, 4/8-pin CPU untuk prosesor, SATA power untuk penyimpanan, dan PCIe 6/8-pin untuk VGA."},
+{t:"Motherboard",
+ en:"What is the main function of a motherboard?",
+ id:"Apa fungsi utama motherboard?",
+ opts:[{en:"Connect all components so they can communicate",id:"Menghubungkan semua komponen agar dapat berkomunikasi",c:1},
+  {en:"Store data permanently",id:"Menyimpan data secara permanen"},{en:"Convert electricity for the PC",id:"Mengubah listrik untuk PC"},
+  {en:"Display images on the monitor",id:"Menampilkan gambar di monitor"}],
+ fe:"The motherboard is the main circuit board that connects the CPU, RAM, storage, and expansion cards.",
+ fi:"Motherboard adalah papan sirkuit utama yang menghubungkan CPU, RAM, penyimpanan, dan kartu ekspansi."},
+{t:"Motherboard",
+ en:"Where should a VGA (graphics) card be installed on the motherboard?",
+ id:"Di mana kartu VGA (grafis) harus dipasang pada motherboard?",
+ opts:[{en:"CPU socket",id:"Soket CPU"},{en:"DIMM slot",id:"Slot DIMM"},{en:"PCIe slot",id:"Slot PCIe",c:1},{en:"SATA connector",id:"Konektor SATA"}],
+ fe:"PCIe slots hold expansion cards such as VGA, sound cards, and LAN cards.",
+ fi:"Slot PCIe adalah tempat kartu ekspansi seperti VGA, sound card, dan LAN card."},
+{t:"Motherboard",
+ en:"Which part of the motherboard controls the data traffic between components?",
+ id:"Bagian motherboard mana yang mengatur lalu lintas data antar komponen?",
+ opts:[{en:"Chipset",id:"Chipset",c:1},{en:"CMOS battery",id:"Baterai CMOS"},{en:"Heatsink",id:"Heatsink"},{en:"Power button",id:"Tombol power"}],
+ fe:"The chipset manages how data flows between the CPU, memory, and peripherals.",
+ fi:"Chipset mengatur aliran data antara CPU, memori, dan periferal."},
+{t:"Motherboard",
+ en:"Which of the following is a motherboard form factor?",
+ id:"Berikut ini yang merupakan ukuran (form factor) motherboard adalah?",
+ opts:[{en:"ATX",id:"ATX",c:1},{en:"USB",id:"USB"},{en:"HDMI",id:"HDMI"},{en:"DDR4",id:"DDR4"}],
+ fe:"Motherboard sizes are ATX, Micro-ATX, and Mini-ITX — the case must match them.",
+ fi:"Ukuran motherboard adalah ATX, Micro-ATX, dan Mini-ITX — casing harus sesuai."},
+{t:"Processor (CPU)",
+ en:"Which part of the CPU performs arithmetic and logic operations?",
+ id:"Bagian CPU mana yang melakukan operasi aritmetika dan logika?",
+ opts:[{en:"ALU (Arithmetic Logic Unit)",id:"ALU (Unit Aritmetika & Logika)",c:1},{en:"CU (Control Unit)",id:"CU (Unit Kendali)"},
+  {en:"Register",id:"Register"},{en:"Cache",id:"Cache"}],
+ fe:"The ALU does the math and logic; the CU controls the flow of instructions.",
+ fi:"ALU melakukan perhitungan dan logika; CU mengendalikan jalannya instruksi."},
+{t:"Processor (CPU)",
+ en:"A processor has a clock speed of 3.5 GHz. What does clock speed measure?",
+ id:"Sebuah prosesor memiliki clock speed 3,5 GHz. Apa yang diukur oleh clock speed?",
+ opts:[{en:"The number of work cycles per second",id:"Jumlah siklus kerja per detik",c:1},{en:"The number of CPU cores",id:"Jumlah inti CPU"},
+  {en:"The amount of CPU memory",id:"Jumlah memori CPU"},{en:"The speed of the fan",id:"Kecepatan kipas"}],
+ fe:"Clock speed (GHz) counts how many work cycles the CPU performs every second.",
+ fi:"Clock speed (GHz) menghitung banyaknya siklus kerja CPU setiap detik."},
+{t:"Processor (CPU)",
+ en:"Intel Core i3/i5/i7/i9 and AMD Ryzen 3/5/7/9 are product lines of...",
+ id:"Intel Core i3/i5/i7/i9 dan AMD Ryzen 3/5/7/9 adalah lini produk dari...",
+ opts:[{en:"Processor (CPU)",id:"Prosesor (CPU)",c:1},{en:"RAM",id:"RAM"},{en:"Storage",id:"Penyimpanan"},{en:"Power supply",id:"Catu daya"}],
+ fe:"Intel and AMD are the two main processor manufacturers.",
+ fi:"Intel dan AMD adalah dua produsen utama prosesor."},
+{t:"Pendingin (Cooling)",
+ en:"What is the purpose of thermal paste between the CPU and the heatsink?",
+ id:"Apa fungsi pasta termal di antara CPU dan heatsink?",
+ opts:[{en:"Fill micro gaps so heat transfers better",id:"Mengisi celah mikro agar panas berpindah lebih baik",c:1},
+  {en:"Glue the heatsink permanently",id:"Mengelem heatsink secara permanen"},{en:"Make the fan spin faster",id:"Membuat kipas berputar lebih cepat"},
+  {en:"Protect the CPU from viruses",id:"Melindungi CPU dari virus"}],
+ fe:"The heatsink absorbs heat, the fan blows it away, and thermal paste fills the micro gaps between them.",
+ fi:"Heatsink menyerap panas, kipas membuangnya, dan pasta termal mengisi celah mikro di antara keduanya."},
+{t:"RAM",
+ en:"Why is RAM called volatile memory?",
+ id:"Mengapa RAM disebut memori volatile?",
+ opts:[{en:"Its data is lost when the power goes off",id:"Datanya hilang saat listrik padam",c:1},{en:"It stores data forever",id:"Menyimpan data selamanya"},
+  {en:"It only works during games",id:"Hanya bekerja saat bermain game"},{en:"It is the slowest memory",id:"Memori paling lambat"}],
+ fe:"RAM is temporary working memory: running programs and active data sit there for fast CPU access.",
+ fi:"RAM adalah memori kerja sementara: program yang berjalan dan data aktif berada di sana agar cepat diakses CPU."},
+{t:"RAM",
+ en:"Which RAM module form is used in laptops?",
+ id:"Bentuk modul RAM apakah yang digunakan pada laptop?",
+ opts:[{en:"SO-DIMM",id:"SO-DIMM",c:1},{en:"DIMM",id:"DIMM"},{en:"M.2 NVMe",id:"M.2 NVMe"},{en:"SATA",id:"SATA"}],
+ fe:"Desktop PCs use DIMM modules; laptops use the smaller SO-DIMM.",
+ fi:"PC desktop memakai modul DIMM; laptop memakai SO-DIMM yang lebih kecil."},
+{t:"Storage",
+ en:"Which storage device works with spinning magnetic platters?",
+ id:"Perangkat penyimpanan mana yang bekerja dengan piringan magnetik berputar?",
+ opts:[{en:"HDD (Hard Disk Drive)",id:"HDD (Cakram Keras)",c:1},{en:"SSD SATA",id:"SSD SATA"},{en:"SSD NVMe (M.2)",id:"SSD NVMe (M.2)"},{en:"RAM",id:"RAM"}],
+ fe:"HDDs are cheap with big capacity but slower and shock-sensitive; SSDs use flash chips with no moving parts.",
+ fi:"HDD murah dan berkapasitas besar tetapi lebih lambat dan rentan benturan; SSD memakai chip flash tanpa bagian bergerak."},
+{t:"Storage",
+ en:"What is true about an SSD NVMe (M.2)?",
+ id:"Pernyataan yang benar tentang SSD NVMe (M.2) adalah?",
+ opts:[{en:"It is very fast because it uses PCIe lanes",id:"Sangat cepat karena menggunakan jalur PCIe",c:1},
+  {en:"It uses spinning platters",id:"Menggunakan piringan berputar"},{en:"It is the slowest storage",id:"Penyimpanan paling lambat"},
+  {en:"It keeps data only while powered",id:"Menyimpan data hanya saat menyala"}],
+ fe:"NVMe SSDs connect through PCIe — the fastest common storage path, though they can run hot.",
+ fi:"SSD NVMe terhubung lewat PCIe — jalur penyimpanan tercepat yang umum, meskipun bisa cepat panas."},
+{t:"VGA / GPU",
+ en:"A GPU that is built into the CPU or motherboard is called...",
+ id:"GPU yang menyatu dengan CPU atau motherboard disebut...",
+ opts:[{en:"Integrated (onboard) GPU",id:"GPU terintegrasi (onboard)",c:1},{en:"Dedicated (discrete) GPU",id:"GPU diskrit (terpisah)"},
+  {en:"External GPU",id:"GPU eksternal"},{en:"Virtual GPU",id:"GPU virtual"}],
+ fe:"Integrated GPUs save power and cost; dedicated cards carry their own VRAM for heavy tasks like design, editing, and gaming.",
+ fi:"GPU terintegrasi hemat daya dan biaya; kartu diskrit punya VRAM sendiri untuk tugas berat seperti desain, editing, dan gaming."},
+{t:"Kartu Ekspansi",
+ en:"Every Network Interface Card (NIC) has a unique identity code called...",
+ id:"Setiap kartu jaringan (NIC) memiliki kode identitas unik yang disebut...",
+ opts:[{en:"MAC Address",id:"MAC Address",c:1},{en:"Username",id:"Nama pengguna"},{en:"Email address",id:"Alamat email"},{en:"Phone number",id:"Nomor telepon"}],
+ fe:"The MAC address uniquely identifies a NIC on a network — essential knowledge for TKJ students!",
+ fi:"MAC address mengidentifikasi NIC secara unik di jaringan — pengetahuan penting bagi siswa TKJ!"},
+{t:"Perangkat Input",
+ en:"Which input device converts physical documents into digital data?",
+ id:"Perangkat input mana yang mengubah dokumen fisik menjadi data digital?",
+ opts:[{en:"Scanner",id:"Pemindai (Scanner)",c:1},{en:"Printer",id:"Pencetak"},{en:"Speaker",id:"Pengeras suara"},{en:"Projector",id:"Proyektor"}],
+ fe:"A scanner turns paper documents into digital files; printers, speakers, and projectors are output devices.",
+ fi:"Scanner mengubah dokumen kertas menjadi file digital; printer, speaker, dan proyektor adalah perangkat output."},
+{t:"Perangkat Output",
+ en:"Which of the following is an output device?",
+ id:"Berikut ini yang termasuk perangkat output adalah?",
+ opts:[{en:"Keyboard",id:"Keyboard"},{en:"Monitor",id:"Monitor",c:1},{en:"Mouse",id:"Mouse"},{en:"Webcam",id:"Kamera web"}],
+ fe:"The monitor displays the visual result of processing; keyboards, mice, and webcams send data into the PC.",
+ fi:"Monitor menampilkan hasil pengolahan secara visual; keyboard, mouse, dan webcam mengirim data ke dalam PC."},
+{t:"Port & Konektor",
+ en:"Which port connects a computer to a wired Ethernet network?",
+ id:"Port mana yang menghubungkan komputer ke jaringan Ethernet kabel?",
+ opts:[{en:"RJ-45 (LAN)",id:"RJ-45 (LAN)",c:1},{en:"HDMI",id:"HDMI"},{en:"Audio jack 3.5 mm",id:"Colokan audio 3,5 mm"},{en:"PS/2",id:"PS/2"}],
+ fe:"RJ-45 carries the Ethernet network cable; HDMI carries video and audio; PS/2 is the old keyboard/mouse port.",
+ fi:"RJ-45 membawa kabel jaringan Ethernet; HDMI membawa video dan audio; PS/2 adalah port lama keyboard/mouse."},
+{t:"Perakitan PC",
+ en:"According to the basic PC assembly order, what is the FIRST step?",
+ id:"Menurut urutan dasar perakitan PC, apa langkah PERTAMA?",
+ opts:[{en:"Install the CPU into the socket, then attach the heatsink and fan",id:"Pasang CPU ke socket, lalu pasang heatsink dan kipas",c:1},
+  {en:"Connect the front panel cables",id:"Sambungkan kabel panel depan"},{en:"Install the PSU into the case",id:"Pasang PSU ke dalam casing"},
+  {en:"Turn on the PC and enter BIOS",id:"Nyalakan PC dan masuk BIOS"}],
+ fe:"Order: CPU + cooler → RAM → motherboard into case → PSU → storage → VGA → front panel → recheck, then boot into BIOS/UEFI.",
+ fi:"Urutan: CPU + pendingin → RAM → motherboard ke casing → PSU → penyimpanan → VGA → panel depan → periksa ulang, lalu masuk BIOS/UEFI."},
+{t:"K3 (Keselamatan Kerja)",
+ en:"Before opening the computer case, what must you do to follow safety rules (K3)?",
+ id:"Sebelum membuka casing komputer, apa yang harus dilakukan sesuai aturan keselamatan kerja (K3)?",
+ opts:[{en:"Turn off and unplug the power cable",id:"Matikan dan cabut kabel listrik",c:1},{en:"Keep the PC running",id:"Biarkan PC menyala"},
+  {en:"Pour water to cool it down",id:"Siram air agar dingin"},{en:"Remove the RAM while powered on",id:"Lepas RAM saat listrik menyala"}],
+ fe:"Also prevent ESD: wear an anti-static wrist strap or touch the metal part of the case first, and hold components by their edges.",
+ fi:"Cegah juga ESD: pakai gelang antistatik atau sentuh bagian logam casing dulu, dan pegang komponen pada bagian tepinya."}
+];
+
+/* ================= STATE ================= */
+const TIME_MAX=30;
+let deck=[], cur=0, score=0, correctCount=0, streak=0, bestStreak=0;
+let answered=false, timeLeft=TIME_MAX, timerInt=null, totalTime=0, phase='intro', MUTE=false, AC=null;
+const $=id=>document.getElementById(id);
+
+/* ================= AUDIO ================= */
+function ac(){ if(!AC){AC=new (window.AudioContext||window.webkitAudioContext)();} return AC; }
+function tone(f,delay,dur,type='square',vol=.13){
+  if(MUTE) return;
+  try{
+    const c=ac(),o=c.createOscillator(),g=c.createGain(),t=c.currentTime+delay;
+    o.type=type;o.frequency.value=f;g.gain.setValueAtTime(vol,t);
+    g.gain.exponentialRampToValueAtTime(.001,t+dur);
+    o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+dur+.02);
+  }catch(e){}
+}
+const sfx={
+  click(){tone(660,0,.06,'triangle',.12);},
+  correct(){tone(523,0,.1,'triangle',.18);tone(784,.09,.12,'triangle',.18);tone(1046,.2,.16,'triangle',.16);},
+  wrong(){tone(196,0,.2,'sawtooth',.15);tone(147,.12,.3,'sawtooth',.15);},
+  tick(){tone(880,0,.04,'square',.07);},
+  timeup(){tone(220,0,.25,'sawtooth',.15);tone(180,.18,.3,'sawtooth',.15);},
+  win(){[523,659,784,1046,1318].forEach((f,i)=>tone(f,i*.13,.18,'square',.15));}
+};
+
+/* ================= DEKORASI ================= */
+(function(){
+  const fx=['💾','🖥️','⌨️','🖱️','🔌','⚙️','🧠','📀'];
+  const box=$('chipfx');
+  fx.forEach((e,i)=>{const s=document.createElement('span');s.textContent=e;
+    s.style.left=(4+i*12.5)+'%';s.style.top=(8+((i*31)%74))+'%';s.style.animationDelay=(i*.9)+'s';box.appendChild(s);});
+  const lines=[
+    '<span class="cu">SMK BUDI MULYA BIOS v10.25</span>','> CPU CHECK ........ OK','> RAM 16GB .......... OK',
+    '> STORAGE SSD ....... OK','> GPU DISPLAY ....... OK','> K3 SAFETY ......... OK',
+    '<span class="cu">&gt; LOADING HARDWARE HERO ...</span>'];
+  const bl=$('bootlines');
+  lines.forEach((l,i)=>{const d=document.createElement('div');d.innerHTML=l;
+    d.style.animationDelay=(0.25+i*0.35)+'s';bl.appendChild(d);});
+})();
+
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+/* ================= GAME ================= */
+function startGame(){
+  deck=QUESTIONS.map(q=>({...q,opts:shuffle(q.opts.map(o=>({...o})))}));
+  cur=0;score=0;correctCount=0;streak=0;bestStreak=0;totalTime=0;phase='play';
+  $('scoreV').textContent='0';$('streakV').textContent='🔥0';
+  $('intro').classList.add('hidden');$('result').classList.add('hidden');
+  showQuestion();
+}
+
+function showQuestion(){
+  answered=false;
+  const q=deck[cur];
+  const card=$('qcard');card.classList.remove('reveal');void card.offsetWidth;card.classList.add('reveal');
+  $('topicTag').textContent=q.t;
+  $('qCount').textContent=`Q ${String(cur+1).padStart(2,'0')} / 25`;
+  $('ptext').textContent=`SOAL ${String(cur+1).padStart(2,'0')}/25`;
+  $('ptopic').textContent=q.t.toUpperCase();
+  $('pfill').style.width=((cur)/25*100)+'%';
+  $('qEn').textContent=q.en;
+  $('qId').textContent='🇮🇩 '+q.id;
+  const box=$('opts');box.innerHTML='';
+  q.opts.forEach((o,i)=>{
+    const b=document.createElement('button');b.className='opt';
+    b.innerHTML=`<span class="letter">${'ABCD'[i]}</span><span class="otext"><b>${o.en}</b><i>${o.id}</i></span>`;
+    b.onclick=()=>answer(i);box.appendChild(b);
+  });
+  $('feedback').classList.remove('on','ok','no');
+  startTimer();
+}
+
+function startTimer(){
+  clearInterval(timerInt);
+  timeLeft=TIME_MAX;paintTimer();
+  timerInt=setInterval(()=>{
+    timeLeft--;paintTimer();
+    if(timeLeft<=5&&timeLeft>0)sfx.tick();
+    if(timeLeft<=0){clearInterval(timerInt);timeUp();}
+  },1000);
+}
+function paintTimer(){
+  const f=$('tfill');
+  f.style.width=(timeLeft/TIME_MAX*100)+'%';
+  f.classList.toggle('warn',timeLeft<=12&&timeLeft>6);
+  f.classList.toggle('danger',timeLeft<=6);
+  $('tnum').textContent=timeLeft+'s';
+}
+function timeUp(){
+  if(answered)return;
+  answered=true;sfx.timeup();
+  streak=0;$('streakV').textContent='🔥0';
+  const q=deck[cur],ci=q.opts.findIndex(o=>o.c),btns=[...document.querySelectorAll('.opt')];
+  btns.forEach((b,i)=>{b.disabled=true;if(i!==ci)b.classList.add('dim');});
+  btns[ci].classList.add('good');
+  $('fbMain').innerHTML='⏱️ WAKTU HABIS!';
+  $('fbAns').innerHTML=`Jawaban benar: <b>${q.opts[ci].en}</b> — ${q.opts[ci].id}`;
+  showFact(q);
+}
+
+function answer(i){
+  if(answered||phase!=='play')return;
+  answered=true;clearInterval(timerInt);
+  totalTime+=(TIME_MAX-timeLeft);
+  const q=deck[cur],ci=q.opts.findIndex(o=>o.c),ok=(i===ci);
+  const btns=[...document.querySelectorAll('.opt')];
+  btns.forEach((b,ix)=>{b.disabled=true;if(ix!==ci&&ix!==i)b.classList.add('dim');});
+  btns[ci].classList.add('good');
+  if(!ok)btns[i].classList.add('bad');
+  $('pfill').style.width=((cur+1)/25*100)+'%';
+
+  if(ok){
+    streak++;correctCount++;
+    bestStreak=Math.max(bestStreak,streak);
+    const bonus=Math.min((streak-1)*25,100), pts=100+bonus;
+    score+=pts;sfx.correct();
+    $('scoreV').textContent=score;
+    $('scorePill').classList.remove('pop');void $('scorePill').offsetWidth;$('scorePill').classList.add('pop');
+    $('streakV').textContent='🔥'+streak;
+    $('streakPill').classList.remove('pop');void $('streakPill').offsetWidth;$('streakPill').classList.add('pop');
+    popFX(`+${pts}`,'var(--mint)',btns[i]);
+    $('fbMain').innerHTML=`✅ BENAR! CORRECT!<span class="fb-pts">+${pts} PTS</span>`;
+    $('fbAns').innerHTML='';
+  }else{
+    streak=0;sfx.wrong();
+    $('streakV').textContent='🔥0';
+    $('fbMain').innerHTML='❌ SALAH! WRONG!';
+    $('fbAns').innerHTML=`Jawaban benar: <b>${q.opts[ci].en}</b> — ${q.opts[ci].id}`;
+  }
+  showFact(q);
+}
+function showFact(q){
+  $('fbFact').innerHTML=`💡 ${q.fe}<i>${q.fi}</i>`;
+  const fb=$('feedback');
+  fb.classList.add('on', q.opts.findIndex(o=>o.c)=== [...document.querySelectorAll('.opt')].findIndex(b=>b.classList.contains('good')) ? 'ok':'ok');
+  fb.classList.remove('ok','no');
+  fb.classList.add(fb.querySelector('.fb-main').textContent.includes('BENAR')?'ok':'no');
+  $('nextBtn').textContent=(cur===24)?'🏁 LIHAT HASIL':'LANJUT ➜';
+}
+function popFX(txt,color,anchor){
+  const r=anchor.getBoundingClientRect(),el=document.createElement('div');
+  el.className='popfx';el.textContent=txt;el.style.color=color;
+  el.style.left=(r.right-40)+'px';el.style.top=(r.top-6)+'px';el.style.fontSize='16px';
+  document.body.appendChild(el);setTimeout(()=>el.remove(),1000);
+}
+
+$('nextBtn').onclick=()=>{
+  if(!answered)return;
+  sfx.click();
+  cur++;
+  if(cur>=deck.length){showResult();}else{showQuestion();}
+};
+
+function showResult(){
+  phase='done';clearInterval(timerInt);
+  const acc=Math.round(correctCount/25*100);
+  let badge,rank;
+  if(correctCount>=23){badge='🏆';rank='MASTER TEKNISI · MASTER TECHNICIAN';}
+  else if(correctCount>=18){badge='🥇';rank='TEKNISI ANDAL · PRO TECHNICIAN';}
+  else if(correctCount>=12){badge='🔧';rank='CALON TEKNISI · APPRENTICE TECHNICIAN';}
+  else{badge='🔩';rank='PEMULA · KEEP PRACTICING!';}
+  $('rBadge').textContent=badge;
+  $('rRank').textContent=rank;
+  $('rScore').textContent=score+' PTS';
+  $('rCorrect').textContent=correctCount+'/25';
+  $('rAcc').textContent=acc+'%';
+  $('rStreak').textContent='x'+bestStreak;
+  $('rTime').textContent=totalTime+'s';
+  const missed=deck.map((q,i)=>({q,i})).filter(({q})=>{
+    return true; // will filter below by saved results
+  });
+  buildReview();
+  $('result').classList.remove('hidden');
+  sfx.win();
+}
+
+/* simpan hasil tiap soal untuk review */
+const results=[];
+const _origAnswer=answer;
+answer=function(i){
+  if(answered)return;
+  const ok=(i===deck[cur].opts.findIndex(o=>o.c));
+  results[cur]=ok;
+  _origAnswer(i);
+};
+const _origTimeUp=timeUp;
+timeUp=function(){ results[cur]=false; _origTimeUp(); };
+
+function buildReview(){
+  const rv=$('review');rv.innerHTML='';
+  const missed=deck.filter((_,i)=>results[i]===false);
+  if(missed.length===0){
+    rv.classList.add('allgood');
+    rv.innerHTML='<h4>🌟 PERFECT! Semua jawaban benar! / All answers correct!</h4>';
+    return;
+  }
+  rv.classList.remove('allgood');
+  const h=document.createElement('h4');
+  h.textContent=`📖 REVIEW — ${missed.length} SOAL SALAH (pelajari lagi!)`;
+  rv.appendChild(h);
+  missed.forEach(q=>{
+    const ci=q.opts.findIndex(o=>o.c);
+    const d=document.createElement('div');d.className='revitem';
+    d.innerHTML=`<div class="rq">❓ ${q.en}</div>
+      <div class="rans">✅ ${q.opts[ci].en} — ${q.opts[ci].id}</div>
+      <div class="rid">🇮🇩 ${q.id}</div>`;
+    rv.appendChild(d);
+  });
+}
+
+$('startBtn').onclick=()=>{ac();sfx.click();startGame();};
+$('replayBtn').onclick=()=>{sfx.click();results.length=0;startGame();};
+$('muteBtn').onclick=()=>{MUTE=!MUTE;$('muteBtn').textContent=MUTE?'🔇':'🔊';};
+
+document.addEventListener('keydown',e=>{
+  if(phase!=='play')return;
+  const map={'1':0,'2':1,'3':2,'4':3,'a':0,'b':1,'c':2,'d':3};
+  const k=e.key.toLowerCase();
+  if(!answered&&k in map)answer(map[k]);
+  else if(answered&&(k==='enter'||k===' ')){e.preventDefault();$('nextBtn').click();}
+});
+</script>
+</body>
+</html>
